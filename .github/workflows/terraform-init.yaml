@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: ''
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
 
 
 jobs:
