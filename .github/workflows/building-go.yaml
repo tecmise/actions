@@ -30,7 +30,7 @@ on:
     outputs:
       md5:
         description: "MD5 checksum of the built artifact"
-        value: ${{ steps.calculate-md5.outputs.md5 }}
+        value: ${{ jobs.building.outputs.md5 }}
 
 jobs:
   building:
@@ -41,7 +41,10 @@ jobs:
       GO111MODULE: on
       GOPROXY: direct
       GOSUMDB: off
+    outputs:
+      md5: ${{ steps.calculate-md5.outputs.md5 }}
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -127,7 +130,7 @@ jobs:
 #
 #      - name: Put parameter in SSM Parameter Store
 #        run: |
-#          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ steps.calculate-md5.outputs.md5 }}" --type String --overwrite
+#          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ jobs.building.outputs.md5 }}" --type String --overwrite
 #
 #      - name: download artifact
 #        uses: actions/download-artifact@v4
@@ -135,4 +138,4 @@ jobs:
 #          name: ${{ inputs.artifact_name }}
 #
 #      - name: Upload artifact to S3
-#        run: aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ steps.calculate-md5.outputs.md5 }}/${{ inputs.artifact_name }}.zip
+#        run: aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
