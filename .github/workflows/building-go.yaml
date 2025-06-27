@@ -3,9 +3,6 @@ name: Building Go
 on:
   workflow_call:
     inputs:
-      repository_name:
-        required: true
-        type: string
       runner_name:
         required: true
         type: string
@@ -40,9 +37,9 @@ jobs:
     name: Building Go
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
-    # permissions:
-    #   id-token: write
-    #   contents: read
+    permissions:
+      id-token: write
+      contents: read
     env:
       GO111MODULE: on
       GOPROXY: direct
@@ -124,6 +121,10 @@ jobs:
           role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
           role-session-name: github-actions-role
           aws-region: ${{ inputs.aws_region }}
+
+      - name: Put parameter in SSM Parameter Store
+        run: |
+          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ steps.calculate-md5.outputs.md5 }}" --type String --overwrite
 
       # # - name: Upload Aws S3
       # #   id: upload_s3
