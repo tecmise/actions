@@ -142,9 +142,4 @@ jobs:
           name: ${{ inputs.artifact_name }}
 
       - name: Upload artifact to S3
-        if: ${{ inputs.runner_category == 's4s' }}
-        run: |
-          aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
-
-
-
+        run: aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
