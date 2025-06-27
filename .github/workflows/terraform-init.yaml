@@ -16,20 +16,17 @@ on:
 
 
 jobs:
-  building:
-    name: Building
+  initialize:
+    name: Initialize
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
     - uses: actions/setup-node@v4
       with:
         node-version: '20'
-
     - uses: hashicorp/setup-terraform@v3
-
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       if: ${{ inputs.runner_category == 's4s' }}
@@ -37,20 +34,16 @@ jobs:
         role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
         role-session-name: github-actions-role
         aws-region: ${{ inputs.aws_region }}
-
-
     - name: Prepare Terraform plugin cache dir
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
-
     - name: Prepare Terraform plugin cache dir root
       if: ${{ inputs.terraform_directory == '' }}
       working-directory: ${{ inputs.terraform_directory }}
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
-
     - name: Cache Terraform providers & modules
       uses: actions/cache@v4
       with:
@@ -60,37 +53,29 @@ jobs:
         key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform/terraform.lock.hcl') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
-
-
     - name: Terraform Init
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}
       shell: bash
       run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
-
     - name: Terraform Init
       if: ${{ inputs.terraform_directory == '' }}
       shell: bash
       run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
 
+    - name: Zip Folder
+      if: ${{ inputs.terraform_directory != '' }}
+      run: |
+        zip -r terraform.zip ${{ inputs.terraform_directory }}
 
+    - name: Zip Folder
+      if: ${{ inputs.terraform_directory == '' }}
+      run: |
+        zip -r terraform.zip .
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    - name: Upload artifact
+    - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: terraform
-        path: "terraform"
         retention-days: 1
+        name: terraform
+        path: terraform.zip
