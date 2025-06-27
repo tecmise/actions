@@ -34,7 +34,7 @@ on:
 
 jobs:
   building:
-    name: Building Go
+    name: Building
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     env:
@@ -120,7 +120,7 @@ jobs:
           path: ${{ inputs.artifact_name }}.zip
 
   publishing:
-    name: Building Go
+    name: Publish
     environment: ${{ github.ref_name }}
     runs-on: 'ubuntu-latest'
     steps:
