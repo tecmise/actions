@@ -120,7 +120,7 @@ jobs:
     environment: ${{ github.ref_name }}
     runs-on: 'ubuntu-latest'
     needs:
-    - building
+      - building
     steps:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -130,14 +130,15 @@ jobs:
           role-session-name: github-actions-role
           aws-region: ${{ inputs.aws_region }}
 
-      - name: Put parameter in SSM Parameter Store
-        run: |
-          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ jobs.building.outputs.md5 }}" --type String --overwrite
-
-      - name: download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.artifact_name }}
-
-      - name: Upload artifact to S3
-        run: aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
+#      - name: Put parameter in SSM Parameter Store
+#        run: |
+#          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ jobs.building.outputs.md5 }}" --type String --overwrite
+#
+#      - name: download artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: ${{ inputs.artifact_name }}
+#
+#      - name: Upload artifact to S3
+#        if: ${{ inputs.runner_category == 's4s' }}
+#        run: aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
