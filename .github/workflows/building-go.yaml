@@ -50,98 +50,102 @@ jobs:
     outputs:
       md5: ${{ steps.calculate-md5.outputs.md5 }}
     steps:
-      # - name: Configure Git credentials
+    - name: "Show Values"
+      run: echo "Show values"
+
+
+      # # - name: Configure Git credentials
+      # #   run: |
+      # #     git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
+
+      # - name: Set up Go
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: ${{ inputs.go_version }}
+      #     cache: false
+
+      # - name: Cache Go modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ~/.cache/go-build
+      #       ~/go/pkg/mod
+      #     key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-go-
+
+      # - name: Tidy
+      #   run: go mod tidy
+
+      # - name: Download dependencies
+      #   run: go mod download
+
+      # - name: Build Container
+      #   if: inputs.is_lambda != true
       #   run: |
-      #     git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      #     go mod verify
+      #     go mod vendor
+      #     GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ inputs.go_version }}
-          cache: false
-
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Tidy
-        run: go mod tidy
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Build Container
-        if: inputs.is_lambda != true
-        run: |
-          go mod verify
-          go mod vendor
-          GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
-
-      - name: Build Lambda
-        if: inputs.is_lambda == true
-        run: |
-          GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
-
-      - name: Calculate MD5
-        id: calculate-md5
-        run: |
-          MD5=$(md5sum ${{ inputs.artifact_name }} | cut -d ' ' -f 1)
-          echo "md5=$MD5" >> "$GITHUB_OUTPUT"
-
-      - name: Set Extended Attributes
-        run: |
-          setfattr -n user.application -v "${{ github.event.repository.name }}" ${{ inputs.artifact_name }}
-          setfattr -n user.artifact -v "${{ inputs.artifact_name }}" ${{ inputs.artifact_name }}
-          setfattr -n user.sha -v "${{ github.sha }}" ${{ inputs.artifact_name }}
-          setfattr -n user.md5 -v "${{ steps.calculate-md5.outputs.md5 }}" ${{ inputs.artifact_name }}
-          setfattr -n user.build_time -v "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" ${{ inputs.artifact_name }}
-          setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
-          setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
-
-      - name: Rename
-        if: inputs.is_lambda == true
-        run: |
-          mv ${{ inputs.artifact_name }} bootstrap
-          chmod +x bootstrap
-
-      - name: Zip the artifact-builded folder
-        if: inputs.is_lambda == true
-        run: zip -r artifact-builded.zip bootstrap
-
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
-          role-session-name: github-actions-role
-          aws-region: ${{ inputs.aws_region }}
-
-      # - name: Upload Aws S3
-      #   id: upload_s3
+      # - name: Build Lambda
       #   if: inputs.is_lambda == true
       #   run: |
-      #     VERSION_ID=$(aws s3api put-object \
-      #       --bucket "${{ secrets.LAMBDA_BUCKET }}" \
-      #       --key "${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip" \
-      #       --body artifact-builded.zip \
-      #       --query VersionId --output text)
-      #     echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
+      #     GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
-      # - name: Atualizar/Inserir Parameter Store
+      # - name: Calculate MD5
+      #   id: calculate-md5
+      #   run: |
+      #     MD5=$(md5sum ${{ inputs.artifact_name }} | cut -d ' ' -f 1)
+      #     echo "md5=$MD5" >> "$GITHUB_OUTPUT"
+
+      # - name: Set Extended Attributes
+      #   run: |
+      #     setfattr -n user.application -v "${{ github.event.repository.name }}" ${{ inputs.artifact_name }}
+      #     setfattr -n user.artifact -v "${{ inputs.artifact_name }}" ${{ inputs.artifact_name }}
+      #     setfattr -n user.sha -v "${{ github.sha }}" ${{ inputs.artifact_name }}
+      #     setfattr -n user.md5 -v "${{ steps.calculate-md5.outputs.md5 }}" ${{ inputs.artifact_name }}
+      #     setfattr -n user.build_time -v "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" ${{ inputs.artifact_name }}
+      #     setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
+      #     setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
+
+      # - name: Rename
       #   if: inputs.is_lambda == true
       #   run: |
-      #     aws ssm put-parameter \
-      #       --name "/${{ github.event.repository.name }}/infrastructure/version_id" \
-      #       --value "${{ steps.upload_s3.outputs.version_id }}" \
-      #       --type String \
-      #       --overwrite
+      #     mv ${{ inputs.artifact_name }} bootstrap
+      #     chmod +x bootstrap
+
+      # - name: Zip the artifact-builded folder
+      #   if: inputs.is_lambda == true
+      #   run: zip -r artifact-builded.zip bootstrap
+
+      # - name: configure aws credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
+      #     role-session-name: github-actions-role
+      #     aws-region: ${{ inputs.aws_region }}
+
+      # # - name: Upload Aws S3
+      # #   id: upload_s3
+      # #   if: inputs.is_lambda == true
+      # #   run: |
+      # #     VERSION_ID=$(aws s3api put-object \
+      # #       --bucket "${{ secrets.LAMBDA_BUCKET }}" \
+      # #       --key "${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip" \
+      # #       --body artifact-builded.zip \
+      # #       --query VersionId --output text)
+      # #     echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
+
+      # # - name: Atualizar/Inserir Parameter Store
+      # #   if: inputs.is_lambda == true
+      # #   run: |
+      # #     aws ssm put-parameter \
+      # #       --name "/${{ github.event.repository.name }}/infrastructure/version_id" \
+      # #       --value "${{ steps.upload_s3.outputs.version_id }}" \
+      # #       --type String \
+      # #       --overwrite
 
 
