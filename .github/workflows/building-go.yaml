@@ -106,7 +106,9 @@ jobs:
 
       - name: Zip the artifact-builded folder
         if: inputs.is_lambda == true
-        run: zip -r artifact-builded.zip bootstrap
+        run: |
+          zip -r artifact-builded.zip bootstrap
+          mv artifact-builded.zip ${{ inputs.artifact_name }}.zip
 
       - name: upload artifact
         uses: actions/upload-artifact@v4
