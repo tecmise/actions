@@ -37,9 +37,6 @@ jobs:
     name: Building Go
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
-    # permissions:
-    #   id-token: write
-    #   contents: read
     env:
       GO111MODULE: on
       GOPROXY: direct
@@ -115,8 +112,21 @@ jobs:
         if: inputs.is_lambda == true
         run: zip -r artifact-builded.zip bootstrap
 
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.artifact_name }}.zip
+
+  publishing:
+    name: Building Go
+    environment: ${{ github.ref_name }}
+    runs-on: 'ubuntu-latest'
+    steps:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ inputs.runner_category == 's4s' }}
         with:
           role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
           role-session-name: github-actions-role
@@ -124,26 +134,17 @@ jobs:
 
       - name: Put parameter in SSM Parameter Store
         run: |
-          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ steps.calculate-md5.outputs.md5 }}" --type String --overwrite
+          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ jobs.building.outputs.md5 }}" --type String --overwrite
 
-      # # - name: Upload Aws S3
-      # #   id: upload_s3
-      # #   if: inputs.is_lambda == true
-      # #   run: |
-      # #     VERSION_ID=$(aws s3api put-object \
-      # #       --bucket "${{ secrets.LAMBDA_BUCKET }}" \
-      # #       --key "${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip" \
-      # #       --body artifact-builded.zip \
-      # #       --query VersionId --output text)
-      # #     echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
 
-      # # - name: Atualizar/Inserir Parameter Store
-      # #   if: inputs.is_lambda == true
-      # #   run: |
-      # #     aws ssm put-parameter \
-      # #       --name "/${{ github.event.repository.name }}/infrastructure/version_id" \
-      # #       --value "${{ steps.upload_s3.outputs.version_id }}" \
-      # #       --type String \
-      # #       --overwrite
+      - name: Upload artifact to S3
+        if: ${{ inputs.runner_category == 's4s' }}
+        run: |
+          aws s3 cp artifact-builded.zip s3://${{ fromJson(vars.AWS_BUCKETS).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ jobs.building.outputs.md5 }}/${{ inputs.artifact_name }}.zip
+
 
 
