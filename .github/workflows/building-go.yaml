@@ -40,9 +40,9 @@ jobs:
     name: Building Go
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
-    permissions:
-      id-token: write
-      contents: read
+    # permissions:
+    #   id-token: write
+    #   contents: read
     env:
       GO111MODULE: on
       GOPROXY: direct
