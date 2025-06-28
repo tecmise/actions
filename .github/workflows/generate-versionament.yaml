@@ -116,14 +116,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-versionament
     steps:
-      - name: TEste
-        run: echo "This is a test step to ensure the workflow runs correctly after generating the versionament file."
-#    - name: Create Pull Request
-#      uses: peter-evans/create-pull-request@v7
-#      with:
-#        commit-message: update release branch
-#        title: Update Release
-#        base: ${{ github.ref_name }}
-#        body: Credit new contributors by updating
-#        branch: ${{ needs.generate-versionament.outputs.branch_name }}
-#        token: '${{ secrets.GITHUB_TOKEN }}'
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        commit-message: update release branch
+        title: Update Release
+        base: ${{ github.ref_name }}
+        body: Credit new contributors by updating
+        branch: ${{ needs.generate-versionament.outputs.branch_name }}
+        token: '${{ secrets.GITHUB_TOKEN }}'
