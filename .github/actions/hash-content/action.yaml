@@ -3,18 +3,25 @@ inputs:
   paths:
     description: 'Paths to verify content'
     required: true
+
+outputs:
+  content:
+    value: ${{ steps.generate_hash.outputs.content }}
+    description: 'Content Hash'
+
 runs:
   using: composite
   steps:
 
-  - name: PWD
+  - name: Checkout script repository
+    uses: actions/checkout@v4
+    with:
+      repository: 'tecmise/actions'
+      path: code
+
+  - id: generate_hash
+    name: Generate JWT and get access token
     shell: bash
-    run: pwd
-
-  - name: Show Files
-    shell: bash
-    run: ls -ltra
-
-
-
-
+    run: |
+      hash=$(python code/.github/scripts/content_check.py "${{ inputs.paths }}")
+      echo "content=$hash" >> $GITHUB_OUTPUT
