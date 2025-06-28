@@ -81,7 +81,13 @@ jobs:
         git config user.email "actions@github.com"
         git checkout -b ${{ steps.create-branch.outputs.branch_name }}
 
-    - name: "Move Terraform file"
+    - name: Show Before
+      shell: bash
+      run: |
+        cat "${{ inputs.terraform_directory }}/versionament.tf"
+
+
+    - name: Move Terraform file
       shell: bash
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versionament.tf"
