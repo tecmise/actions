@@ -86,6 +86,12 @@ jobs:
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versionament.tf"
 
+
+    - name: Status
+      shell: bash
+      run: |
+        git status
+
     - name: Create branch with inverted timestamp
       shell: bash
       run: |
