@@ -128,4 +128,4 @@ jobs:
           --head ${{ needs.generate-versionament.outputs.branch_name }} \
           --title "Update Release" \
           --body "Atualização automática de versões via GitHub Actions." \
-          --repo ${{ github.event.repository.name }}
+          --repo ${{ github.event.repository.full_name }}
