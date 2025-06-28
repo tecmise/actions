@@ -117,7 +117,7 @@ jobs:
         title: Update Release
         base: ${{ github.base_ref }}
         body: Credit new contributors by updating
-        branch: ${{ needs.generate-versionament.outputs.branch_name }}
+        branch: ${{ steps.create-branch.outputs.branch_name }}
         token: '${{ secrets.GITHUB_TOKEN }}'
 
 #  open-pr:
