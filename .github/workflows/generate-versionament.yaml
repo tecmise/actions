@@ -6,7 +6,7 @@ on:
       terraform_directory:
         required: false
         type: string
-        default: ''
+        default: '.'
 
 jobs:
   generate-versionament:
@@ -82,7 +82,7 @@ jobs:
 
     - name: "Move Terraform file"
       shell: bash
-      if: ${{ inputs.terraform_directory != '' }}
+      if: ${{ inputs.terraform_directory != '.' && inputs.terraform_directory != '' }}
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
         cat "${{ inputs.terraform_directory }}/versions.tf"
