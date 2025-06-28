@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: loading-hash
     outputs:
-      has_changes: ${{ steps.check_version.outputs.has_change }}
+      has_changes: ${{ steps.check_version.outputs.has_changes }}
     steps:
 
     - name: configure aws credentials
@@ -80,8 +80,8 @@ jobs:
         PARAM_EXISTS=$(jq --arg name "$PARAM_NAME" '.Parameters[] | select(.Name == $name) | length' parameters.json 2>/dev/null || echo "0")
         
         if [ "$PARAM_EXISTS" == "0" ] || [ -z "$PARAM_EXISTS" ]; then
-          echo "Parameter $PARAM_NAME not found, setting has_change=true"
-          echo "has_change=true" >> $GITHUB_OUTPUT
+          echo "Parameter $PARAM_NAME not found, setting has_changes=true"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
         else
           # Obter o valor do parâmetro específico
           PARAM_VALUE=$(jq --arg name "$PARAM_NAME" -r '.Parameters[] | select(.Name == $name) | .Value' parameters.json)
@@ -90,9 +90,9 @@ jobs:
           # Comparar com o hash atual
           if [ "$PARAM_VALUE" == "$CURRENT_HASH" ]; then
             echo "No changes detected, setting has_change=false"
-            echo "has_change=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "Changes detected, setting has_change=true"
-            echo "has_change=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
         fi
