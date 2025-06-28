@@ -65,7 +65,9 @@ jobs:
     - name: "Move Terraform file"
       shell: bash
       if: ${{ inputs.terraform_directory != '' }}
-      run: mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
+      run: |
+        mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
+        cat "${{ inputs.terraform_directory }}/versions.tf"
 
     - name: Create branch with inverted timestamp
       id: create-branch
@@ -79,7 +81,7 @@ jobs:
         BRANCH_NAME="release-${INVERTED_TIMESTAMP}"
         
         git checkout -b $BRANCH_NAME
-        git add terraform/versions.tf
+        git add -A
         git commit -m "Update versions.tf with latest parameter values"
         git push origin $BRANCH_NAME
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
