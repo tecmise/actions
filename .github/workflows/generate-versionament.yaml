@@ -93,8 +93,6 @@ jobs:
         git add ${{ inputs.terraform_directory }}/versions.tf
         git commit -m "Update versions.tf with latest parameter values"
         git push origin $BRANCH_NAME
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
   open-pr-:
     name: Open PR
