@@ -119,12 +119,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-versionament
     steps:
-
-    - name: Open a PR to the default branch
-      uses: vsoch/pull-request-action@1.1.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        PULL_REQUEST_FROM_BRANCH: ${{ needs.generate-versionament.outputs.branch_name }}
-        PULL_REQUEST_BRANCH: ${{ github.ref_name }}"
-        PULL_REQUEST_TITLE: 'Action: Update suite release file for v${{ steps.data.outputs.suite_version }}'
-        PULL_REQUEST_BODY: "Update versionament"
+    - name: Create Pull Request
+      run: |
+        # Cria o Pull Request
+        gh pr create \
+          --base ${{ github.ref_name }} \
+          --head ${{ needs.generate-versionament.outputs.branch_name }} \
+          --title "Update Release" \
+          --body "Atualização automática de versões via GitHub Actions." \
+          --repo ${{ github.event.repository.name }}
