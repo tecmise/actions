@@ -86,7 +86,7 @@ jobs:
       uses: peter-evans/create-pull-request@v5
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        base: github.ref_name
+        base: ${{ github.ref_name }}
         branch: ${{ env.BRANCH_NAME }}
         title: "Update versions.tf with latest parameter values"
         body: |
