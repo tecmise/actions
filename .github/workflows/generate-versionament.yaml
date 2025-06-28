@@ -90,7 +90,6 @@ jobs:
     - name: Create branch with inverted timestamp
       shell: bash
       run: |
-        git checkout -b $BRANCH_NAME
         git add ${{ inputs.terraform_directory }}/versions.tf
         git commit -m "Update versions.tf with latest parameter values"
         git push origin $BRANCH_NAME
