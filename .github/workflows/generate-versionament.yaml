@@ -127,4 +127,4 @@ jobs:
         PULL_REQUEST_FROM_BRANCH: ${{ needs.generate-versionament.outputs.branch_name }}
         PULL_REQUEST_BRANCH: ${{ github.ref_name }}"
         PULL_REQUEST_TITLE: 'Action: Update suite release file for v${{ steps.data.outputs.suite_version }}'
-        PULL_REQUEST_BODY: Auto-generated PR!
+        PULL_REQUEST_BODY: "Update versionament"
