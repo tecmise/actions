@@ -119,29 +119,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-versionament
     steps:
-    - name: Checkout branch
-      uses: actions/checkout@v4
-      with:
-        ref: "${{ github.ref_name }}"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        fetch-depth: 0
-        persist-credentials: true
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
-      with:
-        commit-message: update release branch
-        title: Update Release
-        base: ${{ github.ref_name }}
-        body: Credit new contributors by updating
-        branch: ${{ needs.generate-versionament.outputs.branch_name }}
-        token: '${{ secrets.GITHUB_TOKEN }}'
-
-#    - name: Open a PR to the default branch
-#      uses: vsoch/pull-request-action@1.1.1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        PULL_REQUEST_FROM_BRANCH: ${{ needs.generate-versionament.outputs.branch_name }}
-#        PULL_REQUEST_BRANCH: ${{ github.ref_name }}"
-#        PULL_REQUEST_TITLE: 'Action: Update suite release file for v${{ steps.data.outputs.suite_version }}'
-#        PULL_REQUEST_BODY: Auto-generated PR!
+    - name: Open a PR to the default branch
+      uses: vsoch/pull-request-action@1.1.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PULL_REQUEST_FROM_BRANCH: ${{ needs.generate-versionament.outputs.branch_name }}
+        PULL_REQUEST_BRANCH: ${{ github.ref_name }}"
+        PULL_REQUEST_TITLE: 'Action: Update suite release file for v${{ steps.data.outputs.suite_version }}'
+        PULL_REQUEST_BODY: Auto-generated PR!
