@@ -3,11 +3,6 @@ name: Versionament
 on:
   workflow_call:
     inputs:
-      aws_region:
-        description: 'Aws region'
-        required: true
-        default: 'us-east-1'
-        type: string
       terraform_directory:
         required: false
         type: string
@@ -32,7 +27,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
         role-session-name: github-actions-role
-        aws-region: ${{ inputs.aws_region }}
+        aws-region: 'us-east-1'
 
     - name: "Generate Terraform file"
       shell: bash
