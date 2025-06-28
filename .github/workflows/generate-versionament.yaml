@@ -116,11 +116,10 @@ jobs:
     environment: ${{ github.ref_name }}
     runs-on: ubuntu-latest
     needs: generate-versionament
+    permissions:
+      pull-requests: write
+      contents: write
     steps:
-    - name: Show Values
-      run: |
-        echo "branch_name: ${{ needs.generate-versionament.outputs.branch_name }}"
-        echo "base_ref: ${{ github.ref_name }}"
 
     - name: Open a PR to the default branch
       uses: vsoch/pull-request-action@1.1.1
