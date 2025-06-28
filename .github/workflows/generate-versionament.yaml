@@ -92,6 +92,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: generate-versionament
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
