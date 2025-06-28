@@ -111,6 +111,7 @@ jobs:
         git push --set-upstream origin ${{ steps.create-branch.outputs.branch_name }}
 
 
+
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
@@ -122,9 +123,12 @@ jobs:
         echo "branch_name: ${{ needs.generate-versionament.outputs.branch_name }}"
         echo "base_ref: ${{ github.ref_name }}"
 
-    - name: pull-request-action
-      uses: vsoch/pull-request-action@1.1.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH_PREFIX: "${{ needs.generate-versionament.outputs.branch_name }}"
-        PULL_REQUEST_BRANCH: ${{ github.ref_name }}"
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        commit-message: update release branch
+        title: Update Release
+        base: ${{ github.ref_name }}
+        body: Credit new contributors by updating
+        branch: ${{ needs.generate-versionament.outputs.branch_name }}
+        token: '${{ secrets.GITHUB_TOKEN }}'
