@@ -76,17 +76,12 @@ jobs:
     - name: Download Terraform variables
       shell: bash
       if: ${{ inputs.terraform_directory != '' }}
-      working-directory: ${{ inputs.terraform_directory }}
       uses:  actions/download-artifact@v4
       with:
         name: ${{ inputs.artifact_vars }}
+        path: ${{ inputs.terraform_directory }}
 
-    - name: Download Terraform variables
-      shell: bash
-      if: ${{ inputs.terraform_directory == '' }}
-      uses:  actions/download-artifact@v4
-      with:
-        name: ${{ inputs.artifact_vars }}
+
 
     - name: Terraform Plan
       if: ${{ inputs.terraform_directory != '' }}
