@@ -86,9 +86,17 @@ jobs:
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
 
+    - name: Status and branch
+      shell: bash
+      run: |
+        git branch
+        git status
+
     - name: Create branch with inverted timestamp
       shell: bash
       run: |
+        git branch
+        git status
         git add ${{ inputs.terraform_directory }}/versions.tf
         cat "${{ inputs.terraform_directory }}/versions.tf"
         git commit -m "Update versions.tf with latest parameter values"
