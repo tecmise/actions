@@ -115,7 +115,7 @@ jobs:
       with:
         commit-message: update release branch
         title: Update Release
-        base: ${{ github.base_ref }}
+        base: ${{ github.ref_name }}
         body: Credit new contributors by updating
         branch: ${{ steps.create-branch.outputs.branch_name }}
         token: '${{ secrets.GITHUB_TOKEN }}'
