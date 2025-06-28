@@ -1,5 +1,8 @@
 name: Versionament
 inputs:
+  aws_accounts:
+    description: 'AWS accounts JSON'
+    required: true
   aws_region:
     description: 'Aws region'
     required: true
@@ -11,9 +14,8 @@ runs:
 
   - name: configure aws credentials
     uses: aws-actions/configure-aws-credentials@v4
-    if: ${{ inputs.runner_category == 's4s' }}
     with:
-      role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
+      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
