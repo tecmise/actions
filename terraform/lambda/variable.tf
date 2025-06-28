@@ -2,17 +2,9 @@ variable "function_name" {
   type = string
 }
 
-variable "environment" {
-  type = string
-}
-
 variable "retention_in_days" {
   type = number
   default = 3
-}
-
-variable "application" {
-  type = string
 }
 
 variable "memory_size" {

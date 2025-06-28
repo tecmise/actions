@@ -63,24 +63,19 @@ jobs:
       working-directory: ${{ inputs.terraform_directory }}
       shell: bash
       run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+
     - name: Terraform Init
       if: ${{ inputs.terraform_directory == '' }}
       shell: bash
       run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
 
-    - name: Zip Folder
+    - name: Terraform Plan
       if: ${{ inputs.terraform_directory != '' }}
-      run: |
-        zip -r terraform.zip ${{ inputs.terraform_directory }}
+      working-directory: ${{ inputs.terraform_directory }}
+      shell: bash
+      run: terraform plan
 
-    - name: Zip Folder
+    - name: Terraform Plan
       if: ${{ inputs.terraform_directory == '' }}
-      run: |
-        zip -r terraform.zip .
-
-    - name: upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        retention-days: 1
-        name: terraform
-        path: terraform.zip
+      shell: bash
+      run: terraform plan
