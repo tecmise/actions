@@ -3,6 +3,10 @@ name: Versionament
 on:
   workflow_call:
     inputs:
+      versionament:
+        description: 'Versionament parameters'
+        required: true
+        type: string
       terraform_directory:
         required: false
         type: string
@@ -40,31 +44,10 @@ jobs:
         
         # Iniciar o arquivo Terraform
         echo 'variable "versionament" {' > versions.tf
-        echo '  type = object({' >> versions.tf
-        
-        # Processar os parâmetros para gerar as definições de tipo
-        jq -r '.Parameters[] | .Name' parameters.json | while read -r name; do
-        # Extrair o sufixo do nome (após a última barra)
-        suffix=$(echo "$name" | awk -F'/' '{print $NF}')
-        echo "    $suffix = string" >> versions.tf
-        done
-        
-        echo '  })' >> versions.tf
-        echo '  default = {' >> versions.tf
-        
-        # Processar os parâmetros para gerar os valores padrão
-        jq -r '.Parameters[] | .Name + "=" + .Value' parameters.json | while read -r line; do
-        # Extrair o sufixo do nome e o valor
-        name=$(echo "$line" | cut -d'=' -f1)
-        value=$(echo "$line" | cut -d'=' -f2-)
-        suffix=$(echo "$name" | awk -F'/' '{print $NF}')
-        echo "    $suffix = \"$value\"" >> versions.tf
-        done
-        
-        echo '  }' >> versions.tf
+        echo '  type = string' >> versions.tf
+        echo '  default = \"${{inputs.versionament}}\"' >> versions.tf
         echo '}' >> versions.tf
         rm -rf parameters.json
-
 
     - name: Create branch with inverted timestamp
       id: create-branch
