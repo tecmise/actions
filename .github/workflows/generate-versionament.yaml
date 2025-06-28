@@ -110,9 +110,6 @@ jobs:
         git commit -m "Update versions.tf with latest parameter values"
         git push --set-upstream origin ${{ steps.create-branch.outputs.branch_name }}
 
-
-
-
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}

@@ -1,0 +1,20 @@
+name: Versionament
+inputs:
+  paths:
+    description: 'Paths to verify content'
+    required: true
+runs:
+  using: composite
+  steps:
+
+  - name: PWD
+    shell: bash
+    run: pwd
+
+  - name: Show Files
+    shell: bash
+    run: ls -ltra
+
+
+
+
