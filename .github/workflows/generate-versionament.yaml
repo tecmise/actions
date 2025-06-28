@@ -85,12 +85,12 @@ jobs:
       if: ${{ inputs.terraform_directory != '.' && inputs.terraform_directory != '' }}
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
-        cat "${{ inputs.terraform_directory }}/versions.tf"
 
     - name: Create branch with inverted timestamp
       shell: bash
       run: |
         git add ${{ inputs.terraform_directory }}/versions.tf
+        cat "${{ inputs.terraform_directory }}/versions.tf"
         git commit -m "Update versions.tf with latest parameter values"
         git push --set-upstream origin ${{ steps.create-branch.outputs.branch_name }}
 
