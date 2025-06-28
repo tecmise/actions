@@ -121,7 +121,6 @@ jobs:
     steps:
     - name: Create Pull Request
       run: |
-        # Cria o Pull Request
         gh pr create \
           --base ${{ github.ref_name }} \
           --head ${{ needs.generate-versionament.outputs.branch_name }} \
