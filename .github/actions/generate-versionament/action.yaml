@@ -12,7 +12,6 @@ inputs:
   token:
     description: 'GitHub token'
     required: true
-    default: '${{ secrets.GITHUB_TOKEN }}'
 
   terraform_directory:
     required: false
