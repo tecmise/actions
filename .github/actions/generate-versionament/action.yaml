@@ -16,7 +16,7 @@ inputs:
   terraform_directory:
     required: false
     type: string
-    default: '.'
+    default: ''
 runs:
   using: composite
   steps:
@@ -69,6 +69,7 @@ runs:
 
   - name: "Move Terraform file"
     shell: bash
+    if: ${{ inputs.terraform_directory != '' }}
     run: mv versions.tf "${{ inputs.terraform_directory }}/versions.tf"
 
 
