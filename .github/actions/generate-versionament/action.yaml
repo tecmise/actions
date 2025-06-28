@@ -21,6 +21,7 @@ runs:
 
 
   - name: "Generate Terraform file"
+    shell: bash
     run: |
       # Buscar parâmetros diretamente e processar em um único passo
       aws ssm get-parameters-by-path --path "/versions/${{ github.event.repository.name }}/" --recursive --with-decryption --region us-east-1 > parameters.json
