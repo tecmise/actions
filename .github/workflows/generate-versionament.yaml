@@ -91,6 +91,7 @@ jobs:
       shell: bash
       run: |
         git status
+        cat "${{ inputs.terraform_directory }}/versionament.tf"
 
     - name: Create branch with inverted timestamp
       shell: bash
