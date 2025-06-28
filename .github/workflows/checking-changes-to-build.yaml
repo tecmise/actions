@@ -50,13 +50,22 @@ jobs:
         role-session-name: github-actions-role
         aws-region: 'us-east-1'
 
-    - name: "Generate Terraform file"
+    - name: "Get parameters from SSM"
       shell: bash
       id: last_version
       run: |
+        # Salvar a saída do comando em um arquivo
         aws ssm get-parameters-by-path --path "/versions/${{ github.event.repository.name }}" --region us-east-1 > parameters.json
-        echo "content=$(cat parameters.json)" >> $GITHUB_OUTPUT
-        rm -rf parameters.json
+        
+        # Exibir o conteúdo para debug
+        cat parameters.json
+        
+        # Escapar corretamente o conteúdo para o GITHUB_OUTPUT
+        # Usando a sintaxe de delimitador para valores multilinhas do GitHub Actions
+        echo "content<<EOF" >> $GITHUB_OUTPUT
+        cat parameters.json >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
 
     - name: "Check if parameters are empty or different from hash"
       shell: bash
