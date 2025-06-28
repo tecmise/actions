@@ -15,7 +15,7 @@ runs:
   - name: configure aws credentials
     uses: aws-actions/configure-aws-credentials@v4
     with:
-      role-to-assume: arn:aws:iam::${{ input.aws_account }}:role/github-actions-role
+      role-to-assume: arn:aws:iam::${{ inputs.aws_account }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
