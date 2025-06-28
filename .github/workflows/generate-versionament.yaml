@@ -86,18 +86,21 @@ jobs:
       run: |
         cat "${{ inputs.terraform_directory }}/versionament.tf"
 
-
     - name: Move Terraform file
       shell: bash
       run: |
         mv versions.tf "${{ inputs.terraform_directory }}/versionament.tf"
 
+    - name: Show After
+      shell: bash
+      run: |
+        cat "${{ inputs.terraform_directory }}/versionament.tf"
 
     - name: Status
       shell: bash
       run: |
         git status
-        cat "${{ inputs.terraform_directory }}/versionament.tf"
+
 
     - name: Create branch with inverted timestamp
       shell: bash
