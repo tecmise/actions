@@ -17,6 +17,10 @@ on:
         required: false
         type: string
         default: 'us-east-1'
+      artifact_vars:
+        required: false
+        type: string
+        default: 'parameters'
 
 
 jobs:
@@ -68,6 +72,21 @@ jobs:
       if: ${{ inputs.terraform_directory == '' }}
       shell: bash
       run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+
+    - name: Download Terraform variables
+      shell: bash
+      if: ${{ inputs.terraform_directory != '' }}
+      working-directory: ${{ inputs.terraform_directory }}
+      uses:  actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact_vars }}
+
+    - name: Download Terraform variables
+      shell: bash
+      if: ${{ inputs.terraform_directory == '' }}
+      uses:  actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact_vars }}
 
     - name: Terraform Plan
       if: ${{ inputs.terraform_directory != '' }}
