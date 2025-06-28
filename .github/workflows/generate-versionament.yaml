@@ -100,4 +100,4 @@ jobs:
         base: ${{ github.ref_name }}
         body: Credit new contributors by updating
         branch: ${{ needs.generate-versionament.outputs.branch_name }}
-        token: '${{ github.GITHUB_TOKEN }}'
+        token: '${{ secrets.GITHUB_TOKEN }}'
