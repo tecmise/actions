@@ -79,8 +79,6 @@ jobs:
         name: ${{ inputs.artifact_vars }}
         path: ${{ inputs.terraform_directory }}
 
-
-
     - name: Terraform Plan
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}

@@ -56,7 +56,7 @@ variable "policy_arns" {
   type = list(string)
   default = []
 }
-
-variable "version_id" {
-  type = string
-}
+#
+# variable "version_id" {
+#   type = string
+# }
