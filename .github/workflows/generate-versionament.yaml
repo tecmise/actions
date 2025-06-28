@@ -62,6 +62,24 @@ jobs:
         echo '  }' >> versions.tf
         echo '}' >> versions.tf
 
+
+    - name: Create branch with inverted timestamp
+      id: create-branch
+      shell: bash
+      run: |
+        TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
+        INVERTED_TIMESTAMP=$(echo $TIMESTAMP | tr '_' '-')
+        BRANCH_NAME="release-${INVERTED_TIMESTAMP}"
+        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+
+    - name: Create branch with inverted timestamp
+      shell: bash
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git checkout -b ${{ steps.create-branch.outputs.branch_name }}
+
     - name: "Move Terraform file"
       shell: bash
       if: ${{ inputs.terraform_directory != '' }}
@@ -70,24 +88,14 @@ jobs:
         cat "${{ inputs.terraform_directory }}/versions.tf"
 
     - name: Create branch with inverted timestamp
-      id: create-branch
       shell: bash
       run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git status
-        
-        TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
-        INVERTED_TIMESTAMP=$(echo $TIMESTAMP | tr '_' '-')
-        BRANCH_NAME="release-${INVERTED_TIMESTAMP}"
-        
         git checkout -b $BRANCH_NAME
         git add ${{ inputs.terraform_directory }}/versions.tf
         git commit -m "Update versions.tf with latest parameter values"
         git push origin $BRANCH_NAME
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-        
 
   open-pr-:
     name: Open PR
