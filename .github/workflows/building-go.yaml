@@ -132,9 +132,9 @@ jobs:
           role-session-name: github-actions-role
           aws-region: ${{ inputs.aws_region }}
 
-      - name: Put parameter in SSM Parameter Store
-        run: |
-          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ needs.building.outputs.md5 }}" --type String --overwrite
+#      - name: Put parameter in SSM Parameter Store
+#        run: |
+#          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ needs.building.outputs.md5 }}" --type String --overwrite
 
       - name: download artifact
         uses: actions/download-artifact@v4

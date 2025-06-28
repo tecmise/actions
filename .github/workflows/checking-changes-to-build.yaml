@@ -51,7 +51,6 @@ jobs:
         aws-region: 'us-east-1'
 
     - name: "Get parameters from SSM"
-      shell: bash
       id: last_version
       run: |
         # Salvar a saída do comando em um arquivo
@@ -68,24 +67,27 @@ jobs:
 
 
     - name: "Check if parameters are empty or different from hash"
-      shell: bash
       id: check_version
       run: |
         CURRENT_HASH="${{ needs.loading-hash.outputs.content }}"
         echo "Current hash: $CURRENT_HASH"
         
-        PARAM_COUNT=$(jq '.Parameters | length' parameters.json)
-        echo "Parameter count: $PARAM_COUNT"
+        # Construir o nome completo do parâmetro que estamos procurando
+        PARAM_NAME="/versions/${{ github.event.repository.name }}/hashcode"
+        echo "Looking for parameter: $PARAM_NAME"
         
-        if [ "$PARAM_COUNT" -eq 0 ]; then
-          echo "Parameters are empty, setting has_change=true"
+        # Verificar se o parâmetro existe usando jq
+        PARAM_EXISTS=$(jq --arg name "$PARAM_NAME" '.Parameters[] | select(.Name == $name) | length' parameters.json 2>/dev/null || echo "0")
+        
+        if [ "$PARAM_EXISTS" == "0" ] || [ -z "$PARAM_EXISTS" ]; then
+          echo "Parameter $PARAM_NAME not found, setting has_change=true"
           echo "has_change=true" >> $GITHUB_OUTPUT
         else
-          # Get the value of the first parameter
-          PARAM_VALUE=$(jq -r '.Parameters[0].Value' parameters.json)
+          # Obter o valor do parâmetro específico
+          PARAM_VALUE=$(jq --arg name "$PARAM_NAME" -r '.Parameters[] | select(.Name == $name) | .Value' parameters.json)
           echo "Parameter value: $PARAM_VALUE"
           
-          # Compare with current hash
+          # Comparar com o hash atual
           if [ "$PARAM_VALUE" == "$CURRENT_HASH" ]; then
             echo "No changes detected, setting has_change=false"
             echo "has_change=false" >> $GITHUB_OUTPUT
