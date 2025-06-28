@@ -1,4 +1,4 @@
-name: Building Go
+name: Versionament
 
 on:
   workflow_call:
