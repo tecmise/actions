@@ -9,6 +9,11 @@ inputs:
     required: true
     default: 'us-east-1'
 
+  token:
+    description: 'GitHub token'
+    required: true
+    default: '${{ secrets.GITHUB_TOKEN }}'
+
   terraform_directory:
     required: false
     type: string
@@ -87,7 +92,7 @@ runs:
   - name: Create Pull Request
     uses: peter-evans/create-pull-request@v5
     with:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ inputs.token }}
       base: sandbox
       branch: ${{ env.BRANCH_NAME }}
       title: "Update versions.tf with latest parameter values"
