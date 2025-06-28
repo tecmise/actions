@@ -75,13 +75,14 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
+        git status
         
         TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
         INVERTED_TIMESTAMP=$(echo $TIMESTAMP | tr '_' '-')
         BRANCH_NAME="release-${INVERTED_TIMESTAMP}"
         
         git checkout -b $BRANCH_NAME
-        git add -A
+        git add ${{ inputs.terraform_directory }}/versions.tf
         git commit -m "Update versions.tf with latest parameter values"
         git push origin $BRANCH_NAME
         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
