@@ -22,7 +22,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'tecmise/actions'
-        path: code
+        path: code_internal
 
     - id: generate_hash
       name: Generate Hash Token
@@ -30,17 +30,17 @@ jobs:
         
         JSON_CONFIG=$(cat << EOF
         {
-          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore"],
-          "source": "."
+          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore", "code_internal"],
+          "source": ".."
         }
         EOF
         )
-        hash=$(python code/.github/scripts/md5_calculator.py "$JSON_CONFIG")
+        hash=$(python code_internal/.github/scripts/md5_calculator.py "$JSON_CONFIG")
         echo "Generated hash: $hash"
         echo "content=$hash" >> $GITHUB_OUTPUT
 
     - name: Remove code directory
-      run: rm -rf code
+      run: rm -rf code_internal
 
   checking-last-version:
     name: Checking current version
