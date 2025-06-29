@@ -100,8 +100,7 @@ jobs:
     needs: generate-versionament
     steps:
     - name: Create Pull Request
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: create_pr
       run: |
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
@@ -122,8 +121,7 @@ jobs:
     
         ---
         *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*" \
-          --repo ${{ github.repository }} \
-          --delete-branch)
+          --repo ${{ github.repository }})
         
         echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
         
@@ -132,6 +130,9 @@ jobs:
         echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
         
         echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+        
+        # Configurar a PR para deletar a branch após o merge
+        gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -X PATCH -f auto_merge=true -f delete_branch_on_merge=true || echo "Não foi possível configurar auto-merge e exclusão de branch"
 
     - name: Notify Discord Webhook
       if: steps.create_pr.outputs.PR_NUMBER != ''
@@ -140,41 +141,41 @@ jobs:
         curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} \
           -H "Content-Type: application/json" \
           -d '{
-                  "embeds": [
-                    {
-                      "title": "🚀 Nova Pull Request de Release Criada",
-                      "description": "Uma nova PR de release foi criada automaticamente pelo pipeline de CD.",
-                      "color": 3447003,
-                      "fields": [
-                        {
-                          "name": "Repositório",
-                          "value": "`${{ github.repository }}`",
-                          "inline": true
-                        },
-                        {
-                          "name": "PR #",
-                          "value": "[#${{ steps.create_pr.outputs.PR_NUMBER }}](${{ steps.create_pr.outputs.PR_URL }})",
-                          "inline": true
-                        },
-                        {
-                      "name": "Branch",
-                      "value": "`${{ needs.generate-versionament.outputs.branch_name }}`",
-                      "inline": true
-                    },
-                    {
-                      "name": "Versão",
-                      "value": "`${{ needs.generate-versionament.outputs.version }}`",
-                      "inline": true
-                    },
-                    {
-                      "name": "Hash",
-                      "value": "`${{ needs.generate-hash.outputs.content }}`",
-                      "inline": true
-                    }
-                  ],
-                  "footer": {
-                    "text": "GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"
+            "embeds": [
+              {
+                "title": "🚀 Nova Pull Request de Release Criada",
+                "description": "Uma nova PR de release foi criada automaticamente pelo pipeline de CD.",
+                "color": 3447003,
+                "fields": [
+                  {
+                    "name": "Repositório",
+                    "value": "`${{ github.repository }}`",
+                    "inline": true
+                  },
+                  {
+                    "name": "PR #",
+                    "value": "[#${{ steps.create_pr.outputs.PR_NUMBER }}](${{ steps.create_pr.outputs.PR_URL }})",
+                    "inline": true
+                  },
+                  {
+                    "name": "Branch",
+                    "value": "`${{ needs.generate-versionament.outputs.branch_name }}`",
+                    "inline": true
+                  },
+                  {
+                    "name": "Versão",
+                    "value": "`${{ needs.generate-versionament.outputs.version }}`",
+                    "inline": true
+                  },
+                  {
+                    "name": "Hash",
+                    "value": "`${{ needs.generate-hash.outputs.content }}`",
+                    "inline": true
                   }
+                ],
+                "footer": {
+                  "text": "GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"
                 }
-              ]
-            }'
+              }
+            ]
+          }'
