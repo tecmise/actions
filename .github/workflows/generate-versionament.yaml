@@ -187,7 +187,7 @@ jobs:
                 },
                 {
                   "name": "Branch",
-                  "value": "${{ needs.generate-versionament.outputs.branch_name }}",
+                  "value": "${{ github.ref_name }}",
                   "inline": true
                 },
                 {
