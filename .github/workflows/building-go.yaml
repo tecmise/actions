@@ -38,7 +38,7 @@ jobs:
     name: Verify Files
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.checking-changes.outputs.has_changes }}
+      has_changes: ${{ steps.check_version.outputs.has_changes }}
       hashcode: ${{ steps.generate_hash.outputs.content }}
     steps:
     - name: Checkout code
@@ -114,10 +114,10 @@ jobs:
           
           # Comparar com o hash atual
           if [ "$PARAM_VALUE" == "$CURRENT_HASH" ]; then
-            echo "No changes detected, setting has_change=false"
+            echo "No changes detected, setting has_changes=false"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
-            echo "Changes detected, setting has_change=true"
+            echo "Changes detected, setting has_changes=true"
             echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
         fi
