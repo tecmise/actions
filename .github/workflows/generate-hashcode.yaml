@@ -20,9 +20,18 @@ jobs:
 
     - name: Checkout script repository
       uses: actions/checkout@v4
+
+    - name: Checkout script repository
+      uses: actions/checkout@v4
       with:
         repository: 'tecmise/actions'
         path: code_internal
+
+    - name: Remove code directory
+      run: mv code_internal/.github/scripts/md5_calculator.py md5_calculator.py
+
+    - name: Remove code directory
+      run: rm -rf code_internal
 
     - id: generate_hash
       name: Generate Hash Token
@@ -30,8 +39,8 @@ jobs:
         
         JSON_CONFIG=$(cat << EOF
         {
-          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore", "code_internal"],
-          "source": ".."
+          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore", "md5_calculator.py"],
+          "source": "."
         }
         EOF
         )
@@ -40,7 +49,7 @@ jobs:
         echo "content=$hash" >> $GITHUB_OUTPUT
 
     - name: Remove code directory
-      run: rm -rf code_internal
+      run: rm -rf md5_calculator.py
 
   checking-last-version:
     name: Checking current version
