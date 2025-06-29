@@ -120,10 +120,10 @@ jobs:
           # Verifica se a branch já existe no remoto
           if git ls-remote --heads origin $BRANCH_NAME | grep -q $BRANCH_NAME; then
             echo "Branch $BRANCH_NAME já existe no remoto. Fazendo push normal..."
-            git push origin $BRANCH_NAME
-          else
-            echo "Branch $BRANCH_NAME não existe no remoto. Configurando upstream..."
             git push --set-upstream origin $BRANCH_NAME
+          else
+            git push origin $BRANCH_NAME
+            echo "Branch $BRANCH_NAME não existe no remoto. Configurando upstream..."
           fi
         fi
   open-pr:
