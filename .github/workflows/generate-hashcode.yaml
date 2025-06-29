@@ -2,11 +2,6 @@ name: Checking Changes
 
 on:
   workflow_call:
-    inputs:
-      paths:
-        description: 'Paths to verify content'
-        required: true
-        type: string
     outputs:
       has_changes:
         value: ${{ jobs.checking-last-version.outputs.has_changes }}
