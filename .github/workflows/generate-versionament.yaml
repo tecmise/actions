@@ -138,7 +138,7 @@ jobs:
       run: |
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
-          --repo ${{ github.repository }}) \
+          --repo ${{ github.repository }} \
           --head delivery/${{ github.ref_name }} \
           --title "🚀 Release Automation[${{ github.ref_name }}]: ${{ inputs.versionament }}" \
           --body "## 🚀 Automated Release Update
