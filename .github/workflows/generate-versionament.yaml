@@ -138,6 +138,7 @@ jobs:
       run: |
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
+          --repo ${{ github.repository }}) \
           --head delivery/${{ github.ref_name }} \
           --title "🚀 Release Automation[${{ github.ref_name }}]: ${{ inputs.versionament }}" \
           --body "## 🚀 Automated Release Update
@@ -151,8 +152,7 @@ jobs:
         - ✅ Artefatos prontos para produção
         
         ---
-        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*" \
-          --repo ${{ github.repository }})
+        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*" 
         
         echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
         
@@ -162,8 +162,7 @@ jobs:
         
         echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
         
-        # Configurar a PR para deletar a branch após o merge
-        gh api repos/${{ github.repository }}/pulls/$PR_NUMBER -X PATCH -f delete_branch_on_merge=true || echo "Não foi possível configurar exclusão de branch"
+
     - name: Notify Discord Webhook
       if: steps.create_pr.outputs.PR_NUMBER != ''
       run: |
