@@ -27,7 +27,7 @@ jobs:
         repository: 'tecmise/actions'
         path: code_internal
 
-    - name: Remove code directory
+    - name: Rename md5_calculator.py
       run: mv code_internal/.github/scripts/md5_calculator.py md5_calculator.py
 
     - name: Remove code directory
