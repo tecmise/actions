@@ -45,7 +45,7 @@ jobs:
         # Iniciar o arquivo Terraform
         echo 'variable "versionament" {' > versions.tf
         echo '  type = string' >> versions.tf
-        echo '  default = \"${{inputs.versionament}}\"' >> versions.tf
+        echo '  default = "${{inputs.versionament}}"' >> versions.tf
         echo '}' >> versions.tf
         rm -rf parameters.json
 
