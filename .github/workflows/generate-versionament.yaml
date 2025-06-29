@@ -49,22 +49,37 @@ jobs:
         echo '}' >> versions.tf
         rm -rf parameters.json
 
-    - name: Create branch with inverted timestamp
-      id: create-branch
-      shell: bash
-      run: |
-        TIMESTAMP=$(date -u +"%Y%m%d_%H%M%S")
-        INVERTED_TIMESTAMP=$(echo $TIMESTAMP | tr '_' '-')
-        BRANCH_NAME="release-${INVERTED_TIMESTAMP}"
-        echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
-
-    - name: Create branch with inverted timestamp
+    - name: Checkout or Create Branch and Merge
       shell: bash
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git checkout -b ${{ steps.create-branch.outputs.branch_name }}
+        
+        # Nome da branch de destino
+        TARGET_BRANCH="delivery/${{ github.ref_name }}"
+        
+        # Verifica se a branch remota existe
+        if git ls-remote --heads origin $TARGET_BRANCH | grep -q $TARGET_BRANCH; then
+          echo "Branch $TARGET_BRANCH já existe. Fazendo checkout e merge..."
+          
+          # Checkout da branch existente
+          git fetch origin $TARGET_BRANCH
+          git checkout $TARGET_BRANCH
+          
+          # Atualiza a branch local com a remota
+          git pull origin $TARGET_BRANCH
+          
+          # Merge com a branch de referência
+          git merge origin/${{ github.ref_name }} --no-edit -m "Merge branch '${{ github.ref_name }}' into $TARGET_BRANCH via GitHub Actions"
+        else
+          echo "Branch $TARGET_BRANCH não existe. Criando nova branch..."
+          
+          # Cria uma nova branch a partir da branch de referência
+          git checkout -b $TARGET_BRANCH
+        fi
+        
+        echo "Agora trabalhando na branch: $(git branch --show-current)"
 
     - name: Show Before
       shell: bash
@@ -86,13 +101,31 @@ jobs:
       run: |
         git status
 
-    - name: Create branch with inverted timestamp
+    - name: Commit and Push Changes
       shell: bash
       run: |
+        # Adiciona todas as alterações
         git add -A
-        git commit -m "Update versions.tf with latest parameter values"
-        git push --set-upstream origin ${{ steps.create-branch.outputs.branch_name }}
-
+        
+        # Verifica se há alterações para commit
+        if git diff --staged --quiet; then
+          echo "Nenhuma alteração para commit."
+        else
+          # Faz o commit das alterações
+          git commit -m "Update versions.tf with latest parameter values"
+          
+          # Nome da branch a ser usada
+          BRANCH_NAME="${{ steps.create-branch.outputs.branch_name }}"
+          
+          # Verifica se a branch já existe no remoto
+          if git ls-remote --heads origin $BRANCH_NAME | grep -q $BRANCH_NAME; then
+            echo "Branch $BRANCH_NAME já existe no remoto. Fazendo push normal..."
+            git push origin $BRANCH_NAME
+          else
+            echo "Branch $BRANCH_NAME não existe no remoto. Configurando upstream..."
+            git push --set-upstream origin $BRANCH_NAME
+          fi
+        fi
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
