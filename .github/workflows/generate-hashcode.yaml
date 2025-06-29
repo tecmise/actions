@@ -6,6 +6,9 @@ on:
       has_changes:
         value: ${{ jobs.checking-last-version.outputs.has_changes }}
         description: 'Content Hash'
+      hashcode:
+        value: ${{ jobs.loading-hash.outputs.content }}
+        description: 'Content Hash'
 
 jobs:
   loading-hash:
@@ -33,6 +36,7 @@ jobs:
         EOF
         )
         hash=$(python code/.github/scripts/md5_calculator.py "$JSON_CONFIG")
+        echo "Generated hash: $hash"
         echo "content=$hash" >> $GITHUB_OUTPUT
 
     - name: Remove code directory
@@ -43,7 +47,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: loading-hash
     outputs:
-      hashcode: ${{ needs.loading-hash.outputs.content }}
       has_changes: ${{ steps.check_version.outputs.has_changes }}
     steps:
 
