@@ -26,7 +26,7 @@ on:
 
 jobs:
   apply:
-    name: Initialize
+    name: Apply
     environment: ${{ github.ref_name }}
     runs-on: ubuntu-latest
     #    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
