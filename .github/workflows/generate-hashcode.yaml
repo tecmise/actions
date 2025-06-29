@@ -29,7 +29,15 @@ jobs:
     - id: generate_hash
       name: Generate Hash Token
       run: |
-        hash=$(python code/.github/scripts/content_check.py "${{ inputs.paths }}")
+        
+        JSON_CONFIG=$(cat << EOF
+        {
+          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore"],
+          "source": "."
+        }
+        EOF
+        )
+        hash=$(python code/.github/scripts/md5_calculator.py "$JSON_CONFIG")
         echo "content=$hash" >> $GITHUB_OUTPUT
 
     - name: Remove code directory
@@ -70,7 +78,7 @@ jobs:
     - name: "Check if parameters are empty or different from hash"
       id: check_version
       run: |
-        CURRENT_HASH="${{ needs.loading-hash.outputs.content }}"
+        CURRENT_HASH="${{ steps.generate_hash.outputs.content }}"
         echo "Current hash: $CURRENT_HASH"
         
         # Construir o nome completo do parâmetro que estamos procurando
@@ -90,10 +98,10 @@ jobs:
           
           # Comparar com o hash atual
           if [ "$PARAM_VALUE" == "$CURRENT_HASH" ]; then
-            echo "No changes detected, setting has_change=false"
+            echo "No changes detected, setting has_changes=false"
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
-            echo "Changes detected, setting has_change=true"
+            echo "Changes detected, setting has_changes=true"
             echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
         fi
