@@ -9,7 +9,7 @@ def should_ignore(file_path, ignore_paths):
     for ignore_path in ignore_paths:
         # Verifica se o caminho começa com algum dos padrões de ignorar
         if any(part == ignore_path for part in file_path.split(os.sep)):
-            print(f"Ignorando: {file_path} (corresponde a {ignore_path})")
+            # print(f"Ignorando: {file_path} (corresponde a {ignore_path})")
             return True
     return False
 
@@ -33,7 +33,7 @@ def calculate_md5(directory, ignore_paths):
             if should_ignore(rel_path, ignore_paths):
                 continue
 
-            print(f"Processando: {file_path}")
+            # print(f"Processando: {file_path}")
 
             try:
                 with open(file_path, 'rb') as f:
