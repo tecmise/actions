@@ -141,7 +141,7 @@ jobs:
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
           --head ${{ needs.generate-versionament.outputs.branch_name }} \
-          --title "🚀 Release Automation[${{ github.ref_name }}]: ${{ inputs.versionament }}" \
+          --title "🚀 Release ${{ github.ref_name }}: ${{ inputs.versionament }}" \
           --body "## 🚀 Automated Release Update
     
         ### Versão: \`${{ inputs.versionament }}\`
