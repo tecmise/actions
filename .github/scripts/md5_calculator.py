@@ -1,99 +1,62 @@
-#!/usr/bin/env python3
-
+import hashlib
+import json
 import os
 import sys
-import json
-import hashlib
-from pathlib import Path
-
-
-def calculate_file_md5(file_path):
-    """Calcula o MD5 de um arquivo."""
-    hash_md5 = hashlib.md5()
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
 
 def should_ignore(file_path, ignore_paths):
-    """Verifica se o arquivo deve ser ignorado."""
+    """Verifica se um caminho deve ser ignorado com base nas regras de ignorar."""
     for ignore_path in ignore_paths:
-        if ignore_path and str(file_path).startswith(ignore_path):
+        # Verifica se o caminho começa com algum dos padrões de ignorar
+        if any(part == ignore_path for part in file_path.split(os.sep)):
+            print(f"Ignorando: {file_path} (corresponde a {ignore_path})")
             return True
     return False
 
 
-def process_directory(source_dir, ignore_paths):
-    """Processa recursivamente o diretório e calcula os MD5s."""
-    md5_values = []
+def calculate_md5(directory, ignore_paths):
+    """Calcula o hash MD5 de todos os arquivos em um diretório, excluindo os ignorados."""
+    print(f"Diretório atual de execução (pwd): {os.getcwd()}")
 
-    # Converte para Path para manipulação mais fácil
-    source_path = Path(source_dir)
+    md5_hash = hashlib.md5()
+    file_list = []
 
-    # Verifica todos os arquivos e diretórios recursivamente
-    for root, dirs, files in os.walk(source_path):
-        root_path = Path(root)
+    # Percorre o diretório recursivamente
+    for root, dirs, files in os.walk(directory):
+        # Remove diretórios ignorados da lista de diretórios a serem percorridos
+        dirs[:] = [d for d in dirs if not should_ignore(os.path.join(root, d), ignore_paths)]
 
-        # Processa cada arquivo
-        for file in sorted(files):  # Ordena para garantir consistência
-            file_path = root_path / file
+        for file in sorted(files):
+            file_path = os.path.join(root, file)
+            rel_path = os.path.relpath(file_path, directory)
 
-            # Verifica se o arquivo deve ser ignorado
-            if should_ignore(file_path, ignore_paths):
+            if should_ignore(rel_path, ignore_paths):
                 continue
 
-            # Calcula o MD5 do arquivo
+            print(f"Processando: {file_path}")
+
             try:
-                file_md5 = calculate_file_md5(file_path)
-                md5_values.append(file_md5)
-                print(f"Verificando: {file_path}")
+                with open(file_path, 'rb') as f:
+                    content = f.read()
+                    md5_hash.update(content)
+                file_list.append(rel_path)
             except Exception as e:
-                print(f"Erro ao processar {file_path}: {e}", file=sys.stderr)
+                print(f"Erro ao processar {file_path}: {e}")
 
-    # Concatena todos os valores MD5
-    concatenated_md5 = "".join(md5_values)
+    # Adiciona a lista de arquivos ao hash para garantir que mudanças na estrutura de arquivos também afetem o hash
+    md5_hash.update(",".join(file_list).encode())
 
-    # Calcula o MD5 final
-    final_md5 = hashlib.md5(concatenated_md5.encode()).hexdigest()
-
-    return final_md5
-
-
-def main():
-    # Verifica se foi fornecido um argumento
-    if len(sys.argv) != 2:
-        print("Erro no parametro de entrada {\"source\": \"\", \"ignore_paths\": []}")
-
-    try:
-        # Carrega o objeto JSON
-        config = json.loads(sys.argv[1])
-
-        # Extrai os parâmetros
-        ignore_paths = config.get("ignore_path", [])
-        source_dir = config.get("source", "")
-
-        if not source_dir:
-            print("Erro: 'source' não especificado ou vazio", file=sys.stderr)
-            sys.exit(1)
-
-        # Mostra o diretório atual de execução
-        current_dir = os.getcwd()
-        print(f"Diretório atual de execução (pwd): {current_dir}")
-
-        # Processa o diretório e calcula o MD5 final
-        final_md5 = process_directory(source_dir, ignore_paths)
-
-        # Imprime apenas o MD5 final
-        print(f"\nMD5 final: {final_md5}")
-
-    except json.JSONDecodeError:
-        print("Erro: O argumento fornecido não é um JSON válido", file=sys.stderr)
-        sys.exit(1)
-    except Exception as e:
-        print(f"Erro: {e}", file=sys.stderr)
-        sys.exit(1)
+    return md5_hash.hexdigest()
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Erro no parametro de entrada {\"source\": \"\", \"ignore_paths\": []}")
+        sys.exit(1)
+
+    config = json.loads(sys.argv[1])
+    ignore_paths = config.get("ignore_path", [])
+    source_dir = config.get("source", ".")
+
+    hash_value = calculate_md5(source_dir, ignore_paths)
+    print(hash_value)
