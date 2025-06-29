@@ -16,7 +16,7 @@ def should_ignore(file_path, ignore_paths):
 
 def calculate_md5(directory, ignore_paths):
     """Calcula o hash MD5 de todos os arquivos em um diretório, excluindo os ignorados."""
-    print(f"Diretório atual de execução (pwd): {os.getcwd()}")
+    # print(f"Diretório atual de execução (pwd): {os.getcwd()}")
 
     md5_hash = hashlib.md5()
     file_list = []
