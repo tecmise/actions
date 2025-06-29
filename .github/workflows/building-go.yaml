@@ -33,9 +33,92 @@ on:
         value: ${{ jobs.building.outputs.md5 }}
 
 jobs:
+
+  verify-files:
+    name: Verify Files
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.checking-changes.outputs.has_changes }}
+      hashcode: ${{ steps.generate_hash.outputs.content }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Checkout script repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'tecmise/actions'
+        path: code
+
+    - id: generate_hash
+      name: Generate Hash Token
+      run: |
+        
+        JSON_CONFIG=$(cat << EOF
+        {
+          "ignore_path": ["terraform", ".github", ".idea", ".git", ".gitignore"],
+          "source": "."
+        }
+        EOF
+        )
+        hash=$(python code/.github/scripts/md5_calculator.py "$JSON_CONFIG")
+        echo "content=$hash" >> $GITHUB_OUTPUT
+
+    - name: Remove code directory
+      run: rm -rf code
+
+    - name: "Get parameters from SSM"
+      id: last_version
+      run: |
+        # Salvar a saída do comando em um arquivo
+        aws ssm get-parameters-by-path --path "/versions/${{ github.event.repository.name }}" --region us-east-1 > parameters.json
+        
+        # Exibir o conteúdo para debug
+        cat parameters.json
+        
+        # Escapar corretamente o conteúdo para o GITHUB_OUTPUT
+        # Usando a sintaxe de delimitador para valores multilinhas do GitHub Actions
+        echo "content<<EOF" >> $GITHUB_OUTPUT
+        cat parameters.json >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+
+    - name: "Check if parameters are empty or different from hash"
+      id: check_version
+      run: |
+        CURRENT_HASH="${{ steps.generate_hash.outputs.content }}"
+        echo "Current hash: $CURRENT_HASH"
+        
+        # Construir o nome completo do parâmetro que estamos procurando
+        PARAM_NAME="/versions/${{ github.event.repository.name }}/hashcode"
+        echo "Looking for parameter: $PARAM_NAME"
+        
+        # Verificar se o parâmetro existe usando jq
+        PARAM_EXISTS=$(jq --arg name "$PARAM_NAME" '.Parameters[] | select(.Name == $name) | length' parameters.json 2>/dev/null || echo "0")
+        
+        if [ "$PARAM_EXISTS" == "0" ] || [ -z "$PARAM_EXISTS" ]; then
+          echo "Parameter $PARAM_NAME not found, setting has_changes=true"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        else
+          # Obter o valor do parâmetro específico
+          PARAM_VALUE=$(jq --arg name "$PARAM_NAME" -r '.Parameters[] | select(.Name == $name) | .Value' parameters.json)
+          echo "Parameter value: $PARAM_VALUE"
+          
+          # Comparar com o hash atual
+          if [ "$PARAM_VALUE" == "$CURRENT_HASH" ]; then
+            echo "No changes detected, setting has_change=false"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected, setting has_change=true"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+        fi
+
   building:
     name: Building
     environment: ${{ github.ref_name }}
+    needs: verify-files
+    if: ${{ needs.verify-files.outputs.has_changes == 'true' }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     env:
       GO111MODULE: on
@@ -43,6 +126,8 @@ jobs:
       GOSUMDB: off
     outputs:
       md5: ${{ steps.calculate-md5.outputs.md5 }}
+      hashcode: ${{ needs.verify-files.outputs.hashcode }}
+      has_changes: ${{ needs.verify-files.outputs.has_changes }}
     steps:
 
       - name: Checkout code
@@ -121,6 +206,7 @@ jobs:
     name: Publish
     environment: ${{ github.ref_name }}
     runs-on: 'ubuntu-latest'
+    if: ${{ needs.building.outputs.has_changes == 'true' }}
     needs:
       - building
     steps:
@@ -132,9 +218,9 @@ jobs:
           role-session-name: github-actions-role
           aws-region: ${{ inputs.aws_region }}
 
-#      - name: Put parameter in SSM Parameter Store
-#        run: |
-#          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/${{ inputs.artifact_name }}" --value "${{ needs.building.outputs.md5 }}" --type String --overwrite
+      - name: Put parameter in SSM Parameter Store
+        run: |
+          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/hashcode" --value "${{ needs.building.outputs.hashcode }}" --type String --overwrite
 
       - name: download artifact
         uses: actions/download-artifact@v4
@@ -143,4 +229,4 @@ jobs:
 
       - name: Upload artifact to S3
         if: ${{ inputs.runner_category == 's4s' }}
-        run: aws s3 cp ${{ inputs.artifact_name }}.zip s3://${{ fromJson(vars.AWS_BUCKETS_LAMBDA).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ inputs.artifact_name }}/${{ needs.building.outputs.md5 }}.zip
+        run: aws s3 cp ${{ inputs.artifact_name }}.zip s3://${{ fromJson(vars.AWS_BUCKETS_LAMBDA).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ needs.building.outputs.hashcode }}/${{ inputs.artifact_name }}.zip
