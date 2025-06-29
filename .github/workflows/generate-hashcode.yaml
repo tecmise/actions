@@ -44,7 +44,7 @@ jobs:
         }
         EOF
         )
-        hash=$(python code_internal/.github/scripts/md5_calculator.py "$JSON_CONFIG")
+        hash=$(python md5_calculator.py "$JSON_CONFIG")
         echo "Generated hash: $hash"
         echo "content=$hash" >> $GITHUB_OUTPUT
 
