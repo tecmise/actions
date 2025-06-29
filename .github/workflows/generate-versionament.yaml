@@ -152,7 +152,7 @@ jobs:
         - ✅ Artefatos prontos para produção
         
         ---
-        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*" 
+        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*")
         
         echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
         
