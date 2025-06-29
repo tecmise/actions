@@ -76,7 +76,7 @@ jobs:
     - name: "Check if parameters are empty or different from hash"
       id: check_version
       run: |
-        CURRENT_HASH="${{ steps.generate_hash.outputs.content }}"
+        CURRENT_HASH="${{ needs.loading-hash.outputs.content }}"
         echo "Current hash: $CURRENT_HASH"
         
         # Construir o nome completo do parâmetro que estamos procurando
