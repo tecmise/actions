@@ -17,8 +17,6 @@ jobs:
     name: Generate
     environment: ${{ github.ref_name }}
     runs-on: ubuntu-latest
-    outputs:
-      branch_name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
     - name: Checkout branch
       uses: actions/checkout@v4
@@ -140,8 +138,8 @@ jobs:
       run: |
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
-          --head ${{ needs.generate-versionament.outputs.branch_name }} \
-          --title "🚀 Release ${{ github.ref_name }}: ${{ inputs.versionament }}" \
+          --head delivery/${{ github.ref_name }} \
+          --title "🚀 Release Automation[${{ github.ref_name }}]: ${{ inputs.versionament }}" \
           --body "## 🚀 Automated Release Update
     
         ### Versão: \`${{ inputs.versionament }}\`
