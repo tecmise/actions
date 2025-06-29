@@ -107,20 +107,17 @@ jobs:
         PR_URL=$(gh pr create \
           --base ${{ github.ref_name }} \
           --head ${{ needs.generate-versionament.outputs.branch_name }} \
-          --title "🚀 Release Automation: v${{ needs.generate-versionament.outputs.version }}" \
+          --title "🚀 Release Automation: v${{ inputs.versionament }}" \
           --body "## 🚀 Automated Release Update
     
-        ### Versão: \`${{ needs.generate-versionament.outputs.version }}\`
-        ### Hash de Conteúdo: \`${{ needs.generate-hash.outputs.content }}\`
+        ### Versão: \`${{ inputs.versionament }}\`
     
         Esta Pull Request foi gerada automaticamente pelo pipeline de CD e contém:
     
-        - ✅ Atualização de versão para \`${{ needs.generate-versionament.outputs.version }}\`
+        - ✅ Atualização de versão para \`${{ inputs.versionament }}\`
         - ✅ Configurações atualizadas para implantação
         - ✅ Artefatos prontos para produção
-    
-        > ⚠️ **Nota**: Esta PR será mesclada automaticamente após aprovação. A branch será excluída após o merge.
-    
+        
         ---
         *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*" \
           --repo ${{ github.repository }})
