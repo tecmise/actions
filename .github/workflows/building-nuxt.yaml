@@ -3,10 +3,6 @@ name: Building Go
 on:
   workflow_call:
     inputs:
-      hashcode:
-        description: 'Hashcode'
-        required: true
-        type: string
       runner_name:
         required: true
         type: string
