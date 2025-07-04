@@ -14,7 +14,7 @@ on:
         type: string
         default: '20'
       npm_script_build:
-        required: true
+        required: false
         type: string
         default: 'generate'
 
