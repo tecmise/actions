@@ -37,7 +37,7 @@ resource "aws_iam_role" "service" {
 }
 
 resource aws_iam_role_policy_attachment tasks {
-  count      = var.task_policy_arns
+  count      = length(var.task_policy_arns)
   policy_arn = var.task_policy_arns[count.index]
   role       = aws_iam_role.service.id
 }
