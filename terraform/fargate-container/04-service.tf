@@ -6,7 +6,7 @@ resource "aws_ecs_task_definition" "server" {
   memory                   = var.memory
   execution_role_arn       = aws_iam_role.task-execution.arn
   task_role_arn            = aws_iam_role.service.arn
-  container_definitions    = flatten([
+  container_definitions    = jsonencode(flatten([
     for index, value in var.containers_definitions : {
       name         = value.name
       image        = value.image
@@ -24,7 +24,7 @@ resource "aws_ecs_task_definition" "server" {
         }
       }
     }
-  ])
+  ]))
 
 }
 
