@@ -34,7 +34,8 @@ resource "aws_ecs_service" "server" {
   task_definition  = aws_ecs_task_definition.server.arn
   desired_count    = var.desired_count
   launch_type      = var.launch_type
-  platform_version = "LATEST"
+  platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
+
 
   dynamic "network_configuration" {
     for_each = toset(var.network_configuration)
