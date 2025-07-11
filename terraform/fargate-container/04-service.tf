@@ -36,6 +36,14 @@ resource "aws_ecs_service" "server" {
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
 
+  dynamic "capacity_provider_strategy" {
+    for_each = toset(var.capacity_provider_strategy)
+    content {
+      capacity_provider = capacity_provider_strategy.value.capacity_provider
+      weight = capacity_provider_strategy.value.weight
+      base = capacity_provider_strategy.value.base
+    }
+  }
 
   dynamic "network_configuration" {
     for_each = toset(var.network_configuration)

@@ -110,3 +110,12 @@ variable "aws_iam_policy_task_execution_arn" {
   type = string
   default = ""
 }
+
+variable "capacity_provider_strategy" {
+  type = list(object({
+    capacity_provider = string
+    weight = number
+    base = number
+  }))
+  default = []
+}
