@@ -35,7 +35,7 @@ variable "desired_count" {
 
 variable "launch_type" {
   type = string
-  default = "FARGATE"
+  default = null
 }
 
 variable "requires_compatibilities" {
