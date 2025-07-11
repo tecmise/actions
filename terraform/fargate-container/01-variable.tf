@@ -33,7 +33,6 @@ variable "desired_count" {
   default = 1
 }
 
-
 variable "launch_type" {
   type = string
   default = "FARGATE"
@@ -106,3 +105,8 @@ variable "containers_definitions" {
   }))
 }
 
+
+variable "aws_iam_policy_task_execution_arn" {
+  type = string
+  default = ""
+}

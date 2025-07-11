@@ -15,6 +15,7 @@ resource "aws_iam_role" "task-execution" {
 }
 
 resource "aws_iam_role_policy_attachment" "task_execution" {
+  count = var.aws_iam_policy_task_execution_arn != "" ? 1 : 0
   policy_arn = var.aws_iam_policy_task_execution_arn
   role       = aws_iam_role.task-execution.id
 }
