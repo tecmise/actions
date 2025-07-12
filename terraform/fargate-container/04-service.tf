@@ -20,7 +20,7 @@ resource "aws_ecs_task_definition" "server" {
         options   = {
           "awslogs-group"         = aws_cloudwatch_log_group.default.name,
           "awslogs-region"        = var.region,
-          "awslogs-stream-prefix" = value.logConfiguration.options.stream-prefix
+          "awslogs-stream-prefix" = var.application_name
         }
       }
     }
