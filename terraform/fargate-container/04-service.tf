@@ -11,6 +11,9 @@ resource "aws_ecs_task_definition" "server" {
       name         = value.name
       image        = value.image
       essential    = value.essential
+      restartPolicy = {
+        enabled = value.enabled
+      }
       portMappings = value.portMappings
       environment = value.environment
       healthCheck = lookup(value, "healthCheck", null)
