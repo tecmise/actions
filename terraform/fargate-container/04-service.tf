@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "server" {
       image        = value.image
       essential    = value.essential
       restartPolicy = {
-        enabled = value.enabled
+        enabled = value.restart_policy
       }
       portMappings = value.portMappings
       environment = value.environment
