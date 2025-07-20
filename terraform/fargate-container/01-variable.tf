@@ -73,7 +73,7 @@ variable "containers_definitions" {
     name         = string
     image        = string
     essential    = optional(bool, true)
-    enabled      = optional(bool, true)
+    restart_policy      = optional(bool, true)
     portMappings = list(object({
       containerPort = number
       hostPort      = number
