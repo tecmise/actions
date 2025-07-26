@@ -72,6 +72,8 @@ variable "containers_definitions" {
   type = list(object({
     name         = string
     image        = string
+    cpu          = optional(number, null)
+    memory       = optional(number, null)
     essential    = optional(bool, true)
     restart_policy      = optional(bool, true)
     portMappings = list(object({
