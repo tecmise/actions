@@ -13,13 +13,13 @@ resource "aws_ecs_task_definition" "server" {
       essential    = value.essential
       cpu          = lookup(value, "cpu", var.cpu)
       memory       = lookup(value, "memory", var.memory)
+      resource_requirements = lookup(value, "resourceRequirements", [])
       restartPolicy = {
         enabled = value.restart_policy
       }
       portMappings = value.portMappings
       environment = value.environment
       healthCheck = lookup(value, "healthCheck", null)
-      resourceRequirements = lookup(value, "resourceRequirements", [])
       logConfiguration = {
         logDriver = "awslogs",
         options   = {
