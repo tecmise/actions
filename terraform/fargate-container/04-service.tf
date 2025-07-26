@@ -11,6 +11,8 @@ resource "aws_ecs_task_definition" "server" {
       name         = value.name
       image        = value.image
       essential    = value.essential
+      cpu          = lookup(value, "cpu", var.cpu)
+      memory       = lookup(value, "memory", var.memory)
       restartPolicy = {
         enabled = value.restart_policy
       }
