@@ -1,0 +1,81 @@
+name: Building Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      docker_file_path:
+        description: 'Path to the Dockerfile'
+        required: true
+        type: string
+      image_name:
+        description: 'Name of the Docker image'
+        required: true
+        type: string
+      versionament:
+        description: 'Versionament parameters'
+        required: true
+        type: string
+      runner_name:
+        required: true
+        type: string
+      runner_category:
+        required: true
+        type: string
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
+
+jobs:
+
+  building:
+    name: Building
+    environment: ${{ github.ref_name }}
+    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
+        role-session-name: github-actions-role
+        aws-region: 'us-east-1'
+
+
+    - name: Building Image
+      run: |
+        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} .
+
+    - name: Tag da imagem
+      run: |
+        docker tag ${{ inputs.image_name }}:${{ needs.generate-hashcode.outputs.hashcode }} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ inputs.image_name }}:${{ inputs.versionament }}
+      env:
+        AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
+        AWS_REGION: "us-east-1"
+
+    - name: Verificar e deletar tag existente no ECR
+      run: |
+        IMAGE_TAG=${{ inputs.versionament }}
+        REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ inputs.image_name }}
+        EXISTING_TAG=$(aws ecr list-images --repository-name ${{ inputs.image_name }} --query "imageIds[?imageTag=='${IMAGE_TAG}'].imageTag" --output text --region ${AWS_REGION})
+        if [ "${EXISTING_TAG}" == "${IMAGE_TAG}" ]; then
+          aws ecr batch-delete-image --repository-name ${{ inputs.image_name }} --image-ids imageTag=${IMAGE_TAG} --region ${AWS_REGION}
+        fi
+      env:
+        AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
+        AWS_REGION: "us-east-1"
+
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Push para o Amazon ECR
+      run: |
+        docker push $REGISTRY/${{ inputs.image_name }}:${{ inputs.versionament }}
+      env:
+        AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
+        AWS_REGION: "us-east-1"
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
