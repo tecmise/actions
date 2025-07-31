@@ -50,7 +50,7 @@ jobs:
 
     - name: Tag da imagem
       run: |
-        docker tag ${{ inputs.image_name }}:${{ needs.generate-hashcode.outputs.hashcode }} ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.image_name }}:${{ inputs.versionament }}
+        docker tag ${{ inputs.image_name }}:${{ inputs.versionament }} ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.image_name }}:${{ inputs.versionament }}
 
     - name: Verificar e deletar tag existente no ECR
       run: |
