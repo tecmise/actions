@@ -10,11 +10,9 @@ on:
       runner_name:
         required: true
         type: string
-        default: ''
       runner_category:
         required: true
         type: string
-        default: ''
       go_version:
         required: false
         type: string
@@ -43,7 +41,7 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: ${{ (inputs.runner_name != '' && inputs.runner_category != '') ? fromJSON(format('["{}","{}","self-hosted","linux","x64","amazon"]', inputs.runner_name, inputs.runner_category)) : 'ubuntu-latest' }}
+    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     env:
       GO111MODULE: on
       GOPROXY: direct
