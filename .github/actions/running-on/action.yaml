@@ -41,5 +41,8 @@ runs:
 
     - name: Show Values
       shell: bash
-      run: echo "${{ steps.determine_runner.outputs.runs_on }}"
+      run: echo "toJson(${{ steps.determine_runner.outputs.runs_on }})"
 
+    - name: Show Values
+      shell: bash
+      run: echo "toJSON(${{ steps.determine_runner.outputs.runs_on }})"
