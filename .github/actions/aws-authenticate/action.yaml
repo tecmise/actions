@@ -16,18 +16,18 @@ runs:
   using: composite
   steps:
 
-  - name: Show category
-    shell: bash
-    run: "echo 'Ref: ${{ github.ref_name }} Category: ${{ inputs.category }}'"
-
-  - name: configure aws credentials s4s
+  - name: configure aws credentials-s4s
+    uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
-    shell: bash
-    run: |
-      echo "${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}"
+    with:
+      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role
+      role-session-name: github-actions-role
+      aws-region: ${{ inputs.aws_region }}
 
-  - name: configure aws credentials infrastructure
+  - name: configure aws credentials-infrastructure
+    uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master') }}
-    shell: bash
-    run: |
-      echo "${{ fromJson(inputs.aws_accounts).infrastructure }}"
+    with:
+      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
+      role-session-name: github-actions-role
+      aws-region: ${{ inputs.aws_region }}
