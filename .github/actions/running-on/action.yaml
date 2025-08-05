@@ -10,31 +10,30 @@ inputs:
     required: false
     default: 'false'
 
-
 outputs:
   runs_on:
-    value: ${{ steps.generate_hash.outputs.runs_on }}
+    # Coleta o output do step que foi executado. Os outros estarão vazios.
+    value: ${{ steps.generate_default.outputs.runs_on || steps.generate_x64.outputs.runs_on || steps.generate_arm64.outputs.runs_on }}
     description: 'Runs On'
 
 runs:
   using: composite
   steps:
 
-  - id: generate_hash
-    name: Run on specified context
+  - id: generate_default # <-- ID ÚNICO 1
+    name: Run on GitHub-hosted runner
     if: ${{ inputs.context == 'ubuntu-latest' || inputs.context == 'windows-latest' || inputs.context == 'macos-latest' }}
     shell: bash
     run: echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
 
-
-  - id: generate_hash
-    name: Run on specified context
-    if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'false' }}
+  - id: generate_x64 # <-- ID ÚNICO 2
+    name: Run on self-hosted runner (x64)
+    if: ${{ !contains(['ubuntu-latest', 'windows-latest', 'macos-latest'], inputs.context) && inputs.arm64 == 'false' }}
     shell: bash
-    run : echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon']"
+    run: echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon']" >> $GITHUB_OUTPUT
 
-  - id: generate_hash
-    name: Run on specified context
-    if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'true' }}
+  - id: generate_arm64 # <-- ID ÚNICO 3
+    name: Run on self-hosted runner (ARM64)
+    if: ${{ !contains(['ubuntu-latest', 'windows-latest', 'macos-latest'], inputs.context) && inputs.arm64 == 'true' }}
     shell: bash
-    run : echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon', 'arm64']"
+    run: echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'arm64', 'amazon']" >> $GITHUB_OUTPUT
