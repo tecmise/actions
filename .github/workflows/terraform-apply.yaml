@@ -22,7 +22,11 @@ on:
         required: false
         type: string
         default: 'parameters'
-
+      aws_environment:
+        description: 'Environment for the workflow'
+        required: false
+        type: string
+        default: 's4s'
 
 jobs:
   apply:
@@ -37,13 +41,16 @@ jobs:
       with:
         node-version: '20'
     - uses: hashicorp/setup-terraform@v3
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ inputs.runner_category == 's4s' }}
+
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
       with:
-        role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
-        role-session-name: github-actions-role
-        aws-region: ${{ inputs.aws_region }}
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+
+
     - name: Prepare Terraform plugin cache dir
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}

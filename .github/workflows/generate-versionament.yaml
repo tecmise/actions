@@ -16,6 +16,11 @@ on:
         required: false
         type: string
         default: '.'
+      aws_environment:
+        description: 'Environment for the workflow'
+        required: false
+        type: string
+        default: 's4s'
 
 jobs:
   generate-versionament:
@@ -32,21 +37,13 @@ jobs:
         persist-credentials: true
 
 
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ inputs.context == 's4s' }}
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
       with:
-        role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
-        role-session-name: github-actions-role
-        aws-region: 'us-east-1'
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
 
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ inputs.context == 'infrastructure' }}
-      with:
-        role-to-assume: arn:aws:iam::303767825511:role/github-actions-role
-        role-session-name: github-actions-role
-        aws-region: "us-east-1"
 
     - name: "Generate Terraform file"
       shell: bash
