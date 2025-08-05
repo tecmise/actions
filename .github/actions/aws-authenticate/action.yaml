@@ -1,0 +1,22 @@
+name: Authenticate Aws Account
+inputs:
+  aws_accounts:
+    description: 'Accounts'
+    required: true
+  category:
+    description: 'Category of repository'
+    required: true
+
+outputs:
+  content:
+    value: ${{ steps.generate_hash.outputs.content }}
+    description: 'Content Hash'
+
+runs:
+  using: composite
+  steps:
+
+  - name: configure aws credentials
+    shell: bash
+    run: |
+      echo "${{ inputs.aws_accounts }}"
