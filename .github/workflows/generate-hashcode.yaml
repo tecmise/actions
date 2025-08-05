@@ -8,7 +8,10 @@ on:
         required: false
         type: string
         default: 's4s'
-
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
 
     outputs:
       has_changes:
