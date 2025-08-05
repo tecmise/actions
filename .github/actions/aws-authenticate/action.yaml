@@ -16,7 +16,14 @@ runs:
   using: composite
   steps:
 
-  - name: configure aws credentials
+  - name: configure aws credentials s4s
+    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
     shell: bash
     run: |
-      echo "${{ inputs.aws_accounts }}"
+      echo "${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}"
+
+  - name: configure aws credentials infrastructure
+    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    shell: bash
+    run: |
+      echo "${{ fromJson(inputs.aws_accounts).infrastructure }}"
