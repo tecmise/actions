@@ -26,16 +26,16 @@ runs:
           echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
         else
           # 2. Se não for, monta a lista de tags para runner self-hosted
-          RUNNER_TAGS="['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux'"
+          RUNNER_TAGS="['${{ github.ref_name }}', '${{ inputs.context }}', self-hosted, linux"
           
           # 3. Adiciona a tag de arquitetura condicionalmente
           if [[ "${{ inputs.arm64 }}" == "true" ]]; then
-            RUNNER_TAGS="$RUNNER_TAGS, 'arm64'"
+            RUNNER_TAGS="$RUNNER_TAGS, arm64"
           else
-            RUNNER_TAGS="$RUNNER_TAGS, 'x64'"
+            RUNNER_TAGS="$RUNNER_TAGS, x64"
           fi
           
-          RUNNER_TAGS="$RUNNER_TAGS, 'amazon']"
+          RUNNER_TAGS="$RUNNER_TAGS, amazon]"
           echo "runs_on=$RUNNER_TAGS" >> $GITHUB_OUTPUT
         fi
 
