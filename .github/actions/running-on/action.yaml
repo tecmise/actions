@@ -40,5 +40,6 @@ runs:
         fi
 
     - name: Show Values
+      shell: bash
       run: echo "${{ steps.determine_runner.outputs.runs_on }}"
 
