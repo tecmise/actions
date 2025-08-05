@@ -6,11 +6,10 @@ inputs:
   category:
     description: 'Category of repository'
     required: true
-
-outputs:
-  content:
-    value: ${{ steps.generate_hash.outputs.content }}
-    description: 'Content Hash'
+  aws_region:
+    description: 'Region'
+    required: false
+    default: 'us-east-1'
 
 runs:
   using: composite
