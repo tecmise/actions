@@ -1,39 +1,40 @@
 name: Running On
 inputs:
   context:
-    description: 'Required context for running the action'
+    description: 'Context for running the action (e.g., ubuntu-latest or a self-hosted label)'
     required: false
     default: 'ubuntu-latest'
-
   arm64:
-    description: 'Run on ARM64 architecture'
+    description: 'Set to "true" to run on ARM64 self-hosted architecture'
     required: false
     default: 'false'
 
 outputs:
   runs_on:
-    # Coleta o output do step que foi executado. Os outros estarão vazios.
-    value: ${{ steps.generate_default.outputs.runs_on || steps.generate_x64.outputs.runs_on || steps.generate_arm64.outputs.runs_on }}
-    description: 'Runs On'
+    value: ${{ steps.determine_runner.outputs.runs_on }}
+    description: 'The final runs-on value, either a string or a JSON array string.'
 
 runs:
   using: composite
   steps:
-
-  - id: generate_default # <-- ID ÚNICO 1
-    name: Run on GitHub-hosted runner
-    if: ${{ inputs.context == 'ubuntu-latest' || inputs.context == 'windows-latest' || inputs.context == 'macos-latest' }}
-    shell: bash
-    run: echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
-
-  - id: generate_x64 # <-- ID ÚNICO 2
-    name: Run on self-hosted runner (x64)
-    if: ${{ !contains(['ubuntu-latest', 'windows-latest', 'macos-latest'], inputs.context) && inputs.arm64 == 'false' }}
-    shell: bash
-    run: echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon']" >> $GITHUB_OUTPUT
-
-  - id: generate_arm64 # <-- ID ÚNICO 3
-    name: Run on self-hosted runner (ARM64)
-    if: ${{ !contains(['ubuntu-latest', 'windows-latest', 'macos-latest'], inputs.context) && inputs.arm64 == 'true' }}
-    shell: bash
-    run: echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'arm64', 'amazon']" >> $GITHUB_OUTPUT
+    - id: determine_runner
+      name: Determine runner environment
+      shell: bash
+      run: |
+        # 1. Verifica se é um runner padrão do GitHub
+        if [[ "${{ inputs.context }}" == "ubuntu-latest" || "${{ inputs.context }}" == "windows-latest" || "${{ inputs.context }}" == "macos-latest" ]]; then
+          echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
+        else
+          # 2. Se não for, monta a lista de tags para runner self-hosted
+          RUNNER_TAGS="['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux'"
+          
+          # 3. Adiciona a tag de arquitetura condicionalmente
+          if [[ "${{ inputs.arm64 }}" == "true" ]]; then
+            RUNNER_TAGS="$RUNNER_TAGS, 'arm64'"
+          else
+            RUNNER_TAGS="$RUNNER_TAGS, 'x64'"
+          fi
+          
+          RUNNER_TAGS="$RUNNER_TAGS, 'amazon']"
+          echo "runs_on=$RUNNER_TAGS" >> $GITHUB_OUTPUT
+        fi
