@@ -1,0 +1,40 @@
+name: Running On
+inputs:
+  context:
+    description: 'Required context for running the action'
+    required: false
+    default: 'ubuntu-latest'
+
+  arm64:
+    description: 'Run on ARM64 architecture'
+    required: false
+    default: 'false'
+
+
+outputs:
+  runs_on:
+    value: ${{ steps.generate_hash.outputs.runs_on }}
+    description: 'Runs On'
+
+runs:
+  using: composite
+  steps:
+
+  - id: run_on
+    name: Run on specified context
+    if: ${{ inputs.context == 'ubuntu-latest' || inputs.context == 'windows-latest' || inputs.context == 'macos-latest' }}
+    shell: bash
+    run: echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
+
+
+  - id: run_on
+    name: Run on specified context
+    if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'false' }}
+    shell: bash
+    run : echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon']"
+
+  - id: run_on
+    name: Run on specified context
+    if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'true' }}
+    shell: bash
+    run : echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon', 'arm64']"
