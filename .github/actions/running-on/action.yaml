@@ -38,3 +38,7 @@ runs:
           RUNNER_TAGS="$RUNNER_TAGS, 'amazon']"
           echo "runs_on=$RUNNER_TAGS" >> $GITHUB_OUTPUT
         fi
+
+    - name: Show Values
+      run: echo "${{ steps.determine_runner.outputs.runs_on }}"
+
