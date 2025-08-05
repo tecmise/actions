@@ -20,20 +20,20 @@ runs:
   using: composite
   steps:
 
-  - id: run_on
+  - id: generate_hash
     name: Run on specified context
     if: ${{ inputs.context == 'ubuntu-latest' || inputs.context == 'windows-latest' || inputs.context == 'macos-latest' }}
     shell: bash
     run: echo "runs_on=${{ inputs.context }}" >> $GITHUB_OUTPUT
 
 
-  - id: run_on
+  - id: generate_hash
     name: Run on specified context
     if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'false' }}
     shell: bash
     run : echo "runs_on=['${{ github.ref_name }}', '${{ inputs.context }}', 'self-hosted', 'linux', 'x64', 'amazon']"
 
-  - id: run_on
+  - id: generate_hash
     name: Run on specified context
     if: ${{ (inputs.context != 'ubuntu-latest' && inputs.context != 'windows-latest' || inputs.context != 'macos-latest') && inputs.arm64 == 'true' }}
     shell: bash
