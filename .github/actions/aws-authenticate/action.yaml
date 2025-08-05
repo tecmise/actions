@@ -18,7 +18,7 @@ runs:
 
   - name: Show category
     shell: bash
-    run: "Ref: ${{ github.ref_name }} Category: ${{ inputs.category }}"
+    run: "echho 'Ref: ${{ github.ref_name }} Category: ${{ inputs.category }}'"
 
   - name: configure aws credentials s4s
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
