@@ -107,3 +107,8 @@ variable "append_authorizer_on_request" {
   type = bool
   default = false
 }
+
+variable "roles" {
+  type = list(string)
+  default = []
+}

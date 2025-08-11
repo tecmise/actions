@@ -61,6 +61,7 @@ jobs:
       working-directory: ${{ inputs.terraform_directory }}
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
+
     - name: Cache Terraform providers & modules
       uses: actions/cache@v4
       with:
@@ -70,6 +71,7 @@ jobs:
         key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform/terraform.lock.hcl') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
+
     - name: Terraform Init
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}

@@ -82,8 +82,6 @@ jobs:
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
           aws_region: ${{ inputs.aws_region }}
 
-
-
       - name: Download
         uses: actions/download-artifact@v4
         with:
