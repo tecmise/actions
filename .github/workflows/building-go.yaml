@@ -122,7 +122,7 @@ jobs:
           chmod +x bootstrap
 
       - name: Zip the artifact-builded folder
-        if: inputs.is_lambda != true
+        if: inputs.is_lambda == true
         run: |
           zip -r artifact-builded.zip bootstrap ${{ inputs.resource_folder }}
           mv artifact-builded.zip ${{ inputs.artifact_name }}.zip
