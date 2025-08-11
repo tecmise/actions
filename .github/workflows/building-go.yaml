@@ -37,6 +37,12 @@ on:
         type: string
         default: 's4s'
 
+      resource_folder:
+        description: 'Resource folder for the artifact'
+        required: false
+        type: string
+        default: ''
+
     outputs:
       md5:
         description: "MD5 checksum of the built artifact"
@@ -116,9 +122,9 @@ jobs:
           chmod +x bootstrap
 
       - name: Zip the artifact-builded folder
-        if: inputs.is_lambda == true
+        if: inputs.is_lambda != true
         run: |
-          zip -r artifact-builded.zip bootstrap
+          zip -r artifact-builded.zip bootstrap ${{ inputs.resource_folder }}
           mv artifact-builded.zip ${{ inputs.artifact_name }}.zip
 
       - name: upload artifact
