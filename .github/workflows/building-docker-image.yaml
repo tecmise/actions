@@ -50,6 +50,7 @@ jobs:
 
     - name: Building Image
       run: |
+        ls -ltra
         docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} .
 
     - name: Tag da imagem
