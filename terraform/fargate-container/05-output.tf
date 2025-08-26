@@ -11,9 +11,9 @@ output "cloudwatch_log_group_name" {
 }
 
 output "iam_task_execution_role_arn" {
-  value = aws_iam_role.task-execution
+  value = aws_iam_role.task-execution.arn
 }
 
 output "iam_service_role_arn" {
-  value = aws_iam_role.service
+  value = aws_iam_role.service.arn
 }
