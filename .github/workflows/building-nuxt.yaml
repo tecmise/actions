@@ -67,6 +67,9 @@ jobs:
       - name: Show files
         run: ls -ltra
 
+      - name: Show files
+        run: mv env .env
+
       - name: npm run build
         run: npm run ${{ inputs.npm_script_build }}
 
