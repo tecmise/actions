@@ -1,5 +1,6 @@
 resource "aws_api_gateway_integration_response" "default" {
   count = var.has_integration_response ? 1 : 0
+  depends_on  = [aws_api_gateway_integration.default, aws_api_gateway_method_response.default]
   http_method = var.integration_response_http_method
   resource_id = var.resource_id
   rest_api_id = var.rest_api_id
