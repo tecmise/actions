@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: 'us-east-1'
+      env_file:
+        description: 'Environment file to load'
+        required: false
+        type: string
+        default: 'environments'
 jobs:
 
   building:
@@ -53,6 +58,14 @@ jobs:
 
       - name: npm install
         run: npm install
+
+      - name: Download env file
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.env_file }}
+
+      - name: Show files
+        run: ls -ltra
 
       - name: npm run build
         run: npm run ${{ inputs.npm_script_build }}
