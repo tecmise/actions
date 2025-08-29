@@ -1,0 +1,17 @@
+name: Expose Endpoints in API Gateway
+inputs:
+  endpoints:
+    description: 'Context for running the action (e.g., ubuntu-latest or a self-hosted label)'
+    required: false
+    default: 'ubuntu-latest'
+
+runs:
+  using: composite
+  steps:
+    - id: determine_runner
+      name: Determine runner environment
+      shell: bash
+      run: |
+        echo "${{ inputs.endpoints }}" | jq .
+
+
