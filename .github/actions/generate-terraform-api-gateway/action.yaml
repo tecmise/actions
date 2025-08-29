@@ -8,8 +8,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - id: show value
-      name: Get Endpoints value
+    - name: Get Endpoints value
       shell: bash
       run: |
         echo "${{ inputs.endpoints }}"
