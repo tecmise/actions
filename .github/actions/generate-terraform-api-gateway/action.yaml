@@ -8,10 +8,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - id: determine_runner
-      name: Determine runner environment
+    - id: show value
+      name: Get Endpoints value
+      shell: bash
+      run: |
+        echo "${{ inputs.endpoints }}"
+
+
+    - name: Convert Data
       shell: bash
       run: |
         echo "${{ inputs.endpoints }}" | jq .
-
-
