@@ -54,7 +54,7 @@ def create_terraform_file(route: Route):
             print(f"\tparent_id   = var.root_resource_id", file=f)
         else:
             print(f"\tdepends_on  = [aws_api_gateway_resource.{route.parent_id}]", file=f)
-            print(f"\tparent_id   = aws_api_gateway_resource.{route.parent_id}", file=f)
+            print(f"\tparent_id   = aws_api_gateway_resource.{route.parent_id}.id", file=f)
         print(f"\trest_api_id = var.rest_api_id", file=f)
         print(f"\tpath_part   = \"{route.path}\"", file=f)
         print(f"}} ", file=f)
