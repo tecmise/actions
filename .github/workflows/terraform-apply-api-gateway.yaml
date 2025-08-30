@@ -60,11 +60,11 @@ jobs:
     name: Terraform Plan for API Gateway
     environment: ${{ github.ref_name }}
     env:
-      TF_VAR_root_resource_id=${{ secrets.ROOT_RESOURCE_ID }}
-      TF_VAR_rest_api_id=${{ secrets.REST_API_ID }}
-      TF_VAR_invoke_uri=${{ secrets.INVOKE_URI }}
-      TF_VAR_authorizer_id=${{ secrets.AUTHORIZER_ID }}
-      TF_VAR_cors_origin_domain=${{ secrets.CORS_ORIGIN_DOMAIN }}
+      TF_VAR_root_resource_id: ${{ secrets.ROOT_RESOURCE_ID }}
+      TF_VAR_rest_api_id: ${{ secrets.REST_API_ID }}
+      TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
+      TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
+      TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
     needs:
       - generate-files
     runs-on: ubuntu-latest
