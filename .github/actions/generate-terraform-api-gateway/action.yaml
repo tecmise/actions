@@ -9,14 +9,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Show Files
+    - name: Create Folder for API Gateway
       shell: bash
-      run: cat ${{ inputs.routes_file }}
+      run: mkdir -p ${{ github.run_number }}
+
 
     - name: Execute API Gateway Script
       shell: bash
-      working-directory: api-gateway
+      working-directory: ${{ github.run_number }}
       run: |       
         # Executa o script Python com o JSON como argumento
-        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
+        python ${{ github.action_path }}/../../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
         ls -ltra
