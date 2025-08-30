@@ -12,6 +12,7 @@ class Method:
     integration_type: Optional[str] = None
     integration_http_method: Optional[str] = None
     integration_response_http_method: Optional[str] = None
+    roles: Optional[List[str]] = None
 
 @dataclass
 class Route:
