@@ -8,6 +8,9 @@ inputs:
     description: "'AWS Region to deploy the API Gateway'"
     required: false
     default: 'us-east-1'
+  bucket_name:
+    description: "'S3 Bucket name for Terraform state'"
+    required: true
 
 runs:
   using: composite
@@ -50,9 +53,11 @@ runs:
         echo '  }' >> backend.tf
         echo '  backend "s3" {' >> backend.tf
         echo '    key            = "api-gateway-routes/${{ github.event.repository.name }}.tfstate"' >> backend.tf
+        echo '    bucket         = "${{ inputs.bucket_name }}"' >> backend.tf
         echo '    region         = "us-east-1"' >> backend.tf
         echo '  }' >> backend.tf
         echo '}' >> backend.tf
+        
         echo 'variable root_resource_id {' >> variable.tf
         echo '  type = string' >> variable.tf
         echo '}' >> variable.tf
