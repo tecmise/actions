@@ -57,7 +57,7 @@ runs:
         
         
     - name: Upload API Gateway Files
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: api-gateway-files
         path: ${{ github.run_number }}
