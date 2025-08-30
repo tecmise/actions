@@ -8,17 +8,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Get Endpoints value
-      shell: bash
-      run: |
-        echo "${{ inputs.routes }}"
-
-
+#    - name: Get Endpoints value
+#      shell: bash
+#      run: |
+#        echo "${{ inputs.routes }}"
 
     - name: Execute API Gateway Script
       shell: bash
       run: |
-        echo "${{ github.action_path }}"
+        echo "${{ github.action_path }}/.."
         ls -ltra ${{ github.action_path }}/..
 #        python ${{ github.action_path }}/../../../scripts/terraform/api-gateway.py --routes '${{ inputs.routes }}'
 #        ls -ltra
