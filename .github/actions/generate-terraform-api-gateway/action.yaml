@@ -19,5 +19,5 @@ runs:
       working-directory: ${{ github.run_number }}
       run: |       
         # Executa o script Python com o JSON como argumento
-        python ${{ github.action_path }}/../../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
+        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
         ls -ltra
