@@ -1,6 +1,6 @@
 name: Expose Endpoints in API Gateway
 inputs:
-  endpoints:
+  routes:
     description: 'Context for running the action (e.g., ubuntu-latest or a self-hosted label)'
     required: false
     default: 'ubuntu-latest'
@@ -11,10 +11,10 @@ runs:
     - name: Get Endpoints value
       shell: bash
       run: |
-        echo "${{ inputs.endpoints }}"
+        echo "${{ inputs.routes }}"
 
 
     - name: Convert Data
       shell: bash
       run: |
-        echo "${{ inputs.endpoints }}" | jq .
+        echo "${{ inputs.routes }}" | jq .
