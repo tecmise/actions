@@ -1,0 +1,120 @@
+
+name: Terraform Apply Api Gateway
+
+on:
+  workflow_call:
+    inputs:
+      routes_file:
+        required: true
+        type: string
+      aws_environment:
+        description: 'Environment for the workflow'
+        required: false
+        type: string
+        default: 's4s'
+#      runner_name:
+#        required: true
+#        type: string
+#      runner_category:
+#        required: true
+#        type: string
+#      terraform_directory:
+#        required: false
+#        type: string
+#        default: ''
+#      aws_region:
+#        required: false
+#        type: string
+#        default: 'us-east-1'
+#      artifact_vars:
+#        required: false
+#        type: string
+#        default: 'parameters'
+
+
+jobs:
+  generate-files:
+    name: Apply
+    environment: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    #    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create files
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@main
+      with:
+        routes_file: '.github/ingress/routes.json'
+        bucket_name: ${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+
+    - name: List files
+      run: |
+        ls -ltra 
+        ls -ltra ${{ github.run_number }}
+
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      with:
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+#
+#
+#    - name: Prepare Terraform plugin cache dir
+#      if: ${{ inputs.terraform_directory != '' }}
+#      working-directory: ${{ inputs.terraform_directory }}
+#      run: mkdir -p ~/.terraform.d/plugin-cache
+#      shell: bash
+#
+#    - name: Prepare Terraform plugin cache dir root
+#      if: ${{ inputs.terraform_directory == '' }}
+#      working-directory: ${{ inputs.terraform_directory }}
+#      run: mkdir -p ~/.terraform.d/plugin-cache
+#      shell: bash
+#
+#    - name: Cache Terraform providers & modules
+#      uses: actions/cache@v4
+#      with:
+#        path: |
+#          ~/.terraform.d/plugin-cache
+#          terraform/.terraform
+#        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform/terraform.lock.hcl') }}
+#        restore-keys: |
+#          ${{ runner.os }}-terraform-
+#
+#    - name: Terraform Init
+#      if: ${{ inputs.terraform_directory != '' }}
+#      working-directory: ${{ inputs.terraform_directory }}
+#      shell: bash
+#      run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+#
+#    - name: Terraform Init
+#      if: ${{ inputs.terraform_directory == '' }}
+#      shell: bash
+#      run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+#
+#    - name: Download Terraform variables
+#      uses:  actions/download-artifact@v4
+#      with:
+#        name: ${{ inputs.artifact_vars }}
+#        path: ${{ inputs.terraform_directory }}
+#
+#    - name: Terraform Apply
+#      if: ${{ inputs.terraform_directory != '' }}
+#      working-directory: ${{ inputs.terraform_directory }}
+#      shell: bash
+#      run: terraform apply -auto-approve
+#
+#    - name: Terraform Apply
+#      if: ${{ inputs.terraform_directory == '' }}
+#      shell: bash
+#      run: terraform apply -auto-approve
