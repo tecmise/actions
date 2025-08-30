@@ -110,9 +110,9 @@ def create_terraform_file(route: Route):
                     print(f"   integration_response_http_method             = {method.integration_response_http_method} ", file=f)
 
                 if method.name == "OPTIONS":
-                    print(f"   has_integration_response                     = false ", file=f)
-                else:
                     print(f"   has_integration_response                     = true ", file=f)
+                else:
+                    print(f"   has_integration_response                     = false ", file=f)
 
                 print(f"   integration_response_status_code             = \"200\" ", file=f)
                 print(f"   method_response_models                       = {{ ", file=f)
