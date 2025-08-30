@@ -13,6 +13,7 @@ runs:
   using: composite
   steps:
     - name: Show Files
+      shell: bash
       run: cat ${{ inputs.routes_file }}
 
     - name: Get Endpoints value
