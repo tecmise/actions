@@ -19,6 +19,7 @@ runs:
       shell: bash
       run: |
         echo "${{ github.action_path }}"
+        ls -ltra ${{ github.action_path }}
 #        python ${{ github.action_path }}/../../../scripts/terraform/api-gateway.py --routes '${{ inputs.routes }}'
 #        ls -ltra
 
