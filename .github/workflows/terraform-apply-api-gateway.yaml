@@ -113,3 +113,60 @@ jobs:
       shell: bash
       run: terraform plan
 
+  exposing-routes-apply:
+    name: Terraform Apply for API Gateway
+    environment: ${{ github.ref_name }}
+    env:
+      TF_VAR_root_resource_id: ${{ secrets.ROOT_RESOURCE_ID }}
+      TF_VAR_rest_api_id: ${{ secrets.REST_API_ID }}
+      TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
+      TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
+      TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
+    needs:
+      - generate-files
+      - exposing-routes-plan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: api-gateway-files
+
+    - name: Show files
+      run: |
+        ls -ltra 
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      with:
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    - name: Terraform Init
+      shell: bash
+      run: terraform init
+
+    - name: Terraform Apply
+      shell: bash
+      run: terraform apply -auto-approve
