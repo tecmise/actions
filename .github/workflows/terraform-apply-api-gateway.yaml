@@ -16,6 +16,10 @@ on:
         required: false
         type: string
         default: 's4s'
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
 #      runner_name:
 #        required: true
 #        type: string
@@ -26,10 +30,7 @@ on:
 #        required: false
 #        type: string
 #        default: ''
-#      aws_region:
-#        required: false
-#        type: string
-#        default: 'us-east-1'
+
 #      artifact_vars:
 #        required: false
 #        type: string
@@ -41,7 +42,6 @@ jobs:
     name: Generate Files for API Gateway
     environment: ${{ github.ref_name }}
     runs-on: ubuntu-latest
-    #    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     steps:
 
     - name: Checkout code
@@ -53,10 +53,6 @@ jobs:
         routes_file: '.github/ingress/routes.json'
         bucket_name: ${{ inputs.bucket_name }}
 
-    - name: List files
-      run: |
-        ls -ltra 
-        ls -ltra ${{ github.run_number }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -64,20 +60,36 @@ jobs:
         name: api-gateway-files
         path: ${{ github.run_number }}
 
+  exposing-routes-plan:
+    name: Terraform Plan for API Gateway
+    environment: ${{ github.ref_name }}
+    needs:
+      - generate-files
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: api-gateway-files
 
-#    - uses: actions/setup-node@v4
-#      with:
-#        node-version: '20'
-#
-#    - uses: hashicorp/setup-terraform@v3
-#
-#    - name: Authenticate on AWS
-#      uses: tecmise/actions/.github/actions/aws-authenticate@main
-#      with:
-#        category: ${{ inputs.aws_environment }}
-#        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-#        aws_region: ${{ inputs.aws_region }}
-##
+    - name: Show files
+      run: |
+        ls -ltra 
+        ls -ltra ${{ github.run_number }}
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      with:
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+
 #
 #    - name: Prepare Terraform plugin cache dir
 #      if: ${{ inputs.terraform_directory != '' }}
