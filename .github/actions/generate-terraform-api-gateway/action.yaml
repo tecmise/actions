@@ -49,11 +49,25 @@ runs:
         echo '    }' >> backend.tf
         echo '  }' >> backend.tf
         echo '  backend "s3" {' >> backend.tf
-        echo '    key            = "api-gateway-routes/${{ github.repository.name }}.tfstate" {' >> backend.tf
-        echo '    region         = "us-east-1" {' >> backend.tf
+        echo '    key            = "api-gateway-routes/${{ github.event.repository.name }}.tfstate"' >> backend.tf
+        echo '    region         = "us-east-1"' >> backend.tf
         echo '  }' >> backend.tf
         echo '}' >> backend.tf
-        echo '' >> backend.tf
+        echo 'variable root_resource_id {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '}' >> variable.tf
+        echo 'variable rest_api_id {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '}' >> variable.tf
+        echo 'variable invoke_uri {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '}' >> variable.tf
+        echo 'variable authorizer_id {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '}' >> variable.tf
+        echo 'variable cors_origin_domain {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '}' >> variable.tf
         
         
     - name: Upload API Gateway Files
