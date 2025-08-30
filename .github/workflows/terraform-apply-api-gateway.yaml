@@ -4,6 +4,10 @@ name: Terraform Apply Api Gateway
 on:
   workflow_call:
     inputs:
+      bucket_name:
+        description: "'S3 Bucket name for Terraform state'"
+        required: true
+        type: string
       routes_file:
         required: true
         type: string
@@ -47,7 +51,7 @@ jobs:
       uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@main
       with:
         routes_file: '.github/ingress/routes.json'
-        bucket_name: ${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
+        bucket_name: ${{ inputs.bucket_name }}
 
     - name: List files
       run: |
