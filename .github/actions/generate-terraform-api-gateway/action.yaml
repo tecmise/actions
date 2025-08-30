@@ -16,19 +16,9 @@ runs:
       shell: bash
       run: cat ${{ inputs.routes_file }}
 
-    - name: Get Endpoints value
+    - name: Execute API Gateway Script
       shell: bash
-      run: |
-        echo '${{ inputs.routes }}'
-
-#    - name: Execute API Gateway Script
-#      shell: bash
-#      run: |
-#        # Salva o JSON em um arquivo temporário para preservar formatação
-#        echo "${{ inputs.routes }}" > /tmp/routes.json
-#
-#        # Executa o script Python com o JSON como argumento
-#        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat /tmp/routes.json)"
-#
-#        # Lista os arquivos gerados
-#        ls -ltra
+      run: |       
+        # Executa o script Python com o JSON como argumento
+        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
+        ls -ltra
