@@ -19,7 +19,6 @@ def build_route_node(data: dict, parent_id: Optional[str] = None) -> Route:
         methods=data.get("methods"),
         cors=data.get("cors"),
         parent_id=parent_id,
-        roles=data.get("roles")
     )
 
     # Inicializa methods como uma lista vazia se for None
