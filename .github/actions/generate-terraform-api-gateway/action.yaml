@@ -1,9 +1,8 @@
 name: Expose Endpoints in API Gateway
 inputs:
   routes:
-    description: 'Context for running the action (e.g., ubuntu-latest or a self-hosted label)'
-    required: false
-    default: 'ubuntu-latest'
+    description: 'JSON de configuração das rotas para API Gateway'
+    required: true
 
 runs:
   using: composite
@@ -11,18 +10,16 @@ runs:
     - name: Get Endpoints value
       shell: bash
       run: |
-        echo "${{ inputs.routes }}"
-
-
-    - name: Convert Data
-      shell: bash
-      run: |
-        CONTENT=$("${{ inputs.routes }}" | jq .)
-        echo "Content: ${CONTENT}"
+        echo '${{ inputs.routes }}'
 
     - name: Execute API Gateway Script
       shell: bash
       run: |
-        CONTENT=$("${{ inputs.routes }}" | jq .)
-        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py '${CONTENT}'
+        # Salva o JSON em um arquivo temporário para preservar formatação
+        echo '${{ inputs.routes }}' > /tmp/routes.json
+        
+        # Executa o script Python com o JSON como argumento
+        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat /tmp/routes.json)"
+        
+        # Lista os arquivos gerados
         ls -ltra
