@@ -13,7 +13,7 @@ resource "aws_ecs_task_definition" "server" {
       essential    = value.essential
       cpu          = value.cpu
       memoryReservation       = value.memoryReservation
-      resource_requirements = value.resourceRequirements
+      resourceRequirements = value.resourceRequirements
       restartPolicy = {
         enabled = value.restart_policy
       }
