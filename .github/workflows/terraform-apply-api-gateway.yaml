@@ -75,7 +75,6 @@ jobs:
     - name: Show files
       run: |
         ls -ltra 
-        ls -ltra ${{ github.run_number }}
 
     - uses: actions/setup-node@v4
       with:
@@ -90,53 +89,25 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: ${{ inputs.aws_region }}
 
-#
-#    - name: Prepare Terraform plugin cache dir
-#      if: ${{ inputs.terraform_directory != '' }}
-#      working-directory: ${{ inputs.terraform_directory }}
-#      run: mkdir -p ~/.terraform.d/plugin-cache
-#      shell: bash
-#
-#    - name: Prepare Terraform plugin cache dir root
-#      if: ${{ inputs.terraform_directory == '' }}
-#      working-directory: ${{ inputs.terraform_directory }}
-#      run: mkdir -p ~/.terraform.d/plugin-cache
-#      shell: bash
-#
-#    - name: Cache Terraform providers & modules
-#      uses: actions/cache@v4
-#      with:
-#        path: |
-#          ~/.terraform.d/plugin-cache
-#          terraform/.terraform
-#        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform/terraform.lock.hcl') }}
-#        restore-keys: |
-#          ${{ runner.os }}-terraform-
-#
-#    - name: Terraform Init
-#      if: ${{ inputs.terraform_directory != '' }}
-#      working-directory: ${{ inputs.terraform_directory }}
-#      shell: bash
-#      run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
-#
-#    - name: Terraform Init
-#      if: ${{ inputs.terraform_directory == '' }}
-#      shell: bash
-#      run: terraform init -backend-config=bucket=${{ fromJson(vars.AWS_BUCKETS_TERRAFORM).s4s[github.ref_name] }}
-#
-#    - name: Download Terraform variables
-#      uses:  actions/download-artifact@v4
-#      with:
-#        name: ${{ inputs.artifact_vars }}
-#        path: ${{ inputs.terraform_directory }}
-#
-#    - name: Terraform Apply
-#      if: ${{ inputs.terraform_directory != '' }}
-#      working-directory: ${{ inputs.terraform_directory }}
-#      shell: bash
-#      run: terraform apply -auto-approve
-#
-#    - name: Terraform Apply
-#      if: ${{ inputs.terraform_directory == '' }}
-#      shell: bash
-#      run: terraform apply -auto-approve
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    - name: Terraform Init
+      shell: bash
+      run: terraform init
+
+    - name: Terraform Plan
+      shell: bash
+      run: terraform plan
+
