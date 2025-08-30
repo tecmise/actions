@@ -1,8 +1,5 @@
 name: Expose Endpoints in API Gateway
 inputs:
-  routes:
-    description: 'JSON de configuração das rotas para API Gateway'
-    required: true
   routes_file:
     description: 'Caminho do arquivo JSON de configuração das rotas para API Gateway'
     required: false
@@ -18,6 +15,7 @@ runs:
 
     - name: Execute API Gateway Script
       shell: bash
+      working-directory: api-gateway
       run: |       
         # Executa o script Python com o JSON como argumento
         python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat ${{ inputs.routes_file }})"
