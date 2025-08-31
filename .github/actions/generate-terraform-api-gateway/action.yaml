@@ -73,6 +73,12 @@ runs:
         echo 'variable cors_origin_domain {' >> variable.tf
         echo '  type = string' >> variable.tf
         echo '}' >> variable.tf
+        echo 'variable application_name {' >> variable.tf
+        echo '  type = string' >> variable.tf
+        echo '  default = "${{ github.event.repository.name }}"' >> variable.tf
+        echo '}' >> variable.tf
+        
+        
         
 
         
