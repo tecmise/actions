@@ -88,7 +88,7 @@ def create_terraform_file(route: Route):
                     else:
                         print(f"   integration_type                             = \"AWS_PROXY\" ", file=f)
                 else:
-                    print(f"   integration_type                             = {method.integration_type} ", file=f)
+                    print(f"   integration_type                             = \"{method.integration_type}\" ", file=f)
 
 
 
@@ -98,7 +98,7 @@ def create_terraform_file(route: Route):
                     else:
                         print(f"   integration_http_method                      = \"POST\" ", file=f)
                 else:
-                    print(f"   integration_http_method                      = {method.integration_http_method} ", file=f)
+                    print(f"   integration_http_method                      = \"{method.integration_http_method}\" ", file=f)
 
 
                 if method.integration_response_http_method is None:
@@ -107,7 +107,7 @@ def create_terraform_file(route: Route):
                     else:
                         print(f"   integration_response_http_method             = \"POST\" ", file=f)
                 else:
-                    print(f"   integration_response_http_method             = {method.integration_response_http_method} ", file=f)
+                    print(f"   integration_response_http_method             = \"{method.integration_response_http_method}\" ", file=f)
 
                 if method.name == "OPTIONS":
                     print(f"   has_integration_response                     = true ", file=f)
