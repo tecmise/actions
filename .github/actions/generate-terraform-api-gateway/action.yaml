@@ -11,6 +11,51 @@ inputs:
   bucket_name:
     description: "'S3 Bucket name for Terraform state'"
     required: true
+  port:
+    description: "'Port for the target group'"
+    required: false
+    default: 0
+  protocol:
+    description: "'Protocol for the target group'"
+    required: false
+    default: 'HTTP'
+  vpc_id:
+    description: "'VPC ID for the target group'"
+    required: false
+    default: ''
+
+  health_check_protocol:
+    description: "'Health Check Protocol for the target group'"
+    required: false
+    default: "HTTP"
+  health_check_port:
+    description: "'Health Check Port for the target group'"
+    required: false
+    default: ""
+  health_check_interval:
+    description: "'Health Check Interval for the target group'"
+    required: false
+    default: "30"
+  health_check_timeout:
+    description: "'Health Check Timeout for the target group'"
+    required: false
+    default: "5"
+  health_check_healthy_threshold:
+    description: "'Health Check Healthy Threshold for the target group'"
+    required: false
+    default: "2"
+  health_check_unhealthy_threshold:
+    description: "'Health Check Unhealthy Threshold for the target group'"
+    required: false
+    default: "2"
+  health_check_path:
+    description: "'Health Check Path for the target group'"
+    required: false
+    default: "/health"
+  health_check_matcher:
+    description: "'Health Check Matcher for the target group'"
+    default: "200"
+
 
 runs:
   using: composite
@@ -37,48 +82,95 @@ runs:
         python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat routes.json)"
         ls -ltra
 
-    - name: Creating other files
+    - name: Creating provider.tf
       shell: bash
       working-directory: ${{ github.run_number }}
       run: |       
-        echo 'provider "aws" {' > provider.tf
-        echo '  region = "${{ inputs.aws_region }}"' >> provider.tf
-        echo '}' >> provider.tf
-        echo 'terraform {' > backend.tf
-        echo '  required_providers {' >> backend.tf
-        echo '    aws = {' >> backend.tf
-        echo '      source  = "hashicorp/aws"' >> backend.tf
-        echo '      version = "5.81.0"' >> backend.tf
-        echo '    }' >> backend.tf
-        echo '  }' >> backend.tf
-        echo '  backend "s3" {' >> backend.tf
-        echo '    key            = "api-gateway-routes/${{ github.event.repository.name }}.tfstate"' >> backend.tf
-        echo '    bucket         = "${{ inputs.bucket_name }}"' >> backend.tf
-        echo '    region         = "us-east-1"' >> backend.tf
-        echo '  }' >> backend.tf
-        echo '}' >> backend.tf
+        cat > provider.tf <<EOF
+        provider "aws" {
+          region = "${{ inputs.aws_region }}"
+        }
+        EOF
+
+    - name: Creating backend.tf
+      shell: bash
+      working-directory: ${{ github.run_number }}
+      run: |       
+        cat > backend.tf <<EOF
+        terraform {
+          required_providers {
+            aws = {
+              source  = "hashicorp/aws"
+              version = "5.81.0"
+            }
+          }
+          backend "s3" {
+            key    = "api-gateway-routes/${{ github.event.repository.name }}.tfstate"
+            bucket = "${{ inputs.bucket_name }}"
+            region = "us-east-1"
+          }
+        }
+        EOF
+
+    - name: Creating variables.tf
+      shell: bash
+      working-directory: ${{ github.run_number }}
+      run: |
+        cat > variables.tf <<EOF
+        variable "root_resource_id" {
+          type = string
+        }
+
+        variable "rest_api_id" {
+          type = string
+        }
+
+        variable "invoke_uri" {
+          type = string
+        }
+
+        variable "authorizer_id" {
+          type = string
+        }
+
+        variable "cors_origin_domain" {
+          type = string
+        }
+
+        variable "application_name" {
+          type    = string
+          default = "${{ github.event.repository.name }}"
+        }
+        EOF
         
-        echo 'variable root_resource_id {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '}' >> variable.tf
-        echo 'variable rest_api_id {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '}' >> variable.tf
-        echo 'variable invoke_uri {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '}' >> variable.tf
-        echo 'variable authorizer_id {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '}' >> variable.tf
-        echo 'variable cors_origin_domain {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '}' >> variable.tf
-        echo 'variable application_name {' >> variable.tf
-        echo '  type = string' >> variable.tf
-        echo '  default = "${{ github.event.repository.name }}"' >> variable.tf
-        echo '}' >> variable.tf
+    - name: Creating target-group.tf
+      shell: bash
+      working-directory: ${{ github.run_number }}
+      if: ${{ inputs.port != 0 && inputs.vpc_id != '' }}
+      run: |
+        cat > target-group.tf <<EOF
+          resource "aws_lb_target_group" "default" {
+              name        = "${{ github.event.repository.name }}"
+              port        = ${{ inputs.port }}
+              protocol    = "${{ inputs.protocol }}"
+              vpc_id      = "${{ inputs.vpc_id }}"
+              target_type = "ip"
+              tags = {
+                  application = "${{ github.event.repository.name }}"
+              }
+              health_check {
+                  protocol            = "${{ inputs.health_check_protocol }}"
+                  port                = "${{ inputs.health_check_port }}"
+                  interval            = ${{ inputs.health_check_interval }}
+                  timeout             = ${{ inputs.health_check_timeout }}
+                  healthy_threshold   = ${{ inputs.health_check_healthy_threshold }}
+                  unhealthy_threshold = ${{ inputs.health_check_unhealthy_threshold }}
+                  path                = "${{ inputs.health_check_path }}"
+                  matcher             = "${{ inputs.health_check_matcher }}"
+              }
+          }
+        EOF
         
-        
-        
+
 
         
