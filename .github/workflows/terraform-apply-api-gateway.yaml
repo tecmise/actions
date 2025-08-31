@@ -44,7 +44,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v2.0.3
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v2.0.4
       with:
         routes_file: '.github/ingress/routes.json'
         bucket_name: ${{ inputs.bucket_name }}
@@ -65,6 +65,7 @@ jobs:
       TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
       TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
+      TF_VAR_application_name: ${{ github.event.repository.name }}
     needs:
       - generate-files
     runs-on: ubuntu-latest
@@ -85,7 +86,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      uses: tecmise/actions/.github/actions/aws-authenticate@v2.0.4
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -122,6 +123,7 @@ jobs:
       TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
       TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
+      TF_VAR_application_name: ${{ github.event.repository.name }}
     needs:
       - generate-files
       - exposing-routes-plan
@@ -143,7 +145,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      uses: tecmise/actions/.github/actions/aws-authenticate@v2.0.4
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}

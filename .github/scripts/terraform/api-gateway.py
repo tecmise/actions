@@ -67,7 +67,9 @@ def create_terraform_file(route: Route):
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
-
+                print(f"   integration_request_parameters               = {{ ", file=f)
+                print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
+                print(f"   }} ", file=f)
                 if method.uri is None:
                     print(f"   uri                                          = var.invoke_uri ", file=f)
                 else:
