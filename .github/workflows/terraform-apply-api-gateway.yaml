@@ -44,7 +44,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v2.0.0
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v2.0.3
       with:
         routes_file: '.github/ingress/routes.json'
         bucket_name: ${{ inputs.bucket_name }}
