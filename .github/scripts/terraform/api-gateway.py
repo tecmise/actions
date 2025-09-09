@@ -128,7 +128,7 @@ def create_terraform_file(route: Route):
                     else:
                         print(f"   authorization                                = \"CUSTOM\" ", file=f)
                 else:
-                    print(f"   authorization                                = {method.authorization} ", file=f)
+                    print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
                 if method.authorizer_id is None:
