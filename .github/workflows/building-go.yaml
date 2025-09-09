@@ -82,10 +82,18 @@ jobs:
             ${{ runner.os }}-go-
 
 
-      - name: Set OAuth Token
+      - name: Configure ~/.netrc for GitHub
         run: |
-            go env -w GOPRIVATE=github.com/tecmise
-            git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          cat <<EOF > ~/.netrc
+          machine github.com
+            login ${{ github.actor }}
+            password ${{ secrets.GITHUB_TOKEN }}
+          EOF
+          chmod 600 ~/.netrc
+
+      - name: Configure Go env for private modules
+        run: go env -w GOPRIVATE=github.com/tecmise
+
 
       - name: Tidy
         run: go mod tidy
