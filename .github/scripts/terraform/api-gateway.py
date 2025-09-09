@@ -137,7 +137,7 @@ def create_terraform_file(route: Route):
                     else:
                         print(f"   authorizer_id                                = var.authorizer_id ", file=f)
                 else:
-                    print(f"   authorizer_id                                = {method.authorizer_id} ", file=f)
+                    print(f"   authorizer_id                                = \"{method.authorizer_id}\" ", file=f)
 
                 if method.roles is not None:
                     print(f"   roles                                = [ ", file=f)
