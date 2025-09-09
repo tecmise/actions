@@ -84,6 +84,7 @@ jobs:
 
       - name: Set OAuth Token
         run: |
+            go env -w GOPRIVATE=github.com/tecmise
             git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
       - name: Tidy
