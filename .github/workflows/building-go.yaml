@@ -54,6 +54,8 @@ jobs:
     name: Building
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    permissions:
+      contents: read
     env:
       GO111MODULE: on
       GOPROXY: direct
@@ -81,19 +83,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-
-      - name: Configure ~/.netrc for GitHub
-        run: |
-          cat <<EOF > ~/.netrc
-          machine github.com
-            login ${{ github.actor }}
-            password ${{ secrets.GITHUB_TOKEN }}
-          EOF
-          chmod 600 ~/.netrc
-
       - name: Configure Go env for private modules
         run: go env -w GOPRIVATE=github.com/tecmise
 
+      - name: Instead of config
+        run: git config --global url.https://x-oauth-basic:${{ secrets.GITHUB_TOKEN }}@github.com/.insteadOf https://github.com/
 
       - name: Tidy
         run: go mod tidy
