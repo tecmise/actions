@@ -81,6 +81,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+
+      - name: Set OAuth Token
+        run: |
+            git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Tidy
         run: go mod tidy
 
