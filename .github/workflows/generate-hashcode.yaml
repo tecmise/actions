@@ -71,7 +71,7 @@ jobs:
     steps:
 
     - name: Authenticate on AWS with ${{ inputs.aws_environment }} environment
-      uses: tecmise/actions/.github/actions/aws-authenticate@2.1.5
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
