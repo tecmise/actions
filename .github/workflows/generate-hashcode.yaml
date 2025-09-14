@@ -70,8 +70,8 @@ jobs:
       has_changes: ${{ steps.check_version.outputs.has_changes }}
     steps:
 
-    - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@main
+    - name: Authenticate on AWS with ${{ inputs.aws_environment }} environment
+      uses: tecmise/actions/.github/actions/aws-authenticate@2.1.5
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
