@@ -78,7 +78,6 @@ jobs:
         aws_region: ${{ inputs.aws_region }}
 
 
-
     - name: "Get parameters from SSM"
       id: last_version
       run: |

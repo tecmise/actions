@@ -25,7 +25,7 @@ runs:
 
   - name: configure aws credentials-infrastructure
     uses: aws-actions/configure-aws-credentials@v4
-    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure') }}
     with:
       role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
@@ -33,4 +33,5 @@ runs:
 
   - name: configure aws credentials-client
     shell: bash
-    run: "aws sts get-caller-identity"
+    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    run: "echo 'Skipping client credentials configuration on infrastructure main/master branch'"
