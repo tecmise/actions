@@ -30,3 +30,7 @@ runs:
       role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
+
+  - name: configure aws credentials-client
+    shell: bash
+    run: "aws sts get-caller-identity"
