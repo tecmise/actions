@@ -30,8 +30,3 @@ runs:
       role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
-
-  - name: configure aws credentials-client
-    shell: bash
-    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master') }}
-    run: "echo 'Skipping client credentials configuration on infrastructure main/master branch'"
