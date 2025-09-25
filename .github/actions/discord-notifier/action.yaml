@@ -51,7 +51,7 @@ runs:
               | map(
                   select(length>0)
                   | split(":")
-                  | {name: .[0], value: .[1], inline: true}
+                  | {name: .[0], value: .[1], inline: false}
                 )
             ' \
           | jq -c '.'
