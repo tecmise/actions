@@ -76,7 +76,7 @@ runs:
         "embeds":[
           {
             "title":"${{ inputs.title }}",
-            "description":"${{ inputs.description }}",
+            "description":"${{ inputs.message }}",
             "color":${{ env.color }},
             "fields":${ALL_FIELDS},
             "footer":{"text":"GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"}
