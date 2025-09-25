@@ -97,32 +97,42 @@ jobs:
       run: |
         git status
 
-    - name: Commit and Push Changes
+    - name: Git Add
       shell: bash
       run: |
-        # Adiciona todas as alterações
         git add -A
         
-        # Verifica se há alterações para commit
+
+    - name: Show Changes
+      shell: bash
+      run: |
         if git diff --staged --quiet; then
           echo "Nenhuma alteração para commit."
           exit 0
         fi
-        
-        # Faz o commit das alterações
+
+    - name: Git Commit
+      shell: bash
+      run: |
         git commit -m "Update versions.tf with latest parameter values"
-        
-        # Obtém o nome da branch atual
+
+    - name: Git Commit
+      shell: bash
+      run: |
         CURRENT_BRANCH=$(git branch --show-current)
         echo "Branch atual: $CURRENT_BRANCH"
-        
-        # Primeiro tenta um push normal
+
+    - name: Git Push
+      shell: bash
+      run: |
         if git push origin $CURRENT_BRANCH 2>/dev/null; then
           echo "Push bem-sucedido para branch existente $CURRENT_BRANCH"
         else
           echo "Tentando configurar upstream para branch $CURRENT_BRANCH"
           git push --set-upstream origin $CURRENT_BRANCH
         fi
+
+
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
