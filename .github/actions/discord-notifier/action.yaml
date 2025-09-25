@@ -1,0 +1,90 @@
+name: Discord Notifier
+inputs:
+  title:
+    required: false
+    description: "Título da mensagem"
+  message:
+    required: true
+    description: "Descrição da mensagem"
+  severity:
+    required: true
+    description: "Severidade da mensagem (info, warn, error)"
+  fields:
+    description: 'Linhas adicionais no formato Nome:Valor'
+    required: false
+  discord-webhook-url:
+    description: 'URL do webhook do Discord (opcional, usa o segredo se não fornecido)'
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+  - name: Validate severity
+    shell: bash
+    run: |
+      case "${{ inputs.severity }}" in
+        info|warn|error) ;;
+        *) echo "❌ Severidade inválida" && exit 1 ;;
+      esac
+
+  - name: Set color based on severity
+    shell: bash
+    run: |
+      case "${{ inputs.severity }}" in
+        info) echo "color=65280"  >> $GITHUB_ENV ;;
+        warn) echo "color=16753920" >> $GITHUB_ENV ;;
+        error) echo "color=16711680" >> $GITHUB_ENV ;;
+      esac
+
+
+  - name: Processar campos extras
+    shell: bash
+    if: ${{ inputs.fields != '' }}
+    id: process_fields
+    run: |
+      # Compact JSON (opção 1)
+      EXTRA_FIELDS_JSON=$(
+        echo "${{ inputs.fields }}" \
+          | jq -R -s '
+              split("\n")
+              | map(
+                  select(length>0)
+                  | split(":")
+                  | {name: .[0], value: .[1], inline: true}
+                )
+            ' \
+          | jq -c '.'
+      )
+      echo "EXTRA_FIELDS_JSON=${EXTRA_FIELDS_JSON}" >> $GITHUB_ENV
+
+  - name: Notify Discord Webhook
+    shell: bash
+    run: |
+      STATIC_FIELDS='[
+        {"name":"Repositório","value":"'"${GITHUB_REPOSITORY}"'","inline":true},
+        {"name":"Branch","value":"'"${GITHUB_REF_NAME}"'","inline":true}
+      ]'
+      if [ -n "${EXTRA_FIELDS_JSON}" ]; then
+        ALL_FIELDS=$(jq -n --argjson a "$STATIC_FIELDS" --argjson b "$EXTRA_FIELDS_JSON" '$a + $b')
+      else
+        ALL_FIELDS="$STATIC_FIELDS"
+      fi
+
+      cat > discord_payload.json <<EOF
+      {
+        "embeds":[
+          {
+            "title":"${{ inputs.title }}",
+            "description":"${{ inputs.description }}",
+            "color":${{ env.color }},
+            "fields":${ALL_FIELDS},
+            "footer":{"text":"GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"}
+          }
+        ]
+      }
+      EOF
+
+      curl -X POST ${{ inputs.discord-webhook-url }} \
+        -H "Content-Type: application/json" \
+        -d @discord_payload.json
