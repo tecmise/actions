@@ -1,0 +1,172 @@
+name: Generate Connectors
+
+on:
+  workflow_call:
+    secrets:
+      DISCORD_NOTIFIER_URL:
+        required: true
+      CONNECTORS_KEY:
+        required: true
+
+    inputs:
+      proto_path:
+        required: false
+        type: string
+        default: "proto"
+      language:
+        required: true
+        type: string
+      container_tag:
+        required: false
+        type: string
+        default: "fc1b698e47b30d3e8381e5e0848f915ea838ee47"
+
+jobs:
+  protocol-buffers:
+    name: Protocol Buffers
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    container:
+      image: public.ecr.aws/g4i8n5q9/connector-provider:${{ inputs.container_tag }}
+      env:
+        LANGUAGE: "${{ inputs.language }}"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Move proto
+        run: mv ${{ inputs.proto_path }} /app/proto
+
+      - name: Run generate-connectors.sh
+        id: run_script
+        working-directory: /app
+        run: generate-connectors.sh
+
+      - name: Upload Generated Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-files
+          path: /app/generated/app/proto/
+
+      - name: Upload Generated Files
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs
+          path: /tmp/execution.log
+
+  notify:
+    name: Notify
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: protocol-buffers
+    if: ${{ always() && needs.protocol-buffers.result == 'failure' }}
+    environment: "${{ github.ref_name }}"
+    steps:
+      - name: Send Notification Error
+        uses: tecmise/actions/.github/actions/discord-notifier@v2.2.1
+        with:
+          title: '🚨 Houve um problema ao gerar connectores 🚨'
+          message: "Para melhor detalhamento consult o arquivo de logs na aba de artifacts."
+          severity: 'error'
+          discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+          fields:
+            Link:${{github.workflow.url}}
+            Run:${{github.run_id}}
+
+  commit-changes:
+    name: Commit Changes
+    environment: ${{ github.ref_name }}
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: protocol-buffers
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
+          token: ${{ secrets.CONNECTORS_KEY }}
+          path: target-repo
+          fetch-depth: 0
+          persist-credentials: true
+
+
+      - name: Checkout or Create Branch and Merge
+        working-directory: target-repo
+        shell: bash
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Nome da branch de destino
+          TARGET_BRANCH="delivery/${{ github.ref_name }}"
+          
+          # Verifica se a branch remota existe
+          if git ls-remote --heads origin $TARGET_BRANCH | grep -q $TARGET_BRANCH; then
+            echo "Branch $TARGET_BRANCH já existe. Fazendo checkout e merge..."
+          
+            # Checkout da branch existente
+            git fetch origin $TARGET_BRANCH
+            git checkout $TARGET_BRANCH
+          
+            # Atualiza a branch local com a remota
+            git pull origin $TARGET_BRANCH
+          
+            # Merge com a branch de referência
+            git merge origin/${{ github.ref_name }} --no-edit -m "Merge branch '${{ github.ref_name }}' into $TARGET_BRANCH via GitHub Actions"
+          else
+            echo "Branch $TARGET_BRANCH não existe. Criando nova branch..."
+          
+            # Cria uma nova branch a partir da branch de referência
+            git checkout -b $TARGET_BRANCH
+          fi
+          echo "Agora trabalhando na branch: $(git branch --show-current)"
+
+      - name: Remove existing pkg directory
+        working-directory: target-repo
+        run: rm -rf pkg
+
+      - name: Create new pkg directory
+        working-directory: target-repo
+        run: mkdir -p pkg
+
+      - name: Download generated-files artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-files
+          path: target-repo/pkg
+
+      - name: Status
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git status
+
+      - name: Git Add
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git add -A
+
+      - name: Show Changes
+        shell: bash
+        working-directory: target-repo
+        run: |
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração para commit."
+            exit 0
+          fi
+
+      - name: Git Commit
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git commit -m "Update versions.tf with latest parameter values"
+
+      - name: Git Push
+        shell: bash
+        working-directory: target-repo
+        run: |
+          if git push origin $CURRENT_BRANCH 2>/dev/null; then
+            echo "Push bem-sucedido para branch existente $CURRENT_BRANCH"
+          else
+            echo "Tentando configurar upstream para branch $CURRENT_BRANCH"
+            git push --set-upstream origin $CURRENT_BRANCH
+          fi
