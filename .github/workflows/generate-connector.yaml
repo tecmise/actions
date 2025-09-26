@@ -158,7 +158,7 @@ jobs:
         shell: bash
         working-directory: target-repo
         run: |
-          git commit -m "Update versions.tf with latest parameter values"
+          git commit -m "Update connectors with latest parameter values"
 
       - name: Git Push
         shell: bash
