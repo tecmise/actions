@@ -96,7 +96,7 @@ jobs:
           git config user.email "actions@github.com"
           
           # Nome da branch de destino
-          TARGET_BRANCH="delivery/${{ github.ref_name }}"
+          TARGET_BRANCH="${{ github.ref_name }}"
           
           # Verifica se a branch remota existe
           if git ls-remote --heads origin $TARGET_BRANCH | grep -q $TARGET_BRANCH; then
