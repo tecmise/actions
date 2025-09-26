@@ -62,7 +62,7 @@ jobs:
     environment: "${{ github.ref_name }}"
     steps:
       - name: Send Notification Error
-        uses: tecmise/actions/.github/actions/discord-notifier@v2.2.1
+        uses: tecmise/actions/.github/actions/discord-notifier@v3.0.0
         with:
           title: '🚨 Houve um problema ao gerar connectores 🚨'
           message: "Para melhor detalhamento consult o arquivo de logs na aba de artifacts."
