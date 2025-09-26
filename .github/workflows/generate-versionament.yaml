@@ -24,7 +24,7 @@ jobs:
   generate-versionament:
     name: Generate
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: "ubuntu-latest"
     steps:
     - name: Checkout branch
       uses: actions/checkout@v4
