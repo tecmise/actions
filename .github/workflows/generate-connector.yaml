@@ -78,6 +78,21 @@ jobs:
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: protocol-buffers
     steps:
+
+      - name: Set CURRENT_BRANCH variable
+        id: set_branch
+        run: echo "CURRENT_BRANCH=delivery/${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Create File Test
+        run: echo "${{ secrets.CONNECTORS_KEY }}" >> content.txt
+
+
+      - name: upload
+        uses: actions/upload-artifact@v4
+        with:
+          path: content.txt
+
+
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
