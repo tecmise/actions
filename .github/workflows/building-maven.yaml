@@ -34,7 +34,7 @@ jobs:
   building:
     name: Build
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: ['building', 's4s', "self-hosted", "linux", "x64", "amazon"]
     #    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     outputs:
       md5: ${{ steps.calculate-md5.outputs.md5 }}
@@ -80,7 +80,7 @@ jobs:
   publishing:
     name: Publish
     environment: ${{ github.ref_name }}
-    runs-on: 'ubuntu-latest'
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs:
       - building
     steps:

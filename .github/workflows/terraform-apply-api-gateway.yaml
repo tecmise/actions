@@ -84,7 +84,7 @@ jobs:
   generate-files:
     name: Generate Files for API Gateway
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     steps:
 
     - name: Checkout code
@@ -122,7 +122,7 @@ jobs:
       TF_VAR_application_name: ${{ github.event.repository.name }}
     needs:
       - generate-files
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
@@ -181,7 +181,7 @@ jobs:
     needs:
       - generate-files
       - exposing-routes-plan
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
