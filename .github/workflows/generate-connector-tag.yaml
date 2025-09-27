@@ -79,8 +79,6 @@ jobs:
             MINOR=$((MINOR + 1))
           fi
           echo "version=MINOR" >> $GITHUB_OUTPUT
-          
-
       - name: Next Major
         id: major
         run: |
@@ -89,7 +87,9 @@ jobs:
             MINOR=$((MAJOR + 1))
           fi
           echo "version=MAJOR" >> $GITHUB_OUTPUT
-          
+      - name: Show final version
+        run: |
+          echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"
 
 
   genrate-version:
@@ -105,7 +105,7 @@ jobs:
 
       - name: Create & Push Patch Tag
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
