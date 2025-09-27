@@ -18,6 +18,7 @@ runs:
       with:
         fetch-depth: 0
     - name: Create & Push Patch Tag
+      id: create-patch-tag
       shell: bash
       run: |
         git config user.name "GitHub Actions"

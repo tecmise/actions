@@ -56,6 +56,7 @@ jobs:
 
       - name: Show versionament
         run: |
+          echo "Outputs: ${{ steps.versionament.outputs }}"
           echo "Major: ${{ steps.versionament.outputs.major }}"
           echo "Minor: ${{ steps.versionament.outputs.minor }}"
           echo "Patch: ${{ steps.versionament.outputs.patch }}"
