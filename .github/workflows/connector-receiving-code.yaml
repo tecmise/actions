@@ -56,13 +56,6 @@ jobs:
     needs: validate
     steps:
 
-    - name: Instalar GitHub CLI (gh)
-      run: |
-        sudo yum install -y yum-utils
-        sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-        sudo yum install -y gh
-        gh --version
-
 
     - name: Create Pull Request via API
       uses: actions/github-script@v6
