@@ -101,7 +101,7 @@ jobs:
       - name: Checkout completo com tags
         uses: actions/checkout@v4
         with:
-          token: '${{ secrets.GITHUB_TOKEN }}'
+          token: "${{ secrets.CONNECTORS_KEY }}"
           fetch-depth: 0
           fetch-tags: true
 
