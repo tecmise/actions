@@ -101,7 +101,7 @@ jobs:
       - name: Checkout completo com tags
         uses: actions/checkout@v4
         with:
-          token: "${{ secrets.CONNECTORS_KEY }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
           fetch-depth: 0
           fetch-tags: true
 
@@ -127,10 +127,10 @@ jobs:
 
       - name: Criar nova tag
         run: |
-          git tag -a "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}" -m "Release ${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
+          git tag v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}
 
       - name: Enviar tag para o repositório
         env:
-          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push origin "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
+          git push origin v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}
