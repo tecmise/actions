@@ -2,6 +2,8 @@ name: "Validate Source Code"
 on:
   workflow_call:
     secrets:
+      CONNECTORS_KEY:
+        required: true
       DISCORD_NOTIFIER_URL:
         required: true
 
@@ -62,46 +64,49 @@ jobs:
         gh --version
 
 
-    - name: Create Pull Request
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Pull Request via API
+      uses: actions/github-script@v6
       id: create_pr
-      run: |
-        PR_URL=$(gh pr create \
-          --base master \
-          --repo ${{ github.repository }} \
-          --head delivery/master \
-          --title "🔗 New connector version" \
-          --body "## 🚀 Uma nova versão do connector está sendo gerada
-    
-        ### Nova versao patch será gerada
-        
-        Por padrão, uma nova versão patch será gerada. Se você deseja alterar o tipo de versão (major, minor, patch), por favor, realizar um comentario nesta PR com a palavra-chave correspondente:
-        - `#major` para uma nova versão major
-        - `#minor` para uma nova versão minor
-        - `#patch` para uma nova versão patch
-  
-        ---
-        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*")
-        
-        echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
-        
-        # Extrair o número do PR do URL
-        PR_NUMBER=$(echo $PR_URL | sed -E 's|.*/pull/([0-9]+).*|\1|')
-        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
-        echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+      with:
+        github-token: ${{ secrets.CONNECTORS_KEY }}
+        result-encoding: string
+        script: |
+          const currentDate = new Date().toISOString();
+          
+          const prBody = `## 🚀 Uma nova versão do connector está sendo gerada
+          
+          ### Nova versao patch será gerada
+          
+          Por padrão, uma nova versão patch será gerada. Se você deseja alterar o tipo de versão (major, minor, patch), por favor, realizar um comentario nesta PR com a palavra-chave correspondente:
+          - \`#major\` para uma nova versão major
+          - \`#minor\` para uma nova versão minor
+          - \`#patch\` para uma nova versão patch
+          
+          ---
+          *Gerado por GitHub Actions em ${currentDate}*`;
+          
+          const { data: pullRequest } = await github.rest.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: "🔗 New connector version",
+            body: prBody,
+            head: "delivery/master",
+            base: "master"
+          });
+          
+          console.log(`Pull Request criado: ${pullRequest.html_url} (PR #${pullRequest.number})`);
+
+          return pullRequest.html_url;
 
     - name: Send Notification
       if: steps.create_pr.outputs.PR_NUMBER != ''
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
       with:
-        title: '🔗 Nova versão do connector sendo gerada 🔗'
+        title: '🔗 Nova Pull request no connector 🔗'
         message: 'Uma nova versão do connector está sendo gerada. Caso seja necessario alterar o tipo de versão (major, minor, patch), por favor, realizar um comentário na PR com a palavra-chave correspondente.'
         severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-        fields:
-          PR:"${{ steps.create_pr.outputs.PR_URL }}"
-          Number:"${{ steps.create_pr.outputs.PR_NUMBER }}"
+
 
   notify-error:
     name: Notify Error
