@@ -13,6 +13,10 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Create & Push Patch Tag
       shell: bash
       run: |
