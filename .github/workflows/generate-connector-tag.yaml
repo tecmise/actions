@@ -97,7 +97,22 @@ jobs:
 
       - name: Show final version
         run: |
-          echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"
+          echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"         
+
+
+  genrate-version:
+    name: "Generate Version"
+    runs-on: ubuntu-latest
+    needs: loading_pr_data
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout completo com tags
+        uses: actions/checkout@v4
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Criar tag via API do GitHub
         uses: actions/github-script@v6
@@ -118,41 +133,3 @@ jobs:
               ref: `refs/tags/v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}`,
               sha: masterSHA
             });
-            
-
-
-  genrate-version:
-    name: "Generate Version"
-    runs-on: ubuntu-latest
-    needs: loading_pr_data
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Checkout completo com tags
-        uses: actions/checkout@v4
-        with:
-          token: "${{ secrets.GITHUB_TOKEN }}"
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Configurar Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-      - name: Buscar tags
-        run: |
-          git fetch --tags
-
-      - name: Checkout e atualizar branch master
-        run: |
-          git checkout master
-          git pull origin master
-
-      - name: Generate Tag
-        run: |
-          git tag v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}
-
-      - name: Push Tag
-        run: |
-          git push --tags
