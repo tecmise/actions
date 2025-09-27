@@ -10,6 +10,7 @@ on:
 jobs:
 
   loading_pr_data:
+    name: "Loading PR Data"
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.keyword.outputs.result }}
@@ -87,6 +88,12 @@ jobs:
             MAJOR=$((MAJOR + 1))
           fi
           echo "version=$MAJOR" >> $GITHUB_OUTPUT
+
+      - name: Configurar URL do repositório
+        env:
+          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.CONNECTORS_KEY }}@github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git
 
       - name: Show final version
         run: |
