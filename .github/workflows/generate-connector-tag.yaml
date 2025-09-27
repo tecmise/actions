@@ -117,8 +117,10 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git fetch --tags
+          git remote set-url origin https://x-access-token:${{ secrets.CONNECTORS_KEY }}@github.com/tecmise/notification-service-connector-go.git
+
           git checkout master
           git pull origin master
-
+          
           git tag -a "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}" -m "Release ${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
           git push origin "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
