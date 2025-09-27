@@ -48,6 +48,8 @@ jobs:
 
       - name: Checking versionament
         id: versionament
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: tecmise/actions/.github/actions/versionament@main
 
       - name: Show versionament
