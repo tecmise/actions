@@ -13,7 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.keyword.outputs.result }}
-      next_version: ${{ steps.versionament.outputs.version }}
+      patch: ${{ steps.patch.outputs.version }}
+      minor: ${{ steps.minor.outputs.version }}
+      major: ${{ steps.major.outputs.version }}
     steps:
       - name: Checking out the repository
         id: keyword
@@ -62,20 +64,33 @@ jobs:
           echo "Patch: ${{ steps.versionament.outputs.patch }}"
 
       - name: Next Patch
-        id: versionament
-        if: ${{ needs.loading_pr_data.outputs.result == 'patch'}}
+        id: patch
         run: |
-          echo "version=v${{ steps.versionament.outputs.major }}.${{ steps.versionament.outputs.minor }}.(${{ steps.versionament.outputs.patch }} + 1)" >> $GITHUB_OUTPUT
+          PATCH="${{ steps.versionament.outputs.patch }}"
+          if [ "${{ steps.keyword.outputs.result }}" == "patch" ]; then
+            PATCH=$((PATCH + 1))
+          fi
+          echo "version=$PATCH" >> $GITHUB_OUTPUT
       - name: Next Minor
-        id: versionament
-        if: ${{ needs.loading_pr_data.outputs.result == 'minor'}}
+        id: minor
         run: |
-          echo "version=v${{ steps.versionament.outputs.major }}.(${{ steps.versionament.outputs.minor }} + 1).0" >> $GITHUB_OUTPUT
+          MINOR="${{ steps.versionament.outputs.minor }}"
+          if [ "${{ steps.keyword.outputs.result }}" == "minor" ]; then
+            MINOR=$((MINOR + 1))
+          fi
+          echo "version=MINOR" >> $GITHUB_OUTPUT
+          
+
       - name: Next Major
-        id: versionament
-        if: ${{ needs.loading_pr_data.outputs.result == 'major'}}
+        id: major
         run: |
-          echo "version=v(${{ steps.versionament.outputs.major }} + 1).0.0" >> $GITHUB_OUTPUT
+          MAJOR="${{ steps.versionament.outputs.major }}"
+          if [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
+            MINOR=$((MAJOR + 1))
+          fi
+          echo "version=MAJOR" >> $GITHUB_OUTPUT
+          
+
 
   genrate-version:
     name: "Generate Version"
@@ -98,5 +113,5 @@ jobs:
           git checkout master
           git pull origin master
 
-          git tag -a "${{ needs.loading_pr_data.outputs.next_version }}" -m "Release ${{ needs.loading_pr_data.outputs.next_version }}"
-          git push origin "${{ needs.loading_pr_data.outputs.next_version }}"
+          git tag -a "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}" -m "Release ${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
+          git push origin "v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
