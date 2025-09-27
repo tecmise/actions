@@ -89,18 +89,12 @@ jobs:
           fi
           echo "version=$MAJOR" >> $GITHUB_OUTPUT
 
-      - name: Configurar URL do repositório
-        env:
-          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
-        run: |
-          git remote set-url origin https://x-access-token:${{ secrets.CONNECTORS_KEY }}@github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}.git
-
       - name: Show final version
         run: |
           echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"         
 
 
-  genrate-version:
+  genmerate-version:
     name: "Generate Version"
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: loading_pr_data
@@ -124,3 +118,14 @@ jobs:
               ref: `refs/tags/v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}`,
               sha: masterSHA
             });
+
+      - name: Send Notification
+        uses: tecmise/actions/.github/actions/discord-notifier@v3.1.2
+        with:
+          title: '🔗 Novo connector ${{ github.event.repository.name }} (v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}) 🔗'
+          message: 'Atualizem seus repositorios com a nova tag, o projeto versaionado está como privado para download sera necessario utilizar proxy local ou chave ssh.'
+          severity: 'info'
+          discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+          fields:
+            PR:"${{ steps.create_pr.outputs.PR_URL }}"
+            Number:"${{ steps.create_pr.outputs.PR_NUMBER }}"
