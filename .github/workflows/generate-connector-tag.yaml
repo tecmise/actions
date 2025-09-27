@@ -9,7 +9,6 @@ jobs:
 
   loading_pr_data:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.merged }}
     outputs:
       result: ${{ steps.keyword.outputs.result }}
     steps:
