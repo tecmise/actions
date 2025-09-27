@@ -1,0 +1,41 @@
+name: Versionament
+outputs:
+  major:
+    description: "Major version"
+    value: ${{ steps.create-patch-tag.outputs.major }}
+  minor:
+    description: "Minor version"
+    value: ${{ steps.create-patch-tag.outputs.minor }}
+  patch:
+    description: "Patch version"
+    value: ${{ steps.create-patch-tag.outputs.patch }}
+
+runs:
+  using: composite
+  steps:
+    - name: Create & Push Patch Tag
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git fetch --tags
+        git checkout master
+        git pull origin master
+        
+        # Pega última tag no formato vX.Y.Z
+        LATEST_TAG=$(git describe --tags --match "v[0-9]*" --abbrev=0)
+        echo "Última tag: $LATEST_TAG"
+        
+        # Se não houver nenhuma, inicia em 0.0.0
+        if [ -z "$LATEST_TAG" ]; then
+          MAJOR=0; MINOR=0; PATCH=0
+        else
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read MAJOR MINOR PATCH <<< "$VERSION"
+        fi
+        echo "Current Version - Major: $MAJOR, Minor: $MINOR, Patch: $PATCH"
+        echo "major=$MAJOR" >> $GITHUB_OUTPUT
+        echo "minor=$MINOR" >> $GITHUB_OUTPUT
+        echo "patch=$PATCH" >> $GITHUB_OUTPUT

@@ -1,0 +1,124 @@
+name: "Validate Source Code"
+on:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      DISCORD_NOTIFIER_URL:
+        required: true
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    environment: master
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.21'
+          cache: false
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Configure Go env for private modules
+        run: go env -w GOPRIVATE=github.com/tecmise
+
+      - name: Instead of config
+        run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Tidy
+        run: go mod tidy
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build Container
+        run: |
+          go mod verify
+          go mod vendor
+
+  open-pr:
+    name: Open PR
+    environment: ${{ github.ref_name }}
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: validate
+    steps:
+
+    - name: Instalar GitHub CLI (gh)
+      run: |
+        sudo yum install -y yum-utils
+        sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+        sudo yum install -y gh
+        gh --version
+
+
+    - name: Create Pull Request
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: create_pr
+      run: |
+        PR_URL=$(gh pr create \
+          --base master \
+          --repo ${{ github.repository }} \
+          --head delivery/master \
+          --title "🔗 New connector version" \
+          --body "## 🚀 Uma nova versão do connector está sendo gerada
+    
+        ### Nova versao patch será gerada
+        
+        Por padrão, uma nova versão patch será gerada. Se você deseja alterar o tipo de versão (major, minor, patch), por favor, realizar um comentario nesta PR com a palavra-chave correspondente:
+        - `#major` para uma nova versão major
+        - `#minor` para uma nova versão minor
+        - `#patch` para uma nova versão patch
+  
+        ---
+        *Gerado por GitHub Actions em $(date -u +"%Y-%m-%dT%H:%M:%SZ")*")
+        
+        echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+        
+        # Extrair o número do PR do URL
+        PR_NUMBER=$(echo $PR_URL | sed -E 's|.*/pull/([0-9]+).*|\1|')
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+        echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+
+    - name: Send Notification
+      if: steps.create_pr.outputs.PR_NUMBER != ''
+      uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
+      with:
+        title: '🔗 Nova versão do connector sendo gerada 🔗'
+        message: 'Uma nova versão do connector está sendo gerada. Caso seja necessario alterar o tipo de versão (major, minor, patch), por favor, realizar um comentário na PR com a palavra-chave correspondente.'
+        severity: 'info'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields:
+          PR:"${{ steps.create_pr.outputs.PR_URL }}"
+          Number:"${{ steps.create_pr.outputs.PR_NUMBER }}"
+
+  notify-error:
+    name: Notify Error
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: validate
+    if: ${{ always() && needs.validate.result == 'failure' }}
+    environment: "${{ github.ref_name }}"
+    steps:
+      - name: Send Notification Error
+        uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
+        with:
+          title: '🚨 Falha ao validar connector 🚨'
+          message: "houve uma falha no build do connector"
+          severity: 'error'
+          discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+          fields:
+            Link:"${{github.workflow.url}}"
+            Run:"${{github.run_id}}"
