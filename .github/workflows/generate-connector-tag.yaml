@@ -69,37 +69,31 @@ jobs:
           PATCH="${{ steps.versionament.outputs.patch }}"
           if [ "${{ steps.keyword.outputs.result }}" == "patch" ]; then
             PATCH=$((PATCH + 1))
+          elif [ "${{ steps.keyword.outputs.result }}" == "minor" ] || [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
+            PATCH=0
           fi
           echo "version=$PATCH" >> $GITHUB_OUTPUT
-          
-          if [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
-            echo "version=0" >> $GITHUB_OUTPUT
-          if
-          
-          if [ "${{ steps.keyword.outputs.result }}" == "minor" ]; then
-            echo "version=0" >> $GITHUB_OUTPUT
-          if
+
       - name: Next Minor
         id: minor
         run: |
           MINOR="${{ steps.versionament.outputs.minor }}"
           if [ "${{ steps.keyword.outputs.result }}" == "minor" ]; then
             MINOR=$((MINOR + 1))
+          elif [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
+            MINOR=0
           fi
           echo "version=$MINOR" >> $GITHUB_OUTPUT
-          
-          if [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
-            echo "version=0" >> $GITHUB_OUTPUT
-          if
 
       - name: Next Major
         id: major
         run: |
           MAJOR="${{ steps.versionament.outputs.major }}"
           if [ "${{ steps.keyword.outputs.result }}" == "major" ]; then
-            MINOR=$((MAJOR + 1))
+            MAJOR=$((MAJOR + 1))
           fi
           echo "version=$MAJOR" >> $GITHUB_OUTPUT
+
       - name: Show final version
         run: |
           echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"
