@@ -133,4 +133,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push origin v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}
+          git push --tags
