@@ -2,7 +2,7 @@ name: "Publish Version"
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
+      CONNECTORS_KEY:
         required: true
       DISCORD_NOTIFIER_URL:
         required: true
@@ -51,7 +51,7 @@ jobs:
       - name: Checking versionament
         id: versionament
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
         uses: tecmise/actions/.github/actions/versionament@main
 
       - name: Show versionament
