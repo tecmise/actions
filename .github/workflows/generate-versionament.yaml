@@ -145,7 +145,7 @@ jobs:
 
     - name: Create Pull Request
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
       id: create_pr
       run: |
         PR_URL=$(gh pr create \
