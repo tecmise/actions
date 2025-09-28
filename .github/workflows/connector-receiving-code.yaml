@@ -94,7 +94,7 @@ jobs:
             prNumber: pullRequest.number
           };
 
-    - name: Send Notification
+    - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
       with:
         title: '🔗 Nova Pull request no connector 🔗'
