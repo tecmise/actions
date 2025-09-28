@@ -62,7 +62,7 @@ jobs:
       id: create_pr
       with:
         github-token: ${{ secrets.CONNECTORS_KEY }}
-        result-encoding: string
+        result-encoding: json
         script: |
           const currentDate = new Date().toISOString();
           
@@ -89,7 +89,10 @@ jobs:
           
           console.log(`Pull Request criado: ${pullRequest.html_url} (PR #${pullRequest.number})`);
 
-          return pullRequest.html_url;
+          return { ;
+            prUrl: pullRequest.html_url,
+            prNumber: pullRequest.number
+          };
 
     - name: Send Notification
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
@@ -98,6 +101,9 @@ jobs:
         message: 'Uma nova versão do connector está sendo gerada. Caso seja necessario alterar o tipo de versão (major, minor, patch), por favor, realizar um comentário na PR com a palavra-chave correspondente.'
         severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields: |
+          Link:"${{ steps.create_pr.outputs.result.prUrl }}"
+          Number:"${{ steps.create_pr.outputs.result.prNumber }}"
 
 
   notify-error:
