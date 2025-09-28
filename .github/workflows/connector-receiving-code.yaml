@@ -89,7 +89,7 @@ jobs:
           
           console.log(`Pull Request criado: ${pullRequest.html_url} (PR #${pullRequest.number})`);
 
-          return { ;
+          return {
             prUrl: pullRequest.html_url,
             prNumber: pullRequest.number
           };
