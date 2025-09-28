@@ -92,7 +92,6 @@ jobs:
           return pullRequest.html_url;
 
     - name: Send Notification
-      if: steps.create_pr.outputs.PR_NUMBER != ''
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
       with:
         title: '🔗 Nova Pull request no connector 🔗'
