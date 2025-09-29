@@ -89,22 +89,18 @@ jobs:
           
           console.log(`Pull Request criado: ${pullRequest.html_url} (PR #${pullRequest.number})`);
 
-          return { ;
+          return {
             prUrl: pullRequest.html_url,
             prNumber: pullRequest.number
           };
 
-    - name: Send Notification
+    - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
       with:
         title: '🔗 Nova Pull request no connector 🔗'
         message: 'Uma nova versão do connector está sendo gerada. Caso seja necessario alterar o tipo de versão (major, minor, patch), por favor, realizar um comentário na PR com a palavra-chave correspondente.'
         severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-        fields: |
-          Link:"${{ steps.create_pr.outputs.result.prUrl }}"
-          Number:"${{ steps.create_pr.outputs.result.prNumber }}"
-
 
   notify-error:
     name: Notify Error
