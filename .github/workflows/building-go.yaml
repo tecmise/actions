@@ -83,11 +83,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Configure Go env for private modules
-        run: go env -w GOPRIVATE=github.com/tecmise
-
-      - name: Instead of config
-        run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      - name: Autenticar repositórios privados
+        run: |
+          # Cria ~/.netrc com credenciais GitHub
+          echo "machine github.com login ${{ github.actor }} password ${{ secrets.GITHUB_TOKEN }}" > ~/.netrc
+          chmod 600 ~/.netrc
+          go env -w GOPRIVATE=github.com/tecmise/*
+          go env -w GOSUMDB=off
 
       - name: Tidy
         run: go mod tidy
