@@ -26,11 +26,6 @@ jobs:
     - name: Validar SQLs com Flyway
       id: validate
       run: |
-        flyway version
-
-    - name: Validar SQLs com Flyway
-      id: validate
-      run: |
         echo "🔍 Iniciando validação..."
         set +e
         VALIDATION_OUTPUT=$(flyway \
