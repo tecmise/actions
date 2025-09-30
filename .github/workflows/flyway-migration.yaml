@@ -38,6 +38,7 @@ jobs:
     - name: Validar SQLs com Flyway
       id: validate
       run: |
+        ls -ltra
         echo "🔍 Iniciando validação..."
         set +e
         VALIDATION_OUTPUT=$(flyway -url="jdbc:postgresql://${{ inputs.endpoint }}/permissions" \
@@ -51,6 +52,11 @@ jobs:
         EXIT_CODE=$?
         echo "$VALIDATION_OUTPUT" > validation.log
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+    - name: Instalar dependências
+      run: |
+        apk update
+        apk add --no-cache jq
 
     - name: Loading
       id: properties
