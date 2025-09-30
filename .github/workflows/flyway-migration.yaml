@@ -56,8 +56,19 @@ jobs:
     - name: Instalar dependências
       run: |
         cat validation.log
-        apk update
-        apk add --no-cache jq
+        # Tentar instalar jq com apt-get (Debian/Ubuntu)
+        if command -v apt-get &> /dev/null; then
+          apt-get update && apt-get install -y jq
+        # Tentar com yum (Red Hat/CentOS)
+        elif command -v yum &> /dev/null; then
+          yum install -y jq
+        else
+          echo "Não foi possível instalar jq, usando alternativa"
+          # Alternativa sem jq
+          tail -n 20 validation.log > formatted_output.txt
+          echo "validated=$(cat formatted_output.txt | sed 's/"/\\"/g' | tr '\n' ' ')" >> $GITHUB_OUTPUT
+          exit 0
+        fi
 
     - name: Loading
       id: properties
