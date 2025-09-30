@@ -8,6 +8,14 @@ on:
 
 
     inputs:
+      schema:
+        description: 'Schema for the database'
+        required: true
+        type: string
+      user:
+        description: 'User for the database'
+        required: true
+        type: string
       endpoint:
         description: 'Endpoint for the connector'
         required: true
@@ -15,7 +23,7 @@ on:
 
 jobs:
   protocol-buffers:
-    name: Protocol Buffers
+    name: Validating Migrations
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     container:
       image: flyway/flyway:latest
@@ -29,10 +37,10 @@ jobs:
         echo "🔍 Iniciando validação..."
         set +e
         VALIDATION_OUTPUT=$(flyway \
-          -url=jdbc:postgresql://${DATABASE_ENDPOINT}/permissions \
-          -user=authorization-service \
-          -password=${DATABASE_PASSWORD} \
-          -schemas=public \
+          -url=jdbc:postgresql://${{ inputs.endpoint }}/permissions \
+          -user=${{ inputs.user }} \
+          -password=${{ secrets.database_password }} \
+          -schemas=${{ inputs.schema }} \
           -ignoreMigrationPatterns='*:pending' \
           -connectRetries=60 \
           validate 2>&1)
