@@ -2,9 +2,6 @@ name: Building Go
 
 on:
   workflow_call:
-    secrets:
-      CONNECTORS_KEY:
-        required: true
     inputs:
       hashcode:
         description: 'Hashcode'
