@@ -5,7 +5,8 @@ on:
     secrets:
       database_password:
         required: true
-
+      DISCORD_NOTIFIER_URL:
+        required: true
 
     inputs:
       schema:
@@ -22,9 +23,12 @@ on:
         type: string
 
 jobs:
-  protocol-buffers:
+  validate-migrations:
     name: Validating Migrations
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    outputs:
+      is-valid: "${{ steps.validate.outputs.exit_code == '0' }}"
+      validated: "${{ steps.properties.outputs.validated }}"
     container:
       image: flyway/flyway:latest
     steps:
@@ -48,7 +52,21 @@ jobs:
         echo "$VALIDATION_OUTPUT" > validation.log
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
-    - name: Notify Validation
-      if: steps.validate.outputs.exit_code != '0'
+    - name: Loading
+      id: properties
       run: |
-        echo "❌ Validação falhou. Enviando mensagem para Discord..."
+        echo "validated=$(tail -n 20 validation.log | jq -Rs .)" >> $GITHUB_OUTPUT
+
+  send-notification:
+    name: Send Notification
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: validate-migrations
+    if: needs.validate-migrations.outputs.is-valid == 'false'
+    steps:
+    - name: Notify Success
+      uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
+      with:
+        title: '❌  Houve um erro ao validar migrations ❌ '
+        message: "${{ steps.properties.outputs.validated }}"
+        severity: 'error'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
