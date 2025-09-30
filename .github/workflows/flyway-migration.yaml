@@ -12,14 +12,6 @@ on:
         description: 'Endpoint for the connector'
         required: true
         type: string
-      aws_account:
-        description: 'AWS Account ID for assuming role'
-        required: true
-        type: string
-      aws_region:
-        required: false
-        type: string
-        default: 'us-east-1'
 
 jobs:
   protocol-buffers:
