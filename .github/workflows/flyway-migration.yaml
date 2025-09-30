@@ -19,8 +19,6 @@ jobs:
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     container:
       image: flyway/flyway:latest
-      env:
-        LANGUAGE: "${{ inputs.language }}"
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -29,3 +27,25 @@ jobs:
       id: validate
       run: |
         flyway version
+
+    - name: Validar SQLs com Flyway
+      id: validate
+      run: |
+        echo "🔍 Iniciando validação..."
+        set +e
+        VALIDATION_OUTPUT=$(flyway \
+          -url=jdbc:postgresql://${DATABASE_ENDPOINT}/permissions \
+          -user=authorization-service \
+          -password=${DATABASE_PASSWORD} \
+          -schemas=public \
+          -ignoreMigrationPatterns='*:pending' \
+          -connectRetries=60 \
+          validate 2>&1)
+        EXIT_CODE=$?
+        echo "$VALIDATION_OUTPUT" > validation.log
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+    - name: Notify Validation
+      if: steps.validate.outputs.exit_code != '0'
+      run: |
+        echo "❌ Validação falhou. Enviando mensagem para Discord..."
