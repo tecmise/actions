@@ -1,0 +1,39 @@
+name: Generate Connectors
+
+on:
+  workflow_call:
+    secrets:
+      database_password:
+        required: true
+
+
+    inputs:
+      endpoint:
+        description: 'Endpoint for the connector'
+        required: true
+        type: string
+      aws_account:
+        description: 'AWS Account ID for assuming role'
+        required: true
+        type: string
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
+
+jobs:
+  protocol-buffers:
+    name: Protocol Buffers
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    container:
+      image: flyway/flyway:latest
+      env:
+        LANGUAGE: "${{ inputs.language }}"
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validar SQLs com Flyway
+      id: validate
+      run: |
+        flyway version
