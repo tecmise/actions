@@ -55,7 +55,7 @@ jobs:
 
     - name: Instalar dependências
       run: |
-        cah validation.log
+        cat validation.log
         apk update
         apk add --no-cache jq
 
