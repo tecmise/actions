@@ -70,7 +70,7 @@ jobs:
       with:
         name: validation-log
 
-    - name: Notify Success
+    - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@main
       with:
         title: '❌  Houve um erro ao validar migrations ❌ '
