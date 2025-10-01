@@ -117,7 +117,7 @@ jobs:
         path: migration.log
         name: migration-log
 
-  send-notification-migrate:
+  send-notification-migrate-error:
     name: Send Notification Migrate Error
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: migrate
@@ -134,6 +134,30 @@ jobs:
         title: '❌  Houve um erro ao Executar Migration ❌ '
         message: "Falha ao executar migrations."
         severity: 'error'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+
+    - name: Send Log File
+      run: |
+        curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@migration.log"
+        
+
+  send-notification-migrate:
+    name: Send Notification Migrate Error
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: migrate
+    if: needs.migrate.outputs.is-valid == 'true'
+    steps:
+    - name: Download Validation Log
+      uses: actions/download-artifact@v4
+      with:
+        name: migration-log
+
+    - name: Notify Error
+      uses: tecmise/actions/.github/actions/discord-notifier@main
+      with:
+        title: '🚀 Migration ${{ github.event.repository.name }} 🚀'
+        message: "Migrações aplicadas com sucesso."
+        severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
 
     - name: Send Log File
