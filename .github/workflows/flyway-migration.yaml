@@ -70,11 +70,6 @@ jobs:
       with:
         name: validation-log
 
-    - name: Loading
-      id: properties
-      run: |
-        echo "validated=$(cat validation.log)" >> $GITHUB_OUTPUT
-
     - name: Notify Success
       uses: tecmise/actions/.github/actions/discord-notifier@main
       with:
