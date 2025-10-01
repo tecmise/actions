@@ -10,57 +10,6 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: Validate severity
-    shell: bash
-    run: |
-      case "${{ inputs.severity }}" in
-        info|warn|error) ;;
-        *) echo "❌ Severidade inválida" && exit 1 ;;
-      esac
-
-  - name: Set color based on severity
-    shell: bash
-    run: |
-      case "${{ inputs.severity }}" in
-        info) echo "color=65280"  >> $GITHUB_ENV ;;
-        warn) echo "color=16753920" >> $GITHUB_ENV ;;
-        error) echo "color=16711680" >> $GITHUB_ENV ;;
-      esac
-
-
-  - name: Processar campos extras
-    shell: bash
-    if: ${{ inputs.fields != '' }}
-    id: process_fields
-    run: |
-      # Compact JSON (opção 1)
-      EXTRA_FIELDS_JSON=$(
-        echo "${{ inputs.fields }}" \
-          | jq -R -s '
-              split("\n")
-              | map(
-                  select(length>0)
-                  | split(":")
-                  | {name: .[0], value: .[1], inline: false}
-                )
-            ' \
-          | jq -c '.'
-      )
-      echo "EXTRA_FIELDS_JSON=${EXTRA_FIELDS_JSON}" >> $GITHUB_ENV
-
   - name: Notify Discord Webhook
     shell: bash
-    run: |
-      cat > discord_payload.json <<EOF
-      {
-        "embeds":[
-          {
-            "author": {
-              "name": "${GITHUB_ACTOR}",
-              "icon_url": "https://github.com/${GITHUB_ACTOR}.png"
-            },
-          }
-        ]
-      }
-      EOF
-      curl -X POST ${{ inputs.discord-webhook-url }} -F "file=@${{ inputs.file-path }}"
+    run: curl -X POST ${{ inputs.discord-webhook-url }} -F "file=@${{ inputs.file-path }}"

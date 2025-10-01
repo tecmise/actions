@@ -79,7 +79,5 @@ jobs:
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
 
     - name: Send Log File
-      uses: tecmise/actions/.github/actions/discord-notifier-file@main
-      with:
-        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-        file-path: validation.log
+      run: |
+        curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@validation.log"
