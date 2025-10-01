@@ -118,7 +118,7 @@ jobs:
         name: migration-log
 
   send-notification-migrate-error:
-    name: Send Notification Migrate Error
+    name: Notify Error
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: migrate
     if: needs.migrate.outputs.is-valid == 'false'
@@ -142,7 +142,7 @@ jobs:
         
 
   send-notification-migrate:
-    name: Send Notification Migrate Error
+    name: Notify
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: migrate
     if: needs.migrate.outputs.is-valid == 'true'
