@@ -15,7 +15,9 @@ inputs:
   discord-webhook-url:
     description: 'URL do webhook do Discord (opcional, usa o segredo se não fornecido)'
     required: true
-
+  file-path:
+    description: 'Caminho para o arquivo que será enviado (opcional)'
+    required: false
 
 runs:
   using: composite
@@ -70,11 +72,15 @@ runs:
       else
         ALL_FIELDS="$STATIC_FIELDS"
       fi
-
+  
       cat > discord_payload.json <<EOF
       {
         "embeds":[
           {
+            "author": {
+              "name": "${GITHUB_ACTOR}",
+              "icon_url": "https://github.com/${GITHUB_ACTOR}.png"
+            },
             "title":"${{ inputs.title }}",
             "description":"${{ inputs.message }}",
             "color":${{ env.color }},
@@ -84,7 +90,15 @@ runs:
         ]
       }
       EOF
-
-      curl -X POST ${{ inputs.discord-webhook-url }} \
-        -H "Content-Type: application/json" \
-        -d @discord_payload.json
+  
+      if [ -n "${{ inputs.file-path }}" ] && [ -f "${{ inputs.file-path }}" ]; then
+        # Enviando arquivo + payload JSON
+        curl -X POST ${{ inputs.discord-webhook-url }} \
+          -F "payload_json=@discord_payload.json" \
+          -F "file=@${{ inputs.file-path }}"
+      else
+        # Comportamento original (apenas JSON)
+        curl -X POST ${{ inputs.discord-webhook-url }} \
+          -H "Content-Type: application/json" \
+          -d @discord_payload.json
+      fi
