@@ -75,6 +75,10 @@ runs:
       {
         "embeds":[
           {
+            "author": {
+              "name": "${GITHUB_ACTOR}",
+              "icon_url": "https://github.com/${GITHUB_ACTOR}.png"
+            },
             "title":"${{ inputs.title }}",
             "description":"${{ inputs.message }}",
             "color":${{ env.color }},
