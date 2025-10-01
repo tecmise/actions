@@ -70,15 +70,10 @@ jobs:
       with:
         name: validation-log
 
-    - name: Instalar dependências
-      run: |
-        cat validation.log
-        yum install -y jq
-
     - name: Loading
       id: properties
       run: |
-        echo "validated=$(tail -n 20 validation.log | jq -Rs .)" >> $GITHUB_OUTPUT
+        echo "validated=$(cat validation.log)" >> $GITHUB_OUTPUT
 
     - name: Notify Success
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
