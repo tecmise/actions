@@ -28,7 +28,6 @@ jobs:
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     outputs:
       is-valid: "${{ steps.validate.outputs.exit_code == '0' }}"
-      validated: "${{ steps.properties.outputs.validated }}"
     container:
       image: flyway/flyway:latest
     steps:
@@ -38,7 +37,6 @@ jobs:
     - name: Validar SQLs com Flyway
       id: validate
       run: |
-        ls -ltra
         echo "🔍 Iniciando validação..."
         set +e
         VALIDATION_OUTPUT=$(flyway -url="jdbc:postgresql://${{ inputs.endpoint }}/permissions" \
@@ -59,8 +57,8 @@ jobs:
         path: validation.log
         name: validation-log
 
-  send-notification:
-    name: Send Notification
+  send-notification-validate:
+    name: Send Notification Validate Error
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: validate-migrations
     if: needs.validate-migrations.outputs.is-valid == 'false'
@@ -81,3 +79,63 @@ jobs:
     - name: Send Log File
       run: |
         curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@validation.log"
+
+
+  migrate:
+    name: Migrating Database
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    if: needs.validate-migrations.outputs.is-valid == 'true'
+    needs: validate-migrations
+    outputs:
+      is-valid: "${{ steps.migrate.outputs.exit_code == '0' }}"
+    container:
+      image: flyway/flyway:latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validar SQLs com Flyway
+      id: migrate
+      run: |
+        echo "🚀 Rodando migrações..."
+        set +e
+        MIGRATION_OUTPUT=$(flyway -url="jdbc:postgresql://${{ inputs.endpoint }}/permissions" \
+          -user="${{ inputs.user }}" \
+          -password="${{ secrets.database_password }}" \
+          -schemas="${{ inputs.schema }}" \
+          -ignoreMigrationPatterns="*:pending" \
+          -connectRetries=60 \
+          -locations="filesystem:./migrations" \
+          migrate 2>&1)
+        EXIT_CODE=$?
+        echo "$MIGRATION_OUTPUT" > migration.log
+        echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+    - name: Upload Validation Log
+      uses: actions/upload-artifact@v4
+      with:
+        path: migration.log
+        name: migration-log
+
+  send-notification-migrate:
+    name: Send Notification Migrate Error
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs: migrate
+    if: needs.migrate.outputs.is-valid == 'false'
+    steps:
+    - name: Download Validation Log
+      uses: actions/download-artifact@v4
+      with:
+        name: migration-log
+
+    - name: Notify Error
+      uses: tecmise/actions/.github/actions/discord-notifier@main
+      with:
+        title: '❌  Houve um erro ao Executar Migration ❌ '
+        message: "Falha ao executar migrations."
+        severity: 'error'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+
+    - name: Send Log File
+      run: |
+        curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@migration.log"
