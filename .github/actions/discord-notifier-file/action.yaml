@@ -1,21 +1,11 @@
-name: Discord Notifier
+name: Discord Notifier File
 inputs:
-  title:
-    required: false
-    description: "Título da mensagem"
-  message:
-    required: true
-    description: "Descrição da mensagem"
-  severity:
-    required: true
-    description: "Severidade da mensagem (info, warn, error)"
-  fields:
-    description: 'Linhas adicionais no formato Nome:Valor'
-    required: false
   discord-webhook-url:
     description: 'URL do webhook do Discord (opcional, usa o segredo se não fornecido)'
     required: true
-
+  file-path:
+    description: 'Caminho para o arquivo que será enviado (opcional)'
+    required: false
 
 runs:
   using: composite
@@ -61,30 +51,16 @@ runs:
   - name: Notify Discord Webhook
     shell: bash
     run: |
-      STATIC_FIELDS='[
-        {"name":"Repositório","value":"'"${GITHUB_REPOSITORY}"'","inline":true},
-        {"name":"Branch","value":"'"${GITHUB_REF_NAME}"'","inline":true}
-      ]'
-      if [ -n "${EXTRA_FIELDS_JSON}" ]; then
-        ALL_FIELDS=$(jq -n --argjson a "$STATIC_FIELDS" --argjson b "$EXTRA_FIELDS_JSON" '$a + $b')
-      else
-        ALL_FIELDS="$STATIC_FIELDS"
-      fi
-
       cat > discord_payload.json <<EOF
       {
         "embeds":[
           {
-            "title":"${{ inputs.title }}",
-            "description":"${{ inputs.message }}",
-            "color":${{ env.color }},
-            "fields":${ALL_FIELDS},
-            "footer":{"text":"GitHub Actions CD Pipeline • $(date -u +"%Y-%m-%d %H:%M UTC")"}
+            "author": {
+              "name": "${GITHUB_ACTOR}",
+              "icon_url": "https://github.com/${GITHUB_ACTOR}.png"
+            },
           }
         ]
       }
       EOF
-
-      curl -X POST ${{ inputs.discord-webhook-url }} \
-        -H "Content-Type: application/json" \
-        -d @discord_payload.json
+      curl -X POST ${{ inputs.discord-webhook-url }} -F "file=@${{ inputs.file-path }}"
