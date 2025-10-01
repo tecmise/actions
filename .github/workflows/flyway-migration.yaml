@@ -70,11 +70,19 @@ jobs:
       with:
         name: validation-log
 
-    - name: Notify
+    - name: Notify Error
       uses: tecmise/actions/.github/actions/discord-notifier@main
       with:
         title: '❌  Houve um erro ao validar migrations ❌ '
-        message: "${{ steps.properties.outputs.validated }}"
+        message: "Falha na validação das migrations."
+        severity: 'error'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+
+    - name: Send Log File
+      uses: tecmise/actions/.github/actions/discord-notifier@main
+      with:
+        title: 'Log de validação'
+        message: "Detalhes do erro de validação:"
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
         file-path: validation.log
