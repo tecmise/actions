@@ -76,9 +76,10 @@ jobs:
         echo "validated=$(cat validation.log)" >> $GITHUB_OUTPUT
 
     - name: Notify Success
-      uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
+      uses: tecmise/actions/.github/actions/discord-notifier@main
       with:
         title: '❌  Houve um erro ao validar migrations ❌ '
         message: "${{ steps.properties.outputs.validated }}"
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        file-path: validation.log
