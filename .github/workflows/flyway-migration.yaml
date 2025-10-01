@@ -54,7 +54,6 @@ jobs:
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
     - name: Upload Validation Log
-      if: failure()
       uses: actions/upload-artifact@v4
       with:
         path: validation.log
