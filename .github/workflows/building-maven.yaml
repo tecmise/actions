@@ -58,10 +58,10 @@ jobs:
 
       - name: Install Maven manually
         run: |
-          wget https://downloads.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz
-          tar -xzvf apache-maven-3.8.8-bin.tar.gz
-          sudo mv apache-maven-3.8.8 /opt/
-          echo 'export PATH=/opt/apache-maven-3.8.8/bin:$PATH' >> ~/.bashrc
+          wget https://downloads.apache.org/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz  
+          tar -xzvf apache-maven-3.8.9-bin.tar.gz
+          sudo mv apache-maven-3.8.9 /opt/
+          echo 'export PATH=/opt/apache-maven-3.8.9/bin:$PATH' >> ~/.bashrc
           source ~/.bashrc
           mvn --version
 
