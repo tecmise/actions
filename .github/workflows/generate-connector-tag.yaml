@@ -11,7 +11,7 @@ jobs:
 
   loading_pr_data:
     name: "Loading PR Data"
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.keyword.outputs.result }}
       patch: ${{ steps.patch.outputs.version }}
@@ -96,7 +96,7 @@ jobs:
 
   genmerate-version:
     name: "Generate Version"
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     needs: loading_pr_data
     steps:
       - name: Criar tag via API do GitHub
