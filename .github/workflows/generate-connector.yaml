@@ -5,8 +5,6 @@ on:
     secrets:
       DISCORD_NOTIFIER_URL:
         required: true
-      CONNECTORS_KEY:
-        required: true
 
     inputs:
       proto_path:
@@ -56,7 +54,7 @@ jobs:
 
   notify:
     name: Notify
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     needs: protocol-buffers
     if: ${{ always() && needs.protocol-buffers.result == 'failure' }}
     environment: "${{ github.ref_name }}"
@@ -75,14 +73,14 @@ jobs:
   commit-changes:
     name: Commit Changes
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     needs: protocol-buffers
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
-          token: ${{ secrets.CONNECTORS_KEY }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: target-repo
           fetch-depth: 0
           persist-credentials: true
