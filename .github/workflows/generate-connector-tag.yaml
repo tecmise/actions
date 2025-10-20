@@ -99,9 +99,9 @@ jobs:
     needs: loading_pr_data
     steps:
       - name: Criar tag via API do GitHub
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.CONNECTORS_KEY }}
+          token: ${{ secrets.CONNECTORS_KEY }}
           script: |
             const { data: refData } = await github.rest.git.getRef({
               owner: context.repo.owner,

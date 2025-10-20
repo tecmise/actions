@@ -58,10 +58,10 @@ jobs:
 
 
     - name: Create Pull Request via API
-      uses: actions/github-script@v6
+      uses: actions/github-script@v8
       id: create_pr
       with:
-        github-token: ${{ secrets.CONNECTORS_KEY }}
+        token: ${{ secrets.CONNECTORS_KEY }}
         result-encoding: json
         script: |
           const currentDate = new Date().toISOString();
