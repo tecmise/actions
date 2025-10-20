@@ -75,16 +75,18 @@ jobs:
         ---
         *Gerado por GitHub Actions em ${CURRENT_DATE}*"
     
-        # Criar a PR e capturar sua URL
+        # Criar a PR sem a flag --json e capturar a URL diretamente
         PR_URL=$(gh pr create -B master -H delivery/master \
           --title "🔗 New connector version - Solicitado por ${{ github.actor }}" \
-          --body "$PR_BODY" \
-          --json url,number)
-        
-        echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
-        echo "PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]*$')" >> $GITHUB_OUTPUT
+          --body "$PR_BODY")
     
-        echo "Pull Request criado: $PR_URL"
+        echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+        
+        # Extrair o número do PR da URL usando expressão regular
+        PR_NUMBER=$(echo $PR_URL | sed -E 's|.*/([0-9]+)$|\1|')
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+    
+        echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
