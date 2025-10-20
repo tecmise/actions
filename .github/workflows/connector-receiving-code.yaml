@@ -54,18 +54,12 @@ jobs:
     needs: validate
     steps:
 
-
-#    - name: Configurar GitHub CLI
-#      run: |
-#        gh auth setup-git --hostname github.com
-#        gh auth status
-
     - name: Criar Pull Request via GitHub CLI
       id: create_pr
       run: |
         # Obter a data atual
         CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-        
+    
         # Criar o corpo da PR
         PR_BODY="## 🚀 Uma nova versão do connector está sendo gerada
     
@@ -80,22 +74,19 @@ jobs:
     
         ---
         *Gerado por GitHub Actions em ${CURRENT_DATE}*"
-        
+    
         # Criar a PR e capturar sua URL
-        PR_INFO=$(gh pr create -B master -H delivery/master \
+        PR_URL=$(gh pr create -B master -H delivery/master \
           --title "🔗 New connector version - Solicitado por ${{ github.actor }}" \
           --body "$PR_BODY" \
           --json url,number)
         
-        PR_URL=$(echo $PR_INFO | jq -r '.url')
-        PR_NUMBER=$(echo $PR_INFO | jq -r '.number')
-        
         echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
-        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
-        
-        echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+        echo "PR_NUMBER=$(echo $PR_URL | grep -o '[0-9]*$')" >> $GITHUB_OUTPUT
+    
+        echo "Pull Request criado: $PR_URL"
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
