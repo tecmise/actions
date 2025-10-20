@@ -22,7 +22,7 @@ on:
 jobs:
   protocol-buffers:
     name: Protocol Buffers
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     container:
       image: public.ecr.aws/g4i8n5q9/connector-provider:${{ inputs.container_tag }}
       env:
