@@ -2,8 +2,6 @@ name: "Publish Version"
 on:
   workflow_call:
     secrets:
-      CONNECTORS_KEY:
-        required: true
       DISCORD_NOTIFIER_URL:
         required: true
 
@@ -21,7 +19,7 @@ jobs:
         id: keyword
         uses: actions/github-script@v8
         with:
-          token: ${{ secrets.CONNECTORS_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -93,31 +91,48 @@ jobs:
           echo "Final Version: ${{ steps.major.outputs.version }}.${{ steps.minor.outputs.version }}.${{ steps.patch.outputs.version }}"         
 
 
-  genmerate-version:
+  gen-version:
     name: "Generate Version"
     runs-on: ubuntu-latest
     needs: loading_pr_data
     steps:
-      - name: Criar tag via API do GitHub
-        uses: actions/github-script@v8
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.CONNECTORS_KEY }}
-          script: |
-            const { data: refData } = await github.rest.git.getRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'heads/master'
-            });
-            
-            const masterSHA = refData.object.sha;
-            
-            await github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `refs/tags/v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}`,
-              sha: masterSHA
-            });
+          fetch-depth: 0
 
+#      - name: Configurar GitHub CLI
+#        run: |
+#          # Instalação do GitHub CLI se não estiver disponível no runner
+#          if ! command -v gh &> /dev/null; then
+#            echo "Instalando GitHub CLI..."
+#            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+#            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+#            sudo apt update
+#            sudo apt install gh
+#          fi
+#          # Verificar versão instalada
+#          gh --version
+
+      - name: Criar tag com GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+        run: |
+          VERSION="v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
+          echo "Criando tag $VERSION na branch master"
+          
+          # Obter o SHA do último commit na master
+          MASTER_SHA=$(git rev-parse origin/master)
+          
+          # Criar tag usando GitHub CLI
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/git/refs \
+            -f ref="refs/tags/$VERSION" \
+            -f sha="$MASTER_SHA"
+          
+          echo "Tag $VERSION criada com sucesso!"
       - name: Send Notification
         uses: tecmise/actions/.github/actions/discord-notifier@v3.1.2
         with:
