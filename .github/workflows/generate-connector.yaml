@@ -76,11 +76,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: protocol-buffers
     steps:
-      - name: Checkout target repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
-
+      - name: Checkout target repository usando GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Definir o repositório de destino
+          TARGET_REPO="${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}"
+          echo "Clonando repositório: $TARGET_REPO"
+          
+          # Criar diretório e clonar o repositório
+          mkdir -p target-repo
+          gh repo clone "$TARGET_REPO" target-repo || {
+            echo "Falha ao clonar repositório. Verifique se ele existe ou se o token tem permissão."
+            exit 1
+          }
+          
+          cd target-repo
+          # Verificar se o clone foi bem-sucedido
+          echo "Repositório clonado com sucesso. Diretório atual:"
+          ls -la
 
 
       - name: Checkout or Create Branch and Merge
