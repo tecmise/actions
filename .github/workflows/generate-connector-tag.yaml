@@ -21,7 +21,7 @@ jobs:
         id: keyword
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.CONNECTORS_KEY }}
+          token: ${{ secrets.CONNECTORS_KEY }}
           result-encoding: string
           script: |
             const prNumber = context.payload.pull_request.number;
