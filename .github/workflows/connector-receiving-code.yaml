@@ -55,10 +55,10 @@ jobs:
     steps:
 
 
-    - name: Configurar GitHub CLI
-      run: |
-        gh auth setup-git --hostname github.com
-        gh auth status
+#    - name: Configurar GitHub CLI
+#      run: |
+#        gh auth setup-git --hostname github.com
+#        gh auth status
 
     - name: Criar Pull Request via GitHub CLI
       id: create_pr
