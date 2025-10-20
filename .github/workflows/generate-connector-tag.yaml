@@ -52,7 +52,7 @@ jobs:
       - name: Checking versionament
         id: versionament
         env:
-          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: tecmise/actions/.github/actions/versionament@main
 
       - name: Next Patch
@@ -116,7 +116,7 @@ jobs:
 
       - name: Criar tag com GitHub CLI
         env:
-          GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}"
           echo "Criando tag $VERSION na branch master"
