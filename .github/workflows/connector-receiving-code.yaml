@@ -2,7 +2,7 @@ name: "Validate Source Code"
 on:
   workflow_call:
     secrets:
-      CONNECTORS_KEY:
+      GITHUB_TOKEN:
         required: true
       DISCORD_NOTIFIER_URL:
         required: true
@@ -61,7 +61,7 @@ jobs:
       uses: actions/github-script@v6
       id: create_pr
       with:
-        github-token: ${{ secrets.CONNECTORS_KEY }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         result-encoding: json
         script: |
           const currentDate = new Date().toISOString();
