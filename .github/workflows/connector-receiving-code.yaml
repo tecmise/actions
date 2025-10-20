@@ -55,42 +55,47 @@ jobs:
     steps:
 
 
-    - name: Create Pull Request via API
-      uses: actions/github-script@v6
-      id: create_pr
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        result-encoding: json
-        script: |
-          const currentDate = new Date().toISOString();
-          
-          const prBody = `## 🚀 Uma nova versão do connector está sendo gerada
-          
-          ### Nova versao patch será gerada
-          
-          Por padrão, uma nova versão patch será gerada. Se você deseja alterar o tipo de versão (major, minor, patch), por favor, realizar um comentario nesta PR com a palavra-chave correspondente:
-          - \`#major\` para uma nova versão major
-          - \`#minor\` para uma nova versão minor
-          - \`#patch\` para uma nova versão patch
-          
-          ---
-          *Gerado por GitHub Actions em ${currentDate}*`;
-          
-          const { data: pullRequest } = await github.rest.pulls.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: "🔗 New connector version",
-            body: prBody,
-            head: "delivery/master",
-            base: "master"
-          });
-          
-          console.log(`Pull Request criado: ${pullRequest.html_url} (PR #${pullRequest.number})`);
+    - name: Configurar GitHub CLI
+      run: |
+        gh auth setup-git --hostname github.com
+        gh auth status
 
-          return {
-            prUrl: pullRequest.html_url,
-            prNumber: pullRequest.number
-          };
+    - name: Criar Pull Request via GitHub CLI
+      id: create_pr
+      run: |
+        # Obter a data atual
+        CURRENT_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+        
+        # Criar o corpo da PR
+        PR_BODY="## 🚀 Uma nova versão do connector está sendo gerada
+    
+        ### Solicitado por: @${{ github.actor }}
+    
+        ### Nova versao patch será gerada
+    
+        Por padrão, uma nova versão patch será gerada. Se você deseja alterar o tipo de versão (major, minor, patch), por favor, realizar um comentario nesta PR com a palavra-chave correspondente:
+        - \`#major\` para uma nova versão major
+        - \`#minor\` para uma nova versão minor
+        - \`#patch\` para uma nova versão patch
+    
+        ---
+        *Gerado por GitHub Actions em ${CURRENT_DATE}*"
+        
+        # Criar a PR e capturar sua URL
+        PR_INFO=$(gh pr create -B master -H delivery/master \
+          --title "🔗 New connector version - Solicitado por ${{ github.actor }}" \
+          --body "$PR_BODY" \
+          --json url,number)
+        
+        PR_URL=$(echo $PR_INFO | jq -r '.url')
+        PR_NUMBER=$(echo $PR_INFO | jq -r '.number')
+        
+        echo "PR_URL=$PR_URL" >> $GITHUB_OUTPUT
+        echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_OUTPUT
+        
+        echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
