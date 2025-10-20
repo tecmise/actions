@@ -61,7 +61,7 @@ jobs:
       uses: actions/github-script@v6
       id: create_pr
       with:
-        token: ${{ secrets.CONNECTORS_KEY }}
+        github-token: ${{ secrets.CONNECTORS_KEY }}
         result-encoding: json
         script: |
           const currentDate = new Date().toISOString();
