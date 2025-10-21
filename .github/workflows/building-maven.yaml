@@ -57,7 +57,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@< version >
+        uses: s4u/setup-maven-action@v1.19.0
         with:
           java-version: '${{ inputs.java_version }}'
           maven-version: '3.8.9'
