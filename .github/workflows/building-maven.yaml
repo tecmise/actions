@@ -56,10 +56,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@< version >
+        with:
+          java-version: '${{ inputs.java_version }}'
+          maven-version: '3.8.9'
+
       - name: Maven build
-        run: |
-          chomd +x ./mvnw
-          ./mvnw -B clean package -DskipTests
+        run: mvn -B clean package -DskipTests
 
       - name: Refactoring jar name
         working-directory: target
