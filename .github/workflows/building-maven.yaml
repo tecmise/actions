@@ -57,7 +57,9 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Maven build
-        run: ./mvnw -B clean package -DskipTests
+        run: |
+          chomd +x ./mvnw
+          ./mvnw -B clean package -DskipTests
 
       - name: Refactoring jar name
         working-directory: target
