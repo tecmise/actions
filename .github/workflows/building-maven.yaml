@@ -56,17 +56,8 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Install Maven manually
-        run: |
-          wget https://downloads.apache.org/maven/maven-3/3.8.9/binaries/apache-maven-3.8.9-bin.tar.gz  
-          tar -xzvf apache-maven-3.8.9-bin.tar.gz
-          sudo mv apache-maven-3.8.9 /opt/
-          echo 'export PATH=/opt/apache-maven-3.8.9/bin:$PATH' >> ~/.bashrc
-          source ~/.bashrc
-          mvn --version
-
       - name: Maven build
-        run: mvn -B clean package -DskipTests
+        run: ./mvnw -B clean package -DskipTests
 
       - name: Refactoring jar name
         working-directory: target
