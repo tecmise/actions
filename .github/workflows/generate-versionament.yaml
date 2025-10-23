@@ -27,7 +27,7 @@ jobs:
   generate-versionament:
     name: Generate
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout branch
       uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     needs: generate-versionament
     steps:
 
