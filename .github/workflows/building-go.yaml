@@ -53,8 +53,7 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-#    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
-    runs-on: ubuntu-latest
+    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
     env:
@@ -74,15 +73,15 @@ jobs:
           go-version: ${{ inputs.go_version }}
           cache: false
 
-#      - name: Cache Go modules
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.cache/go-build
-#            ~/go/pkg/mod
-#          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-#          restore-keys: |
-#            ${{ runner.os }}-go-
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Autenticar repositórios privados
         run: |
@@ -92,8 +91,6 @@ jobs:
           go env -w GOPRIVATE=github.com/tecmise/*
           go env -w GOSUMDB=off
 
-      - name: Clean
-        run: go clean -modcache
 
       - name: Tidy
         run: go mod tidy
