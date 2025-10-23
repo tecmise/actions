@@ -3,8 +3,6 @@ name: Versionament
 on:
   workflow_call:
     secrets:
-      CONNECTORS_KEY:
-        required: true
       DISCORD_NOTIFIER_URL:
         required: true
     inputs:
@@ -145,7 +143,7 @@ jobs:
 
     - name: Create Pull Request
       env:
-        GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       id: create_pr
       run: |
         PR_URL=$(gh pr create \
