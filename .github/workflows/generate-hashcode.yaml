@@ -24,7 +24,7 @@ on:
 jobs:
   loading-hash:
     name: Generating hashcode
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     outputs:
       content: ${{ steps.generate_hash.outputs.content }}
     steps:
@@ -72,7 +72,7 @@ jobs:
 
   checking-last-version:
     name: Checking current version
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: loading-hash
     outputs:
       has_changes: ${{ steps.check_version.outputs.has_changes }}
