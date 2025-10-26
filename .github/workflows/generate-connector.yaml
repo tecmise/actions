@@ -81,7 +81,7 @@ jobs:
     - name: Trigger workflow in another repository
       uses: peter-evans/repository-dispatch@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.CONNECTORS_KEY }}
         repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
         event-type: trigger-event
         client-payload: '{"key1":"value1"}'
