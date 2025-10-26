@@ -83,6 +83,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: "${{ github.ref_name }}"
           path: target-repo
           fetch-depth: 0
           persist-credentials: true
