@@ -47,20 +47,6 @@ jobs:
           name: generated-files
           path: /app/generated/app/proto/
 
-
-      - name: Pushes test file
-        uses: dmnemec/copy_file_to_another_repo_action@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.CONNECTORS_KEY }}
-        with:
-          source_file: '/app/generated/app/proto/'
-          destination_repo: '${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}'
-          destination_folder: 'pkg'
-          user_email: 'guilherme.giusti04@gmail.com'
-          user_name: 'GuilhermeGiusti'
-          commit_message: 'A custom message for the commit'
-
-
       - name: Upload Generated Files
         uses: actions/upload-artifact@v4
         if: failure()
@@ -86,103 +72,101 @@ jobs:
             Link:${{github.workflow.url}}
             Run:${{github.run_id}}
 
-#  commit-changes:
-#    name: Commit Changes
-#    environment: ${{ github.ref_name }}
-#    runs-on: ubuntu-latest
-#    needs: protocol-buffers
-#    steps:
+  commit-changes:
+    name: Commit Changes
+    environment: ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    needs: protocol-buffers
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
+          token: ${{ secrets.CONNECTORS_KEY }}
+          path: target-repo
+          fetch-depth: 0
+          persist-credentials: true
 
 
+      - name: Checkout or Create Branch and Merge
+        working-directory: target-repo
+        shell: bash
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Nome da branch de destino
+          TARGET_BRANCH="delivery/${{ github.ref_name }}"
+          
+          # Verifica se a branch remota existe
+          if git ls-remote --heads origin $TARGET_BRANCH | grep -q $TARGET_BRANCH; then
+            echo "Branch $TARGET_BRANCH já existe. Fazendo checkout e merge..."
+          
+            # Checkout da branch existente
+            git fetch origin $TARGET_BRANCH
+            git checkout $TARGET_BRANCH
+          
+            # Atualiza a branch local com a remota
+            git pull origin $TARGET_BRANCH
+          
+            # Merge com a branch de referência
+            git merge origin/${{ github.ref_name }} --no-edit -m "Merge branch '${{ github.ref_name }}' into $TARGET_BRANCH via GitHub Actions"
+          else
+            echo "Branch $TARGET_BRANCH não existe. Criando nova branch..."
+          
+            # Cria uma nova branch a partir da branch de referência
+            git checkout -b $TARGET_BRANCH
+          fi
+          echo "Agora trabalhando na branch: $(git branch --show-current)"
 
-#      - name: Checkout target repository
-#        uses: actions/checkout@v4
-#        with:
-#          repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          path: target-repo
-#          fetch-depth: 0
-#          persist-credentials: true
-#
-#      - name: Checkout or Create Branch and Merge
-#        working-directory: target-repo
-#        shell: bash
-#        run: |
-#          git config user.name "GitHub Actions"
-#          git config user.email "actions@github.com"
-#
-#          # Nome da branch de destino
-#          TARGET_BRANCH="delivery/${{ github.ref_name }}"
-#
-#          # Verifica se a branch remota existe
-#          if git ls-remote --heads origin $TARGET_BRANCH | grep -q $TARGET_BRANCH; then
-#            echo "Branch $TARGET_BRANCH já existe. Fazendo checkout e merge..."
-#
-#            # Checkout da branch existente
-#            git fetch origin $TARGET_BRANCH
-#            git checkout $TARGET_BRANCH
-#
-#            # Atualiza a branch local com a remota
-#            git pull origin $TARGET_BRANCH
-#
-#            # Merge com a branch de referência
-#            git merge origin/${{ github.ref_name }} --no-edit -m "Merge branch '${{ github.ref_name }}' into $TARGET_BRANCH via GitHub Actions"
-#          else
-#            echo "Branch $TARGET_BRANCH não existe. Criando nova branch..."
-#
-#            # Cria uma nova branch a partir da branch de referência
-#            git checkout -b $TARGET_BRANCH
-#          fi
-#          echo "Agora trabalhando na branch: $(git branch --show-current)"
-#
-#      - name: Remove existing pkg directory
-#        working-directory: target-repo
-#        run: rm -rf pkg
-#
-#      - name: Create new pkg directory
-#        working-directory: target-repo
-#        run: mkdir -p pkg
-#
-#      - name: Download generated-files artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: generated-files
-#          path: target-repo/pkg
-#
-#      - name: Status
-#        shell: bash
-#        working-directory: target-repo
-#        run: |
-#          git status
-#
-#      - name: Git Add
-#        shell: bash
-#        working-directory: target-repo
-#        run: |
-#          git add -A
-#
-#      - name: Show Changes
-#        shell: bash
-#        working-directory: target-repo
-#        run: |
-#          if git diff --staged --quiet; then
-#            echo "Nenhuma alteração para commit."
-#            exit 0
-#          fi
-#
-#      - name: Git Commit
-#        shell: bash
-#        working-directory: target-repo
-#        run: |
-#          git commit -m "Update connectors with latest parameter values"
-#
-#      - name: Git Push
-#        shell: bash
-#        working-directory: target-repo
-#        run: |
-#          if git push origin $CURRENT_BRANCH 2>/dev/null; then
-#            echo "Push bem-sucedido para branch existente $CURRENT_BRANCH"
-#          else
-#            echo "Tentando configurar upstream para branch $CURRENT_BRANCH"
-#            git push --set-upstream origin $CURRENT_BRANCH
-#          fi
+      - name: Remove existing pkg directory
+        working-directory: target-repo
+        run: rm -rf pkg
+
+      - name: Create new pkg directory
+        working-directory: target-repo
+        run: mkdir -p pkg
+
+      - name: Download generated-files artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-files
+          path: target-repo/pkg
+
+      - name: Status
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git status
+
+      - name: Git Add
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git add -A
+
+      - name: Show Changes
+        shell: bash
+        working-directory: target-repo
+        run: |
+          if git diff --staged --quiet; then
+            echo "Nenhuma alteração para commit."
+            exit 0
+          fi
+
+      - name: Git Commit
+        shell: bash
+        working-directory: target-repo
+        run: |
+          git commit -m "Update connectors with latest parameter values"
+
+      - name: Git Push
+        shell: bash
+        working-directory: target-repo
+        run: |
+          if git push origin $CURRENT_BRANCH 2>/dev/null; then
+            echo "Push bem-sucedido para branch existente $CURRENT_BRANCH"
+          else
+            echo "Tentando configurar upstream para branch $CURRENT_BRANCH"
+            git push --set-upstream origin $CURRENT_BRANCH
+          fi
