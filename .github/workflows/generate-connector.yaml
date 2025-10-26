@@ -83,7 +83,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/${{ github.event.repository.name }}-connector-${{ inputs.language }}
-          token: ${{ secrets.CONNECTORS_KEY }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: target-repo
           fetch-depth: 0
           persist-credentials: true
