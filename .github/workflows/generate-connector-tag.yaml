@@ -4,7 +4,8 @@ on:
     secrets:
       DISCORD_NOTIFIER_URL:
         required: true
-
+      CONNECTORS_KEY:
+        required: true
 jobs:
   loading_pr_data:
     name: "Loading PR Data"
@@ -19,7 +20,7 @@ jobs:
         id: keyword
         uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.CONNECTORS_KEY }}
           result-encoding: string
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -52,7 +53,7 @@ jobs:
       - name: Checking versionament
         id: versionament
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
         uses: tecmise/actions/.github/actions/versionament@main
 
       - name: Next Patch
