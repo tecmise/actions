@@ -4,6 +4,8 @@ on:
     secrets:
       DISCORD_NOTIFIER_URL:
         required: true
+      CONNECTORS_KEY:
+        required: true
 
 jobs:
   validate:
@@ -34,7 +36,7 @@ jobs:
         run: go env -w GOPRIVATE=github.com/tecmise
 
       - name: Instead of config
-        run: git config --global url."https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://oauth2:${{ secrets.CONNECTORS_KEY }}@github.com/".insteadOf "https://github.com/"
 
       - name: Tidy
         run: go mod tidy
@@ -90,7 +92,7 @@ jobs:
     
         echo "Pull Request criado: $PR_URL (PR #$PR_NUMBER)"
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
 
     - name: Notify
       uses: tecmise/actions/.github/actions/discord-notifier@v3.0.4
