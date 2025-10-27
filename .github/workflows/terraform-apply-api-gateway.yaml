@@ -93,7 +93,7 @@ jobs:
     - name: Create files
       uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v3.4.3
       with:
-        routes_file: '.github/ingress/routes.json'
+        routes_file: ${{ inputs.routes_file }}
         bucket_name: ${{ inputs.bucket_name }}
         port: ${{ inputs.port }}
         protocol: "${{ inputs.protocol }}"
