@@ -19,7 +19,7 @@ on:
       container_tag:
         required: false
         type: string
-        default: "1f254c183baf76e10cc35f804371c9c394fc15ef"
+        default: "ef9f6612e15a9888449b31809066886d3e37e113"
 
 jobs:
   protocol-buffers:
