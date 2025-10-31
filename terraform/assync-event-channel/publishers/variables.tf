@@ -5,6 +5,13 @@ variable "topics" {
   }))
 }
 
+variable "parameters" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+}
+
 variable "application" {
   type = string
 }
