@@ -6,7 +6,7 @@ locals {
   }
   parameters = flatten([
     for value in local.content["publishers"] : flatten([
-      for key, attr in (containskey(value, "attributes") && value["attributes"] != null ? value["attributes"] : []) : {
+      for key, attr in (lookup(value, "attributes", null) != null ? value["attributes"] : []) : {
         name: "/${var.application}/assync-event-channel/${value["name"]}/${attr["name"]}",
         value: attr["value"]
       }
