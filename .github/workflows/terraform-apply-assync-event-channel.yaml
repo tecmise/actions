@@ -32,11 +32,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Move file
+      shell: bash
+      run: |
+        ls -ltra
+
+    - name: Move file
+      shell: bash
+      run: |
+          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.json
+
     - name: upload entities file
       uses: actions/upload-artifact@v4
       with:
         name: entities-file
-        path: "${{ inputs.entities_file }}"
+        path: entities.json
 
   terraform-plan:
     name: Terraform Plan
@@ -57,24 +67,6 @@ jobs:
       with:
           name: entities-file
 
-    - name: Move file
-      shell: bash
-      run: |
-        ls -ltra
-
-    - name: Move file
-      shell: bash
-      run: |
-        if [[ "${{ inputs.entities_file }}" == *.json ]]; then
-          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.json
-        fi
-        if [[ "${{ inputs.entities_file }}" == *.yaml ]]; then
-          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.yaml
-        fi
-        if [[ "${{ inputs.entities_file }}" == *.yml ]]; then
-          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.yaml
-        fi
-
     - name: upload entities file
       working-directory: terraform/assync-event-channel
       shell: bash
@@ -86,7 +78,7 @@ jobs:
       shell: bash
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
-        TF_VAR_file_name: "${{ inputs.entities_file }}"
+        TF_VAR_file_name: "entities.json"
       run: terraform plan
 
   terraform-apply:
@@ -113,19 +105,6 @@ jobs:
       run: |
         ls -ltra
 
-    - name: Move file
-      shell: bash
-      run: |
-        if [[ "${{ inputs.entities_file }}" == *.json ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.json
-        fi
-        if [[ "${{ inputs.entities_file }}" == *.yaml ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
-        fi
-        if [[ "${{ inputs.entities_file }}" == *.yml ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
-        fi
-
     - name: upload entities file
       working-directory: terraform/assync-event-channel
       shell: bash
@@ -137,5 +116,5 @@ jobs:
       shell: bash
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
-        TF_VAR_file_name: "${{ inputs.entities_file }}"
+        TF_VAR_file_name: "entities.json"
       run: terraform apply -auto-approve
