@@ -66,13 +66,13 @@ jobs:
       shell: bash
       run: |
         if [[ "${{ inputs.entities_file }}" == *.json ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.json
+          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.json
         fi
         if [[ "${{ inputs.entities_file }}" == *.yaml ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.yaml
         fi
         if [[ "${{ inputs.entities_file }}" == *.yml ]]; then
-          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.yaml
         fi
 
     - name: upload entities file
