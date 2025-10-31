@@ -1,5 +1,5 @@
 locals {
-  content = endswith(var.file_name, ".json") ? jsondecode(file("content.json")) : yamldecode(file("content.yaml"))
+  content = jsondecode(file(var.file_name))
 
   topics_fifo = {
     for queue in local.content["publishers"] : queue["name"] => queue
