@@ -147,7 +147,7 @@ jobs:
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
 
-    - name: upload entities file
+    - name: Terraform Init
       working-directory: code_internal/terraform/assync-event-channel
       shell: bash
       run: |
