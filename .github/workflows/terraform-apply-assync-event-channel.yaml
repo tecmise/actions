@@ -1,25 +1,14 @@
 
-name: Terraform Apply Api Gateway
+name: Create Assyncrounous Event Channel
 
 on:
   workflow_call:
-    secrets:
-      ROOT_RESOURCE_ID:
-        required: true
-      REST_API_ID:
-        required: true
-      INVOKE_URI:
-        required: true
-      AUTHORIZER_ID:
-        required: true
-      CORS_ORIGIN_DOMAIN:
-        required: true
     inputs:
       bucket_name:
         description: "'S3 Bucket name for Terraform state'"
         required: true
         type: string
-      routes_file:
+      entities_file:
         required: true
         type: string
       aws_environment:
@@ -33,196 +22,120 @@ on:
         default: 'us-east-1'
 
 
-      port:
-        type: number
-        required: false
-        default: 0
-      protocol:
-        type: string
-        required: false
-        default: 'HTTP'
-      vpc_id:
-        type: string
-        required: false
-        default: ''
-
-      health_check_protocol:
-        type: string
-        required: false
-        default: "HTTP"
-      health_check_port:
-        type: number
-        required: false
-        default: 0
-      health_check_interval:
-        type: number
-        required: false
-        default: 30
-      health_check_timeout:
-        type: number
-        required: false
-        default: 5
-      health_check_healthy_threshold:
-        type: number
-        required: false
-        default: 2
-      health_check_unhealthy_threshold:
-        required: false
-        type: number
-        default: 2
-      health_check_path:
-        required: false
-        type: string
-        default: "/health"
-      health_check_matcher:
-        default: "200"
-        type: string
-        required: false
-
-
 jobs:
-  generate-files:
+  generate-file:
     name: Generate Files for API Gateway
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
     steps:
 
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v3.4.3
-      with:
-        routes_file: ${{ inputs.routes_file }}
-        bucket_name: ${{ inputs.bucket_name }}
-        port: ${{ inputs.port }}
-        protocol: "${{ inputs.protocol }}"
-        vpc_id: "${{ inputs.vpc_id }}"
-        health_check_protocol: "${{ inputs.health_check_protocol }}"
-        health_check_port: ${{ inputs.health_check_port }}
-        health_check_path: "${{ inputs.health_check_path }}"
-
-
-
-    - name: Upload artifact
+    - name: upload entities file
       uses: actions/upload-artifact@v4
       with:
-        name: api-gateway-files
-        path: ${{ github.run_number }}
+        name: entities-file
+        path: "${{ inputs.entities_file }}"
 
-  exposing-routes-plan:
-    name: Terraform Plan for API Gateway
+  terraform-plan:
+    name: Terraform Plan
     environment: ${{ github.ref_name }}
-    env:
-      TF_VAR_root_resource_id: ${{ secrets.ROOT_RESOURCE_ID }}
-      TF_VAR_rest_api_id: ${{ secrets.REST_API_ID }}
-      TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
-      TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
-      TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
-      TF_VAR_application_name: ${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
     needs:
-      - generate-files
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+      - generate-file
     steps:
-    - name: Download artifact
+
+    - name: Checkout script repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'tecmise/actions'
+        path: code_internal
+
+    - name: download entities
       uses: actions/download-artifact@v4
       with:
-        name: api-gateway-files
+          name: entities-file
 
-    - name: Show files
+    - name: Move file
+      shell: bash
       run: |
-        ls -ltra 
+        ls -ltra
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - uses: hashicorp/setup-terraform@v3
-
-    - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v3.4.3
-      with:
-        category: ${{ inputs.aws_environment }}
-        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-        aws_region: ${{ inputs.aws_region }}
-
-    - name: Prepare Terraform plugin cache dir
-      run: mkdir -p ~/.terraform.d/plugin-cache
+    - name: Move file
       shell: bash
+      run: |
+        if [[ "${{ inputs.entities_file }}" == *.json ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.json
+        fi
+        if [[ "${{ inputs.entities_file }}" == *.yaml ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+        fi
+        if [[ "${{ inputs.entities_file }}" == *.yml ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+        fi
 
-#    - name: Cache Terraform providers & modules
-#      uses: actions/cache@v4
-#      with:
-#        path: |
-#          ~/.terraform.d/plugin-cache
-#          terraform/.terraform
-#        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform.lock.hcl') }}
-#        restore-keys: |
-#          ${{ runner.os }}-terraform-
-
-    - name: Terraform Init
+    - name: upload entities file
+      working-directory: terraform/assync-event-channel
       shell: bash
-      run: terraform init
-
+      run: |
+        terraform init -backend-config=bucket=${{ inputs.bucket_name }} -backend-config=key=assync-event-channel/${{ github.event.repository.name }}.tfstate
+    
     - name: Terraform Plan
+      working-directory: terraform/assync-event-channel
       shell: bash
+      env:
+        TF_VAR_application: "${{ github.event.repository.name }}"
+        TF_VAR_file_name: "${{ inputs.entities_file }}"
       run: terraform plan
 
-  exposing-routes-apply:
-    name: Terraform Apply for API Gateway
+  terraform-apply:
+    name: Terraform Plan
     environment: ${{ github.ref_name }}
-    env:
-      TF_VAR_root_resource_id: ${{ secrets.ROOT_RESOURCE_ID }}
-      TF_VAR_rest_api_id: ${{ secrets.REST_API_ID }}
-      TF_VAR_invoke_uri: ${{ secrets.INVOKE_URI }}
-      TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
-      TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
-      TF_VAR_application_name: ${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
     needs:
-      - generate-files
-      - exposing-routes-plan
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+      - terraform-plan
     steps:
-    - name: Download artifact
+
+    - name: Checkout script repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'tecmise/actions'
+        path: code_internal
+
+    - name: download entities
       uses: actions/download-artifact@v4
       with:
-        name: api-gateway-files
+          name: entities-file
 
-    - name: Show files
+    - name: Move file
+      shell: bash
       run: |
-        ls -ltra 
+        ls -ltra
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - uses: hashicorp/setup-terraform@v3
-
-    - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v3.4.3
-      with:
-        category: ${{ inputs.aws_environment }}
-        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-        aws_region: ${{ inputs.aws_region }}
-
-    - name: Prepare Terraform plugin cache dir
-      run: mkdir -p ~/.terraform.d/plugin-cache
+    - name: Move file
       shell: bash
+      run: |
+        if [[ "${{ inputs.entities_file }}" == *.json ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.json
+        fi
+        if [[ "${{ inputs.entities_file }}" == *.yaml ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+        fi
+        if [[ "${{ inputs.entities_file }}" == *.yml ]]; then
+          mv ./${{ inputs.entities_file }} ./terraform/assync-event-channel/entities.yaml
+        fi
 
-    - name: Cache Terraform providers & modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.terraform.d/plugin-cache
-          terraform/.terraform
-        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform.lock.hcl') }}
-        restore-keys: |
-          ${{ runner.os }}-terraform-
-
-    - name: Terraform Init
+    - name: upload entities file
+      working-directory: terraform/assync-event-channel
       shell: bash
-      run: terraform init
+      run: |
+        terraform init -backend-config=bucket=${{ inputs.bucket_name }} -backend-config=key=assync-event-channel/${{ github.event.repository.name }}.tfstate
 
-    - name: Terraform Apply
+    - name: Terraform Plan
+      working-directory: terraform/assync-event-channel
       shell: bash
+      env:
+        TF_VAR_application: "${{ github.event.repository.name }}"
+        TF_VAR_file_name: "${{ inputs.entities_file }}"
       run: terraform apply -auto-approve
