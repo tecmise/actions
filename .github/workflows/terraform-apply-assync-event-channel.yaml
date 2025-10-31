@@ -72,6 +72,25 @@ jobs:
       run: |
         mv entities.json ./code_internal/terraform/assync-event-channel/entities.json 
 
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@v4.0.0
+      with:
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
+
+
     - name: terraform init
       working-directory: code_internal/terraform/assync-event-channel
       shell: bash
@@ -109,6 +128,24 @@ jobs:
       shell: bash
       run: |
         mv entities.json ./code_internal/terraform/assync-event-channel/entities.json 
+
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@v4.0.0
+      with:
+        category: ${{ inputs.aws_environment }}
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: ${{ inputs.aws_region }}
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
 
     - name: upload entities file
       working-directory: code_internal/terraform/assync-event-channel
