@@ -67,14 +67,19 @@ jobs:
       with:
           name: entities-file
 
-    - name: upload entities file
-      working-directory: terraform/assync-event-channel
+    - name: Move file
+      shell: bash
+      run: |
+        mv entities.json ./code_internal/terraform/assync-event-channel/entities.json 
+
+    - name: terraform init
+      working-directory: code_internal/terraform/assync-event-channel
       shell: bash
       run: |
         terraform init -backend-config=bucket=${{ inputs.bucket_name }} -backend-config=key=assync-event-channel/${{ github.event.repository.name }}.tfstate
     
     - name: Terraform Plan
-      working-directory: terraform/assync-event-channel
+      working-directory: code_internal/terraform/assync-event-channel
       shell: bash
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
@@ -103,16 +108,16 @@ jobs:
     - name: Move file
       shell: bash
       run: |
-        ls -ltra
+        mv entities.json ./code_internal/terraform/assync-event-channel/entities.json 
 
     - name: upload entities file
-      working-directory: terraform/assync-event-channel
+      working-directory: code_internal/terraform/assync-event-channel
       shell: bash
       run: |
         terraform init -backend-config=bucket=${{ inputs.bucket_name }} -backend-config=key=assync-event-channel/${{ github.event.repository.name }}.tfstate
 
     - name: Terraform Plan
-      working-directory: terraform/assync-event-channel
+      working-directory: code_internal/terraform/assync-event-channel
       shell: bash
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
