@@ -49,6 +49,15 @@ jobs:
           go mod verify
           go mod vendor
 
+      - name: Verificar erros de compilação
+        run: go build ./...
+
+      - name: Verificar erros de lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v8.0.0
+          args: run
+
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
