@@ -40,7 +40,7 @@ jobs:
     - name: Move file
       shell: bash
       run: |
-          mv ./${{ inputs.entities_file }} ./code_internal/terraform/assync-event-channel/entities.json
+          mv ./${{ inputs.entities_file }} entities.json
 
     - name: upload entities file
       uses: actions/upload-artifact@v4
