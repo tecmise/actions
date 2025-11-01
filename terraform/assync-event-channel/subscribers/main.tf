@@ -2,6 +2,9 @@ resource "aws_sqs_queue" "queues" {
   for_each = local.queues
   name = each.value["fifo"] ? "${var.preffix}-entity-${each.value["name"]}.fifo" : "${var.preffix}-entity-${each.value["name"]}"
   fifo_queue = lookup(each.value, "fifo", false)
+  tags = {
+    application = var.application
+  }
 }
 
 resource aws_sns_topic_subscription default {
@@ -12,6 +15,9 @@ resource aws_sns_topic_subscription default {
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.queues[each.value["queue"]].arn
   depends_on = [aws_sqs_queue.queues]
+  tags = {
+    application = var.application
+  }
 }
 
 
@@ -26,6 +32,9 @@ resource "aws_sqs_queue_redrive_policy" "default" {
 
 resource "aws_iam_policy" "default" {
   name        = "${var.application}-assync-event-channel-policy"
+  tags = {
+    application = var.application
+  }
   policy      = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -56,7 +65,6 @@ resource "aws_iam_policy" "default" {
 resource "aws_sqs_queue_policy" "allow_sns_to_sqs" {
   for_each = local.queues
   queue_url = aws_sqs_queue.queues[each.key].id
-
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
