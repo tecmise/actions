@@ -4,6 +4,7 @@ resource "aws_sqs_queue" "queues" {
   fifo_queue = lookup(each.value, "fifo", false)
   tags = {
     application = var.application
+    channel = "assync-event-channel"
   }
 }
 
@@ -17,6 +18,7 @@ resource aws_sns_topic_subscription default {
   depends_on = [aws_sqs_queue.queues]
   tags = {
     application = var.application
+    channel = "assync-event-channel"
   }
 }
 
@@ -34,6 +36,7 @@ resource "aws_iam_policy" "default" {
   name        = "${var.application}-assync-event-channel-policy"
   tags = {
     application = var.application
+    channel = "assync-event-channel"
   }
   policy      = jsonencode({
     Version = "2012-10-17",

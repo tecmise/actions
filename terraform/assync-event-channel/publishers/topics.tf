@@ -6,5 +6,6 @@ resource aws_sns_topic topics_fifo {
   fifo_topic = each.value["fifo"]
   tags = {
     application = var.application
+    channel = "assync-event-channel"
   }
 }
