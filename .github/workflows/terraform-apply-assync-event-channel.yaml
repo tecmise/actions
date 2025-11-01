@@ -4,6 +4,10 @@ name: Create Assyncrounous Event Channel
 on:
   workflow_call:
     inputs:
+      preffix_name:
+        description: "Prefix Name for resources"
+        required: true
+        type: string
       bucket_name:
         description: "'S3 Bucket name for Terraform state'"
         required: true
@@ -103,6 +107,7 @@ jobs:
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
         TF_VAR_file_name: "entities.json"
+        TF_VAR_preffix: "${{ inputs.preffix_name }}"
       run: terraform plan
 
   terraform-apply:
@@ -159,4 +164,5 @@ jobs:
       env:
         TF_VAR_application: "${{ github.event.repository.name }}"
         TF_VAR_file_name: "entities.json"
+        TF_VAR_preffix: "${{ inputs.preffix_name }}"
       run: terraform apply -auto-approve

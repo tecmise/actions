@@ -12,6 +12,6 @@ module "subscribers" {
   application = var.application
   topics = local.topics_to_subscribe
   queues = local.queues
-  preffix = "auth-serv"
+  preffix = var.preffix
 }
 
