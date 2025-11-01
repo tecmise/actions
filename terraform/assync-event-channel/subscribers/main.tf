@@ -16,10 +16,6 @@ resource aws_sns_topic_subscription default {
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.queues[each.value["queue"]].arn
   depends_on = [aws_sqs_queue.queues]
-  tags = {
-    application = var.application
-    channel = "assync-event-channel"
-  }
 }
 
 
