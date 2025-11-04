@@ -1,8 +1,8 @@
 module "lambda-consumer" {
-  source              = "git::https://github.com/tecmise/actions//terraform/lambda?ref=v4.2.2"
-  function_name       = "${var.application_name}-aec-${var.consumer}"
+  source              = "git::https://github.com/tecmise/actions//terraform/lambda?ref=v4.2.3"
+  function_name       = var.consumer
   tags                = {
-    application       = "${var.application_name}-aec-${var.consumer}"
+    application       = var.consumer
   }
   s3_bucket           = var.bucket_lambda
   s3_key              = "${var.application_name}/${var.versionament}/${var.artifact_name}.zip"
