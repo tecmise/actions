@@ -11,11 +11,7 @@ resource "aws_iam_role_policy" "default" {
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ],
-        Resource = flatten([
-          for i, v in var.queue_urls : replace(
-            v, "https://sqs.${var.region}.amazonaws.com/${var.account_id}/", "arn:aws:sqs:${var.region}:${var.account_id}:"
-          )
-        ])
+        Resource = var.queue_arn
       }, {
         Effect = "Allow",
         Action = [

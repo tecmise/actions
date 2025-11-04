@@ -35,14 +35,6 @@ variable "dead_leaders_arn" {
   type = string
 }
 
-variable "queue_urls" {
-  type = string
-}
-
-variable "region" {
-  type = string
-}
-
-variable "account_id" {
+variable "queue_arn" {
   type = string
 }
