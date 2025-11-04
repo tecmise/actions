@@ -1,0 +1,17 @@
+module "lambda-consumer" {
+  source              = "git::https://github.com/tecmise/actions//terraform/lambda?ref=v3.4.2"
+  function_name       = "${var.application_name}-aec-${var.consumer}"
+  tags                = {
+    application       = "${var.application_name}-aec-${var.consumer}"
+  }
+  s3_bucket           = var.bucket_lambda
+  s3_key              = "${var.application_name}/${var.versionament}/${var.artifact_name}.zip"
+  runtime             = "provided.al2023"
+  handler             = "bootstrap"
+  variables           = merge(var.variables, {
+    CONSUMER = var.consumer
+  })
+  policy_arns         = var.policy_arns
+  security_group_ids  = var.security_groups
+}
+
