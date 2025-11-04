@@ -1,5 +1,5 @@
 module "lambda-consumer" {
-  source              = "git::https://github.com/tecmise/actions//terraform/lambda?ref=v3.4.2"
+  source              = "git::https://github.com/tecmise/actions//terraform/lambda?ref=v4.2.2"
   function_name       = "${var.application_name}-aec-${var.consumer}"
   tags                = {
     application       = "${var.application_name}-aec-${var.consumer}"
