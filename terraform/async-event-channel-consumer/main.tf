@@ -10,6 +10,7 @@ module "lambda-consumer" {
   handler             = "bootstrap"
   variables           = merge(var.variables, {
     CONSUMER = var.consumer
+    DISCORD_WEBHOOK_URL = var.webhook_discord
   })
   policy_arns         = var.policy_arns
   security_group_ids  = var.security_groups

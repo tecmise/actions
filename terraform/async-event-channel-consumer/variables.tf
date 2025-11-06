@@ -38,3 +38,7 @@ variable "dead_leaders_arn" {
 variable "queue_arn" {
   type = string
 }
+
+variable "webhook_discord" {
+  type = string
+}
