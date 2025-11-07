@@ -50,7 +50,7 @@ runs:
               split("\n")
               | map(
                   select(length>0)
-                  | split(":")
+                  | split("||")
                   | {name: .[0], value: .[1], inline: false}
                 )
             ' \
