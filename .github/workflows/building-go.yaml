@@ -21,6 +21,10 @@ on:
         required: false
         type: boolean
         default: false
+      is_container:
+        required: false
+        type: boolean
+        default: false
       artifact_name:
         required: true
         type: string
@@ -36,12 +40,16 @@ on:
         required: false
         type: string
         default: 's4s'
-
       resource_folder:
         description: 'Resource folder for the artifact'
         required: false
         type: string
         default: ''
+      docker_file_path:
+        description: 'Docker image name for container builds'
+        required: false
+        type: string
+        default: '.github/docker/Dockerfile'
 
     outputs:
       md5:
@@ -91,19 +99,11 @@ jobs:
           go env -w GOPRIVATE=github.com/tecmise/*
           go env -w GOSUMDB=off
 
-
       - name: Tidy
         run: go mod tidy
 
       - name: Download dependencies
         run: go mod download
-
-      - name: Build Container
-        if: inputs.is_lambda != true
-        run: |
-          go mod verify
-          go mod vendor
-          GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
       - name: Build Lambda
         if: inputs.is_lambda == true
@@ -145,10 +145,29 @@ jobs:
           name: ${{ inputs.artifact_name }}
           path: ${{ inputs.artifact_name }}.zip
 
+      - name: Remove Bootstrap
+        run: |
+          rm -f bootstrap
+
+      - name: Build Container
+        if: inputs.is_container == true
+        run: |
+          go mod verify
+          go mod vendor
+          GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: ${{ inputs.artifact_name }}_bin
+          path: ${{ inputs.artifact_name }}
+
   publishing:
     name: Publish
     environment: ${{ github.ref_name }}
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    if: inputs.is_lambda == true
     needs:
       - building
     steps:
@@ -173,3 +192,60 @@ jobs:
       - name: Upload artifact to S3
         if: ${{ inputs.runner_category == 's4s' }}
         run: aws s3 cp ${{ inputs.artifact_name }}.zip s3://${{ fromJson(vars.AWS_BUCKETS_LAMBDA).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ inputs.hashcode }}/${{ inputs.artifact_name }}.zip
+
+
+  docker-push:
+    name: Docker push
+    environment: ${{ github.ref_name }}
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    if: inputs.is_container == true
+    needs:
+      - building
+    steps:
+
+      - name: Authenticate on AWS
+        uses: tecmise/actions/.github/actions/aws-authenticate@main
+        with:
+          category: ${{ inputs.aws_environment }}
+          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+          aws_region: ${{ inputs.aws_region }}
+
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}_bin
+
+
+      - name: Building Image
+        run: |
+          docker build -t ${{ github.event.repository.name }}-${{ inputs.artifact_name }}:${{ inputs.hashcode }} -f ${{ inputs.docker_file_path }} .
+
+      - name: Tag da imagem
+        run: |
+          docker tag ${{ github.event.repository.name }}-${{ inputs.artifact_name }}:${{ inputs.hashcode }} ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}.dkr.ecr.us-east-1.amazonaws.com/${{ github.event.repository.name }}-${{ inputs.artifact_name }}:${{ inputs.hashcode }}
+
+      - name: Verificar e deletar tag existente no ECR
+        run: |
+          IMAGE_TAG=${{ inputs.hashcode }}
+          REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ github.event.repository.name }}-${{ inputs.artifact_name }}
+          EXISTING_TAG=$(aws ecr list-images --repository-name ${{ github.event.repository.name }}-${{ inputs.artifact_name }} --query "imageIds[?imageTag=='${IMAGE_TAG}'].imageTag" --output text --region ${AWS_REGION})
+          if [ "${EXISTING_TAG}" == "${IMAGE_TAG}" ]; then
+            aws ecr batch-delete-image --repository-name ${{ github.event.repository.name }}-${{ inputs.artifact_name }} --image-ids imageTag=${IMAGE_TAG} --region ${AWS_REGION}
+          fi
+        env:
+          AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
+          AWS_REGION: "us-east-1"
+
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push para o Amazon ECR
+        run: |
+          docker push $REGISTRY/${{ inputs.image_name }}:${{ inputs.hashcode }}
+        env:
+          AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
+          AWS_REGION: "us-east-1"
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+

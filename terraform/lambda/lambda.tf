@@ -29,6 +29,7 @@ resource "aws_lambda_function" "default" {
   }
 }
 
+
 locals {
   emptyList = []
   vpc_valid = [{
