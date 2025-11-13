@@ -27,6 +27,13 @@ on:
         required: true
         type: string
 
+      flyway_table:
+        description: 'Flyway schema history table name'
+        required: true
+        type: string
+        default: 'flyway_schema_history'
+
+
 jobs:
   validate-migrations:
     name: Validating Migrations
@@ -48,6 +55,7 @@ jobs:
           -user="${{ inputs.user }}" \
           -password="${{ secrets.database_password }}" \
           -schemas="${{ inputs.schema }}" \
+          -table="${{ inputs.flyway_table }}" \
           -ignoreMigrationPatterns="*:pending" \
           -connectRetries=60 \
           -locations="filesystem:./migrations" \
@@ -109,6 +117,7 @@ jobs:
           -password="${{ secrets.database_password }}" \
           -schemas="${{ inputs.schema }}" \
           -ignoreMigrationPatterns="*:pending" \
+          -table="${{ inputs.flyway_table }}" \
           -connectRetries=60 \
           -locations="filesystem:./migrations" \
           migrate 2>&1)
