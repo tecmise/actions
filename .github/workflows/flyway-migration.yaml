@@ -130,7 +130,7 @@ jobs:
 
     - name: Notify Error
       uses: tecmise/actions/.github/actions/discord-notifier@v3.5.0
-      with:environment:
+      with:
         title: '❌  Houve um erro ao Executar Migration ❌ '
         message: "Falha ao executar migrations."
         severity: 'error'
