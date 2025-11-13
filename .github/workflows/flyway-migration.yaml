@@ -122,6 +122,7 @@ jobs:
           -table="${{ inputs.flyway_table }}" \
           -connectRetries=60 \
           -locations="filesystem:./migrations" \
+          -baselineOnMigrate=true \
           migrate 2>&1)
         EXIT_CODE=$?
         echo "$MIGRATION_OUTPUT" > migration.log
