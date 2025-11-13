@@ -82,12 +82,14 @@ jobs:
         name: validation-log
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v3.5.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v4.4.0
       with:
         title: '❌  Houve um erro ao validar migrations ❌ '
         message: "Falha na validação das migrations."
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields:
+          table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
       run: |
@@ -143,12 +145,14 @@ jobs:
         name: migration-log
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v3.5.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v4.4.0
       with:
         title: '❌  Houve um erro ao Executar Migration ❌ '
         message: "Falha ao executar migrations."
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields:
+          table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
       run: |
@@ -167,12 +171,14 @@ jobs:
         name: migration-log
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v3.5.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v4.4.0
       with:
         title: '🚀 Migration ${{ github.event.repository.name }} 🚀'
         message: "Migrações aplicadas com sucesso."
         severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields:
+          table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
       run: |
