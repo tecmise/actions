@@ -33,6 +33,12 @@ on:
         type: string
         default: 'flyway_schema_history'
 
+      migration_path:
+        description: 'Path to the migration files'
+        required: false
+        type: string
+        default: './migrations'
+
 
 jobs:
   validate-migrations:
@@ -58,7 +64,7 @@ jobs:
           -table="${{ inputs.flyway_table }}" \
           -ignoreMigrationPatterns="*:pending" \
           -connectRetries=60 \
-          -locations="filesystem:./migrations" \
+          -locations="filesystem:${{ inputs.migration_path }}" \
           validate 2>&1)
         EXIT_CODE=$?
         echo "$VALIDATION_OUTPUT" > validation.log
@@ -121,7 +127,7 @@ jobs:
           -ignoreMigrationPatterns="*:pending" \
           -table="${{ inputs.flyway_table }}" \
           -connectRetries=60 \
-          -locations="filesystem:./migrations" \
+          -locations="filesystem:${{ inputs.migration_path }}" \
           -baselineOnMigrate=true \
           migrate 2>&1)
         EXIT_CODE=$?
