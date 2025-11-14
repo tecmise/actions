@@ -57,7 +57,7 @@ jobs:
       run: |
         echo "🔍 Iniciando validação..."
         set +e
-        VALIDATION_OUTPUT=$(flyway -url="jdbc:postgresql://${{ inputs.endpoint }}/${{ inputs.database_name }}" \
+        VALIDATION_OUTPUT=$(flyway -url="${{ inputs.endpoint }}/${{ inputs.database_name }}" \
           -user="${{ inputs.user }}" \
           -password="${{ secrets.database_password }}" \
           -schemas="${{ inputs.schema }}" \
@@ -120,7 +120,7 @@ jobs:
       run: |
         echo "🚀 Rodando migrações..."
         set +e
-        MIGRATION_OUTPUT=$(flyway -url="jdbc:postgresql://${{ inputs.endpoint }}/${{ inputs.database_name }}" \
+        MIGRATION_OUTPUT=$(flyway -url="${{ inputs.endpoint }}/${{ inputs.database_name }}" \
           -user="${{ inputs.user }}" \
           -password="${{ secrets.database_password }}" \
           -schemas="${{ inputs.schema }}" \
