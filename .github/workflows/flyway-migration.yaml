@@ -58,7 +58,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Copiar drivers para o Flyway
-      if: inputs.drivers_path != '
+      if: inputs.drivers_path != ''
       run: |
         mkdir -p /flyway/drivers
         cp ./${{ inputs.drivers }}/* /flyway/drivers/
@@ -142,7 +142,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Copiar drivers para o Flyway
-      if: inputs.drivers_path != '
+      if: inputs.drivers_path != ''
       run: |
         mkdir -p /flyway/drivers
         cp ./${{ inputs.drivers }}/* /flyway/drivers/
