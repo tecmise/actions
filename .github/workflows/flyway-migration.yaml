@@ -61,7 +61,7 @@ jobs:
       if: inputs.drivers_path != ''
       run: |
         mkdir -p /flyway/drivers
-        cp ./${{ inputs.drivers }}/* /flyway/drivers/
+        cp ./${{ inputs.drivers_path }}/* /flyway/drivers/
 
     - name: Validar SQLs com Flyway
       id: validate
@@ -145,7 +145,7 @@ jobs:
       if: inputs.drivers_path != ''
       run: |
         mkdir -p /flyway/drivers
-        cp ./${{ inputs.drivers }}/* /flyway/drivers/
+        cp ./${{ inputs.drivers_path }}/* /flyway/drivers/
 
     - name: Validar SQLs com Flyway
       id: migrate
