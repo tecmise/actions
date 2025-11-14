@@ -38,6 +38,11 @@ on:
         required: false
         type: string
         default: './migrations'
+      drivers_path:
+        description: 'Copy database drivers to Flyway container'
+        required: false
+        type: string
+        default: ''
 
 
 jobs:
@@ -51,6 +56,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Copiar drivers para o Flyway
+      if: inputs.drivers_path != '
+      run: |
+        mkdir -p /flyway/drivers
+        cp ./${{ inputs.drivers }}/* /flyway/drivers/
 
     - name: Validar SQLs com Flyway
       id: validate
@@ -129,6 +140,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Copiar drivers para o Flyway
+      if: inputs.drivers_path != '
+      run: |
+        mkdir -p /flyway/drivers
+        cp ./${{ inputs.drivers }}/* /flyway/drivers/
 
     - name: Validar SQLs com Flyway
       id: migrate
