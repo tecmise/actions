@@ -9,6 +9,11 @@ on:
         required: true
 
     inputs:
+      name:
+        description: 'Name of the connector'
+        required: true
+        type: string
+        default: 'database'
       schema:
         description: 'Schema for the database'
         required: true
@@ -32,7 +37,6 @@ on:
         required: true
         type: string
         default: 'flyway_schema_history'
-
       migration_path:
         description: 'Path to the migration files'
         required: false
@@ -81,18 +85,11 @@ jobs:
         echo "$VALIDATION_OUTPUT" > validation.log
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
-    - name: Calculate MD5 of Endpoint
-      id: calculate-md5
-      run: |
-        echo "${{ inputs.endpoint }}" | md5sum | awk '{print $1}' > md5.txt
-        MD5=$(cat md5.txt)
-        echo "md5=$MD5" >> $GITHUB_ENV
-
     - name: Upload Validation Log
       uses: actions/upload-artifact@v4
       with:
         path: validation.log
-        name: validation-log-${{ env.md5 }}
+        name: validation-log-${{ inputs.name }}
 
   send-notification-validate:
     name: Send Notification Validate Error
@@ -101,17 +98,10 @@ jobs:
     if: needs.validate-migrations.outputs.is-valid == 'false'
     steps:
 
-    - name: Calculate MD5 of Endpoint
-      id: calculate-md5
-      run: |
-        echo "${{ inputs.endpoint }}" | md5sum | awk '{print $1}' > md5.txt
-        MD5=$(cat md5.txt)
-        echo "md5=$MD5" >> $GITHUB_ENV
-
     - name: Download Validation Log
       uses: actions/download-artifact@v4
       with:
-        name: validation-log-${{ env.md5 }}
+        name: validation-log-${{ inputs.name }}
 
     - name: Notify Error
       uses: tecmise/actions/.github/actions/discord-notifier@v4.4.0
