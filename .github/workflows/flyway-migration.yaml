@@ -111,6 +111,7 @@ jobs:
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
         fields:
+          name||"${{ inputs.name }}"
           table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
@@ -181,6 +182,7 @@ jobs:
         severity: 'error'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
         fields:
+          name||"${{ inputs.name }}"
           table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
@@ -207,6 +209,7 @@ jobs:
         severity: 'info'
         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
         fields:
+          name||"${{ inputs.name }}"
           table||"${{ inputs.flyway_table }}"
 
     - name: Send Log File
