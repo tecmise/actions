@@ -48,6 +48,7 @@ jobs:
       is-valid: "${{ steps.validate.outputs.exit_code == '0' }}"
     container:
       image: flyway/flyway:latest
+      options: --volume ${{ github.workspace }}/drivers:/flyway/drivers
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
