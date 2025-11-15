@@ -3,10 +3,9 @@ name: Building Docker Image
 on:
   workflow_call:
     secrets:
-      docker_args:
-        description: 'Additional Docker build arguments separated by double || (e.g., ARG1=value1||ARG2=value2)'
+      CONNECTORS_KEY:
         required: false
-        default: ''
+
     inputs:
       docker_file_path:
         description: 'Path to the Dockerfile'
@@ -62,14 +61,16 @@ jobs:
       run: |
         ls -ltra
         ARGS=""
-        if [ -n "${{ secrets.docker_args }}" ]; then
-          ARGS=$(echo "${{ secrets.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
+        if [ -n "${{ secrets.CONNECTORS_KEY }}" ]; then
+          echo "Token incluído no argumento."
+          ARGS="--build-arg TOKEN=${{ secrets.CONNECTORS_KEY }}"
         fi
         if [ -n "${{ inputs.docker_args }}" ]; then
           INPUT_ARGS=$(echo "${{ inputs.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
           ARGS="$ARGS $INPUT_ARGS"
         fi
         docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
+
 
     - name: Tag da imagem
       run: |
