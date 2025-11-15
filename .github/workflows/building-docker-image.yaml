@@ -57,20 +57,30 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: ${{ inputs.aws_region }}
 
-    - name: Building Image
+    - name: Montar argumentos para o build
+      id: prepare-args
       run: |
-        ls -ltra
         ARGS=""
         if [ -n "${{ secrets.CONNECTORS_KEY }}" ]; then
-          echo "Token incluído no argumento."
           ARGS="--build-arg TOKEN=${{ secrets.CONNECTORS_KEY }}"
         fi
         if [ -n "${{ inputs.docker_args }}" ]; then
           INPUT_ARGS=$(echo "${{ inputs.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
           ARGS="$ARGS $INPUT_ARGS"
         fi
-        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
+        echo "args=$ARGS" >> "$GITHUB_ENV"
 
+    - name: Printar argumentos
+      run: |
+        echo "Argumentos para o build: $ARGS"
+      env:
+        ARGS: ${{ env.ARGS }}
+
+    - name: Docker Build
+      run: |
+        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
+      env:
+        ARGS: ${{ env.ARGS }}
 
     - name: Tag da imagem
       run: |
