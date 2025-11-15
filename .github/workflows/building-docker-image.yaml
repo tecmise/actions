@@ -2,6 +2,11 @@ name: Building Docker Image
 
 on:
   workflow_call:
+    secrets:
+      docker_args:
+        description: 'Additional Docker build arguments separated by double || (e.g., ARG1=value1||ARG2=value2)'
+        required: false
+        default: ''
     inputs:
       docker_file_path:
         description: 'Path to the Dockerfile'
@@ -56,13 +61,15 @@ jobs:
     - name: Building Image
       run: |
         ls -ltra
-        if [ -n "${{ inputs.docker_args }}" ]; then
-          ARGS=$(echo "${{ inputs.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
-          docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
-        else
-          docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host
+        ARGS=""
+        if [ -n "${{ secrets.docker_args }}" ]; then
+          ARGS=$(echo "${{ secrets.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
         fi
-
+        if [ -n "${{ inputs.docker_args }}" ]; then
+          INPUT_ARGS=$(echo "${{ inputs.docker_args }}" | sed 's/||/ --build-arg /g' | sed 's/^/--build-arg /')
+          ARGS="$ARGS $INPUT_ARGS"
+        fi
+        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
 
     - name: Tag da imagem
       run: |
