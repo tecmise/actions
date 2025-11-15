@@ -72,16 +72,15 @@ jobs:
 
     - name: Printar argumentos
       run: |
-        echo "Argumentos para o build: $ARGS"
+        echo "Argumentos para o build: ${{ env.args }}"
       env:
-        ARGS: ${{ env.ARGS }}
+        args: ${{ env.args }}
 
     - name: Docker Build
       run: |
-        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host $ARGS
+        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host ${{ env.args }}
       env:
-        ARGS: ${{ env.ARGS }}
-
+        args: ${{ env.args }}
     - name: Tag da imagem
       run: |
         docker tag ${{ inputs.image_name }}:${{ inputs.versionament }} ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.image_name }}:${{ inputs.versionament }}
