@@ -112,7 +112,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: inputs.artifact_name
+        name: ${{ inputs.artifact_name }}
         path: ${{ github.run_number }}
 
   exposing-routes-plan:
@@ -132,7 +132,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: inputs.artifact_name
+        name: ${{ inputs.artifact_name }}
 
     - name: Show files
       run: |
@@ -191,7 +191,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: inputs.artifact_name
+        name: ${{ inputs.artifact_name }}
 
     - name: Show files
       run: |
