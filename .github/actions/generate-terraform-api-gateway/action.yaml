@@ -55,7 +55,10 @@ inputs:
   health_check_matcher:
     description: "'Health Check Matcher for the target group'"
     default: "200"
-
+  key_name:
+    description: "'Key name for the Terraform state file in S3'"
+    required: true
+    default: 'default'
 
 runs:
   using: composite
@@ -111,7 +114,7 @@ runs:
             }
           }
           backend "s3" {
-            key    = "api-gateway-routes/${{ github.event.repository.name }}.tfstate"
+            key    = "api-gateway-routes/${{ github.event.repository.name }}/${{ inputs.key_name }}.tfstate"
             bucket = "${{ inputs.bucket_name }}"
             region = "us-east-1"
           }

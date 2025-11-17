@@ -83,7 +83,11 @@ on:
         required: false
         type: string
         default: 'api-gateway-files'
-
+      key_name:
+        description: "'Key name for the Terraform state file in S3'"
+        required: true
+        type: string
+        default: 'default'
 
 jobs:
   generate-files:
@@ -96,7 +100,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v3.4.3
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@main
       with:
         routes_file: ${{ inputs.routes_file }}
         bucket_name: ${{ inputs.bucket_name }}
@@ -106,6 +110,7 @@ jobs:
         health_check_protocol: "${{ inputs.health_check_protocol }}"
         health_check_port: ${{ inputs.health_check_port }}
         health_check_path: "${{ inputs.health_check_path }}"
+        key_name: '${{ inputs.key_name }}'
 
 
 
