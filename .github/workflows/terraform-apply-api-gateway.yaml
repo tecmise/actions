@@ -79,6 +79,11 @@ on:
         type: string
         required: false
 
+      artifact_name:
+        required: false
+        type: string
+        default: 'api-gateway-files'
+
 
 jobs:
   generate-files:
@@ -107,7 +112,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: api-gateway-files
+        name: inputs.artifact_name
         path: ${{ github.run_number }}
 
   exposing-routes-plan:
@@ -127,7 +132,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: api-gateway-files
+        name: inputs.artifact_name
 
     - name: Show files
       run: |
@@ -186,7 +191,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
-        name: api-gateway-files
+        name: inputs.artifact_name
 
     - name: Show files
       run: |
