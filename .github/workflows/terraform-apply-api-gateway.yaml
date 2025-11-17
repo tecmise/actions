@@ -83,11 +83,7 @@ on:
         required: false
         type: string
         default: 'api-gateway-files'
-      key_name:
-        description: "'Key name for the Terraform state file in S3'"
-        required: true
-        type: string
-        default: 'default'
+
 
 jobs:
   generate-files:
@@ -110,7 +106,7 @@ jobs:
         health_check_protocol: "${{ inputs.health_check_protocol }}"
         health_check_port: ${{ inputs.health_check_port }}
         health_check_path: "${{ inputs.health_check_path }}"
-        key_name: '${{ inputs.key_name }}'
+        key_name: '${{ inputs.artifact_name }}'
 
 
 
