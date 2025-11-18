@@ -1,4 +1,5 @@
 resource "aws_ecs_service" "server" {
+  depends_on = [aws_ecs_task_definition.server]
   name             = var.application_name
   cluster          = var.cluster_id
   task_definition  = aws_ecs_task_definition.server.arn
