@@ -16,7 +16,7 @@ resource "aws_ecs_service" "server" {
       namespace = service_connect_configuration.value["namespace"]
 
       dynamic "service" {
-        for_each = lookup(service_connect_configuration.value, "service", null) != null ? [service_connect_configuration.value["service"]] : []
+        for_each = lookup(service_connect_configuration.value, "service", null) != null ? service_connect_configuration.value["service"] : []
 
         content {
           port_name      = service.value["port_name"]
