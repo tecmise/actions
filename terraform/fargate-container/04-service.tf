@@ -40,7 +40,7 @@ resource "aws_ecs_service" "server" {
   desired_count    = var.desired_count
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
-
+  enable_execute_command = true
 
   dynamic "service_connect_configuration" {
     for_each = toset(var.service_connect_configuration)
