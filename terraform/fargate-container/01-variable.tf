@@ -118,14 +118,14 @@ variable "service_connect_configuration" {
   type = list(object({
     enabled = bool
     namespace = string
-    service = optional(list(object({
+    service = object({
       port_name = string
       discovery_name = string
-      client_alias = optional(list(object({
+      client_alias = list(object({
         port = number
         dns_name = string
-      })), [])
-    })), [])
+      }))
+    })
   }))
 }
 
@@ -142,4 +142,3 @@ variable "capacity_provider_strategy" {
   }))
   default = []
 }
-
