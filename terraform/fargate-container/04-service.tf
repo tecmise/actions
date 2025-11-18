@@ -47,10 +47,19 @@ resource "aws_ecs_service" "server" {
     content {
       enabled = service_connect_configuration.value.enabled
       namespace = service_connect_configuration.value.namespace
-
-      service {
-        port_name = service_connect_configuration.value.service["port_name"]
-        discovery_name = service_connect_configuration.value.service["discovery_name"]
+      dynamic "service" {
+        for_each = toset(service_connect_configuration.value.service)
+        content {
+            port_name = service.value.port_name
+            discovery_name = service.value.discovery_name
+            dynamic "client_alias" {
+              for_each = toset(service.value.client_alias)
+              content {
+                port = client_alias.value.port
+                dns_name = client_alias.value.dns_name
+              }
+            }
+        }
       }
     }
   }
