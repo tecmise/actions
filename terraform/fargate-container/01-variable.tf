@@ -80,6 +80,7 @@ variable "containers_definitions" {
       containerPort = number
       hostPort      = number
       protocol      = string
+      name          = string
     }))
     environment = list(object({
       name  = string
