@@ -41,6 +41,23 @@ resource "aws_ecs_service" "server" {
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
 
+  dynamic "service_connect_configuration" {
+    for_each = toset(var.service_connect_configuration)
+    content {
+      enabled = true
+      namespace = service_connect_configuration.value.namespace
+      service = {
+        port_name = service_connect_configuration.value.service["port_name"]
+        discovery_name = service_connect_configuration.value.service["discovery_name"]
+        client_alias = flatten([
+          for alias in service_connect_configuration.value.service["client_alias"] : {
+            port = alias["port"]
+            dns_name  = alias["dns_name"]
+          }
+        ])
+      }
+    }
+  }
 
   dynamic "service_registries" {
     for_each = toset(var.service_registries)

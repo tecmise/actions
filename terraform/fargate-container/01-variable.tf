@@ -114,6 +114,21 @@ variable "service_registries" {
   }))
 }
 
+variable "service_connect_configuration" {
+  type = list(object({
+    enabled = bool
+    namespace = string
+    service = object({
+      port_name = string
+      discovery_name = string
+      client_alias = list(object({
+        port = number
+        dns_name = string
+      }))
+    })
+  }))
+}
+
 variable "aws_iam_policy_task_execution_arn" {
   type = string
   default = ""
