@@ -108,8 +108,10 @@ variable "containers_definitions" {
   }))
 }
 
-variable "registry_arn" {
-  type = string
+variable "service_registries" {
+  type = list(object({
+    registry_arn = string
+  }))
 }
 
 variable "aws_iam_policy_task_execution_arn" {

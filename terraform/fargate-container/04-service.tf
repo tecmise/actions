@@ -45,6 +45,15 @@ resource "aws_ecs_service" "server" {
     registry_arn = var.registry_arn
   }
 
+  dynamic "service_registries" {
+    for_each = toset(var.service_registries)
+    content {
+      registry_arn = service_registries.value.registry_arn
+    }
+  }
+
+
+
   dynamic "capacity_provider_strategy" {
     for_each = toset(var.capacity_provider_strategy)
     content {
