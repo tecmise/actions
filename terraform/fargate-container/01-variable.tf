@@ -119,14 +119,14 @@ variable "service_connect_configuration" {
   type = list(object({
     enabled = bool
     namespace = string
-    service = object({
+    service = optional(list(object({
       port_name = string
       discovery_name = string
       client_alias = list(object({
         port = number
         dns_name = string
       }))
-    })
+    })), [])
   }))
 }
 
