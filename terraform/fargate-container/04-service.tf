@@ -41,9 +41,6 @@ resource "aws_ecs_service" "server" {
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
 
-  service_registries {
-    registry_arn = var.registry_arn
-  }
 
   dynamic "service_registries" {
     for_each = toset(var.service_registries)
