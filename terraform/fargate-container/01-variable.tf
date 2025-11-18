@@ -142,3 +142,4 @@ variable "capacity_provider_strategy" {
   }))
   default = []
 }
+
