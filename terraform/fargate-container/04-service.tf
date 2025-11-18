@@ -42,23 +42,16 @@ resource "aws_ecs_service" "server" {
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
   enable_execute_command = true
 
-  dynamic "service_connect_configuration" {
-    for_each = toset(var.service_connect_configuration)
-    content {
-      enabled = service_connect_configuration.value.enabled
-      namespace = service_connect_configuration.value.namespace
 
-      service {
-        port_name = service_connect_configuration.value.service["port_name"]
-        discovery_name = service_connect_configuration.value.service["discovery_name"]
-
-        dynamic "client_alias" {
-          for_each = service_connect_configuration.value.service["client_alias"]
-          content {
-            port = client_alias.value["port"]
-            dns_name = client_alias.value["dns_name"]
-          }
-        }
+  service_connect_configuration {
+    enabled = false
+    namespace = "shield.local"
+    service {
+      port_name = "native"
+      discovery_name = "clickhouse"
+      client_alias {
+        port = 9000
+        dns_name = "clickhouse-service"
       }
     }
   }
