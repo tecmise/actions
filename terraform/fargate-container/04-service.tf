@@ -51,12 +51,6 @@ resource "aws_ecs_service" "server" {
       service {
         port_name = service_connect_configuration.value.service["port_name"]
         discovery_name = service_connect_configuration.value.service["discovery_name"]
-        client_alias = flatten([
-            for client_alias in service_connect_configuration.value.service["client_alias"] : {
-                port = client_alias["port"]
-                dns_name = client_alias["dns_name"]
-            }
-        ])
       }
     }
   }
