@@ -108,6 +108,9 @@ variable "containers_definitions" {
   }))
 }
 
+variable "registry_arn" {
+  type = string
+}
 
 variable "aws_iam_policy_task_execution_arn" {
   type = string

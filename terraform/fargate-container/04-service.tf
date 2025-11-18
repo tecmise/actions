@@ -41,6 +41,10 @@ resource "aws_ecs_service" "server" {
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
 
+  service_registries {
+    registry_arn = var.registry_arn
+  }
+
   dynamic "capacity_provider_strategy" {
     for_each = toset(var.capacity_provider_strategy)
     content {
