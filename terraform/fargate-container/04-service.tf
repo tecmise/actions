@@ -9,20 +9,25 @@ resource "aws_ecs_service" "server" {
   enable_execute_command = true
 
   dynamic "service_connect_configuration" {
-    for_each = toset(var.service_connect_configuration)
+    for_each = length(var.service_connect_configuration) > 0 ? [var.service_connect_configuration[0]] : []
+
     content {
-      enabled = service_connect_configuration.value.enabled
-      namespace = service_connect_configuration.value.namespace
+      enabled   = service_connect_configuration.value["enabled"]
+      namespace = service_connect_configuration.value["namespace"]
 
-      service {
-        port_name = service_connect_configuration.value.service["port_name"]
-        discovery_name = service_connect_configuration.value.service["discovery_name"]
+      dynamic "service" {
+        for_each = lookup(service_connect_configuration.value, "service", null) != null ? [service_connect_configuration.value["service"]] : []
 
-        dynamic "client_alias" {
-          for_each = service_connect_configuration.value.service["client_alias"]
-          content {
-            port = client_alias.value["port"]
-            dns_name = client_alias.value["dns_name"]
+        content {
+          port_name      = service.value["port_name"]
+          discovery_name = service.value["discovery_name"]
+
+          dynamic "client_alias" {
+            for_each = lookup(service.value, "client_alias", [])
+            content {
+              port     = client_alias.value.port
+              dns_name = client_alias.value.dns_name
+            }
           }
         }
       }
