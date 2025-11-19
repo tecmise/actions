@@ -7,7 +7,7 @@ resource "aws_ecs_service" "server" {
   launch_type      = var.launch_type
   platform_version = var.launch_type == "FARGATE" ? "LATEST" : null
   enable_execute_command = true
-
+  force_new_deployment = true
   dynamic "service_connect_configuration" {
     for_each = length(var.service_connect_configuration) > 0 ? [var.service_connect_configuration[0]] : []
 
