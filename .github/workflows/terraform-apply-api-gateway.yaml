@@ -229,6 +229,11 @@ jobs:
       shell: bash
       run: terraform init
 
+    - name: Terraform Destroy
+      shell: bash
+      run: terraform destroy -auto-approve
+
+
     - name: Terraform Apply
       shell: bash
       run: terraform apply -auto-approve

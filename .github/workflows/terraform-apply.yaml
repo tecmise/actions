@@ -56,6 +56,7 @@ jobs:
       working-directory: ${{ inputs.terraform_directory }}
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
+
     - name: Prepare Terraform plugin cache dir root
       if: ${{ inputs.terraform_directory == '' }}
       working-directory: ${{ inputs.terraform_directory }}
