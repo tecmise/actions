@@ -131,6 +131,11 @@ def create_terraform_file(route: Route):
                     print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
+                if method.vpc_link_name is None:
+                    if method.name != "OPTIONS":
+                        print(f"   vpc_link_name                                = \"{method.vpc_link_name}\" ", file=f)
+
+
                 if method.authorizer_id is None:
                     if method.name == "OPTIONS":
                         print(f"   authorizer_id                                = \"\" ", file=f)
@@ -138,6 +143,7 @@ def create_terraform_file(route: Route):
                         print(f"   authorizer_id                                = var.authorizer_id ", file=f)
                 else:
                     print(f"   authorizer_id                                = \"{method.authorizer_id}\" ", file=f)
+
 
                 if method.roles is not None:
                     print(f"   roles                                = [ ", file=f)

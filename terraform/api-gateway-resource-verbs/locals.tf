@@ -1,4 +1,9 @@
 locals {
+
+  vpc_links = data.terraform_remote_state.api-gateway.outputs.api_gateway_virginia.safe4school-api-internal.vpc_link
+  vpc_link_id = (local.vpc_links != {} && local.vpc_links != null && length(local.vpc_links) > 0) ? vpc_links[var.vpc_link_name]["id"] : null
+
+
   authorizer_appender = {
     "application/json" = <<EOF
 #set($inputRoot = $input.json('$'))

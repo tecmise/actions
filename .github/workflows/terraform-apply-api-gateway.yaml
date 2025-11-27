@@ -107,6 +107,7 @@ jobs:
         health_check_port: ${{ inputs.health_check_port }}
         health_check_path: "${{ inputs.health_check_path }}"
         key_name: '${{ inputs.artifact_name }}'
+        terraform_bucket: ${{ inputs.bucket_name }}
 
 
 
@@ -126,6 +127,7 @@ jobs:
       TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
       TF_VAR_application_name: ${{ github.event.repository.name }}
+      TF_VAR_terraform_bucket: ${{ inputs.bucket_name }}
     needs:
       - generate-files
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
@@ -173,7 +175,6 @@ jobs:
     - name: Terraform Plan
       shell: bash
       run: terraform plan
-
   exposing-routes-apply:
     name: Terraform Apply for API Gateway
     environment: ${{ github.ref_name }}
@@ -184,6 +185,7 @@ jobs:
       TF_VAR_authorizer_id: ${{ secrets.AUTHORIZER_ID }}
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
       TF_VAR_application_name: ${{ github.event.repository.name }}
+      TF_VAR_terraform_bucket: ${{ inputs.bucket_name }}
     needs:
       - generate-files
       - exposing-routes-plan
@@ -227,6 +229,7 @@ jobs:
 
     - name: Terraform Init
       shell: bash
+
       run: terraform init
 
     - name: Terraform Destroy

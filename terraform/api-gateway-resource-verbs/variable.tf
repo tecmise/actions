@@ -112,3 +112,12 @@ variable "roles" {
   type = list(string)
   default = []
 }
+
+variable "terraform_bucket" {
+  type = string
+}
+
+variable "vpc_link_name" {
+  type = string
+  default = ""
+}

@@ -24,6 +24,10 @@ inputs:
     required: false
     default: ''
 
+  terraform_bucket:
+    description: "'S3 Bucket name for Terraform state'"
+    required: true
+
   health_check_protocol:
     description: "'Health Check Protocol for the target group'"
     required: false
