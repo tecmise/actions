@@ -61,8 +61,16 @@ def create_terraform_file(route: Route):
         if route.methods is not None:
             for method in route.methods:
                 print(f" ", file=f)
+
+                if method.uri is not None:
+
+                    print(f"data \"aws_ssm_parameter\" \"{route.id}_{method.name.lower()}_{method.uri}\" {{ ", file = f)
+                    print(f"    name = \"/api-gateway/keys/uri/{method.uri}\"", file=f)
+                    print(f"}} ", file = f)
+                    print(f" ", file=f)
+
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.6\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.7\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -76,7 +84,7 @@ def create_terraform_file(route: Route):
                 if method.uri is None:
                     print(f"   uri                                          = var.invoke_uri ", file=f)
                 else:
-                    print(f"   uri                                          = \"{method.uri}\" ", file=f)
+                    print(f"   uri                                          = data.aws_ssm_parameter.{route.id}_{method.name.lower()}_{method.uri}.value ", file=f)
 
                 if method.api_key_required is None:
                     if method.name == "OPTIONS":
