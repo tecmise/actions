@@ -117,7 +117,7 @@ variable "terraform_bucket" {
   type = string
 }
 
-variable "vpc_link_name" {
+variable "vpc_link_key" {
   type = string
   default = ""
 }

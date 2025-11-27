@@ -63,7 +63,7 @@ def create_terraform_file(route: Route):
             for method in route.methods:
                 print(f" ", file=f)
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.0\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.1\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -131,9 +131,10 @@ def create_terraform_file(route: Route):
                     print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
-                if method.vpc_link_name is None:
+                if method.vpc_link_name is not None and method.loadbalancer_name is not None:
                     if method.name != "OPTIONS":
-                        print(f"   vpc_link_name                                = \"{method.vpc_link_name}\" ", file=f)
+                        print(f"   vpc_link_key                                = \"{method.loadbalancer_name}_{method.vpc_link_name}\" ", file=f)
+
 
 
                 if method.authorizer_id is None:
