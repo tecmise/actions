@@ -154,6 +154,12 @@ runs:
           type    = string
           default = "${{ github.event.repository.name }}"
         }
+        
+        variable "terraform_bucket" {
+            type    = string
+            default = "${{ inputs.terraform_bucket }}"
+        }
+        
         EOF
         
     - name: Creating target-group.tf

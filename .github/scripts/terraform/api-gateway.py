@@ -63,10 +63,14 @@ def create_terraform_file(route: Route):
             for method in route.methods:
                 print(f" ", file=f)
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.1\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.2\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
+                print(f"   terraform_bucket                             = var.terraform_bucket ", file=f)
+
+
+
                 print(f"   integration_request_parameters               = {{ ", file=f)
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
                 print(f"   }} ", file=f)
