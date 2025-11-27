@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.99.1"
+    }
+  }
+}
 resource "aws_api_gateway_integration" "default" {
   count                     = local.vpc_link_id == null ? 1 : 0
   depends_on                = [  aws_api_gateway_method.default ]
@@ -13,7 +21,7 @@ resource "aws_api_gateway_integration" "default" {
 
 
 
-resource "aws_api_gateway_integration" "vpc" {
+resource "aws_api_gateway_integration" "vpc_link" {
   count                     = local.vpc_link_id != null ? 1 : 0
   resource_id               = var.resource_id
   rest_api_id               = var.rest_api_id
@@ -25,7 +33,6 @@ resource "aws_api_gateway_integration" "vpc" {
   connection_id             = local.vpc_link_id
   request_parameters        = var.integration_request_parameters
   request_templates         = var.append_authorizer_on_request ? merge(local.authorizer_appender, var.integration_request_templates) : var.integration_request_templates
-  # request_parameters = {
-  #   "integration.request.path.proxy" = "method.request.path.proxy"
-  # }
+
 }
+
