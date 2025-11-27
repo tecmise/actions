@@ -1,5 +1,5 @@
 resource "aws_api_gateway_integration" "default" {
-  count                     = var.vpc_link_name == "" ? 1 : 0
+  count                     = local.vpc_link_id == null ? 1 : 0
   depends_on                = [  aws_api_gateway_method.default ]
   http_method               = aws_api_gateway_method.default.http_method
   integration_http_method   = var.integration_http_method
