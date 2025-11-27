@@ -96,7 +96,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@main
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v5.1.0
       with:
         routes_file: ${{ inputs.routes_file }}
         bucket_name: ${{ inputs.bucket_name }}
@@ -148,7 +148,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v3.4.3
+      uses: tecmise/actions/.github/actions/aws-authenticate@v5.1.0
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -207,7 +207,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v3.4.3
+      uses: tecmise/actions/.github/actions/aws-authenticate@v5.1.0
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
