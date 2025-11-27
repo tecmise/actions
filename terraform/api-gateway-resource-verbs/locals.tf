@@ -1,8 +1,22 @@
+output "vpc_links" {
+  value = local.vpc_links
+}
+
+output "vpc_link_id" {
+  value = local.vpc_link_id
+}
+
+
 locals {
 
   vpc_links = data.terraform_remote_state.api-gateway.outputs.api_gateway_virginia.safe4school-api-internal.vpc_link
-  vpc_link_id = (local.vpc_links != {} && local.vpc_links != null && length(local.vpc_links) > 0 && var.vpc_link_key != null && var.vpc_link_key != "") ? local.vpc_links[var.vpc_link_key]["id"] : null
 
+  vpc_link_id = (
+    local.vpc_links != {} &&
+    local.vpc_links != null &&
+    length(local.vpc_links
+  ) > 0 && var.vpc_link_key != null && var.vpc_link_key != "" && contains(keys(local.vpc_links), var.vpc_link_key)
+  ) ? local.vpc_links[var.vpc_link_key]["id"] : null
 
   authorizer_appender = {
     "application/json" = <<EOF
