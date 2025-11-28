@@ -63,7 +63,7 @@ def create_terraform_file(route: Route):
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.6\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v5.1.9\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -163,7 +163,7 @@ def create_terraform_file(route: Route):
                     print(f"    \"method.response.header.Access-Control-Allow-Origin\" = true,", file=f)
                     print(f"   }} ", file=f)
                     print(f"   integration_response_response_parameters     = {{ ", file=f)
-                    print(f"    \"method.response.header.Access-Control-Allow-Headers\" = \"'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Requested-With,Cache-Control,X-Tenant-Id'\",", file=f)
+                    print(f"    \"method.response.header.Access-Control-Allow-Headers\" = \"'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Requested-With,Cache-Control,X-Tenant-Id,x-tenant-id'\",", file=f)
                     print(f"    \"method.response.header.Access-Control-Allow-Methods\" = \"'OPTIONS,GET,PUT,POST,DELETE,PATCH,HEAD'\",", file=f)
                     print(f"    \"method.response.header.Access-Control-Allow-Origin\" = \"'${{var.cors_origin_domain}}'\",", file=f)
                     print(f"   }} ", file=f)
