@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.99.1"
-    }
-  }
-}
 resource "aws_api_gateway_integration" "default" {
   count                     = local.vpc_link_id == null ? 1 : 0
   depends_on                = [  aws_api_gateway_method.default ]
