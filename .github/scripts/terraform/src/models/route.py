@@ -13,8 +13,6 @@ class Method:
     integration_http_method: Optional[str] = None
     integration_response_http_method: Optional[str] = None
     roles: Optional[List[str]] = None
-    vpc_link_name: Optional[str] = None
-    loadbalancer_name: Optional[str] = None
 
 @dataclass
 class Route:

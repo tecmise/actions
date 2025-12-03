@@ -64,6 +64,16 @@ inputs:
     required: true
     default: 'default'
 
+  loadbalancer_name:
+    description: "'Load Balancer Name to link with VPC Link'"
+    required: false
+    default: ''
+
+  vpc_link_name:
+    description: "'VPC Link Name for the API Gateway'"
+    required: false
+    default: ''
+
 runs:
   using: composite
   steps:
@@ -89,6 +99,9 @@ runs:
 
     - name: Execute API Gateway Script
       shell: bash
+      env:
+        LOAD_BALANCER_NAME: ${{ inputs.loadbalancer_name }}
+        VPC_LINK_NAME: ${{ inputs.vpc_link_name }}
       working-directory: ${{ github.run_number }}
       run: |       
         # Executa o script Python com o JSON como argumento
