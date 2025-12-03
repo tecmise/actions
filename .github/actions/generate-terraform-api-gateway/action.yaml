@@ -63,12 +63,10 @@ inputs:
     description: "'Key name for the Terraform state file in S3'"
     required: true
     default: 'default'
-
   loadbalancer_name:
     description: "'Load Balancer Name to link with VPC Link'"
     required: false
     default: ''
-
   vpc_link_name:
     description: "'VPC Link Name for the API Gateway'"
     required: false
