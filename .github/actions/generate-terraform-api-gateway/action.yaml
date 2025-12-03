@@ -89,17 +89,28 @@ runs:
       run: |
         sudo yum update -y
         sudo yum install -y python3 python3-pip
-        sudo ln -sf $(which python3) /usr/bin/python
+        sudo ln -sf $(which python3) /usr/bin/python 
 
     - name: Execute API Gateway Script
       shell: bash
+      if: ${{ inputs.vpc_link_id != '' }}
       env:
         VPC_LINK_ID: ${{ inputs.vpc_link_id }}
       working-directory: ${{ github.run_number }}
       run: |       
-        # Executa o script Python com o JSON como argumento
+        python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat routes.json)" "${{ inputs.vpc_link_id }}"
+
+    - name: Execute API Gateway Script
+      shell: bash
+      if: ${{ inputs.vpc_link_id == '' }}
+      env:
+        VPC_LINK_ID: ${{ inputs.vpc_link_id }}
+      working-directory: ${{ github.run_number }}
+      run: |       
         python ${{ github.action_path }}/../../scripts/terraform/api-gateway.py "$(cat routes.json)"
-        ls -ltra
+        
+
+        
 
     - name: Creating provider.tf
       shell: bash

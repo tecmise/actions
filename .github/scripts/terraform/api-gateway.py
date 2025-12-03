@@ -4,9 +4,7 @@ import uuid
 import os
 from typing import List, Optional
 from src.models.route import Route, Method
-
-
-VPC_LINK_ID = os.getenv("VPC_LINK_ID")
+import argparse
 
 
 def parse_routes(json_string: str) -> List[Route]:
@@ -49,7 +47,7 @@ def check_method_name_already_exists(methods: List, name: str) -> bool:
             return True
     return False
 
-def create_terraform_file(route: Route):
+def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> None:
     filename = f"{route.id}.tf"
     with open(filename, "w", encoding="utf-8") as f:
         print(f"resource aws_api_gateway_resource {route.id}  {{", file=f)
@@ -79,7 +77,7 @@ def create_terraform_file(route: Route):
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
                 print(f"   }} ", file=f)
                 if method.uri is None:
-                    if VPC_LINK_ID is not None:
+                    if vpc_link_id is not None:
                         print(f"   uri = \"${{var.invoke_uri}}${{aws_api_gateway_resource.{route.id}.path}}\" ", file=f)
                     else:
                         print(f"   uri                                          = var.invoke_uri ", file=f)
@@ -101,7 +99,7 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_type                             = \"MOCK\" ", file=f)
                     else:
-                        if VPC_LINK_ID is not None:
+                        if vpc_link_id is not None:
                             print(f"   integration_type                             = \"HTTP_PROXY\" ", file=f)
                         else:
                             print(f"   integration_type                             = \"AWS_PROXY\" ", file=f)
@@ -114,7 +112,7 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_http_method                      = \"OPTIONS\" ", file=f)
                     else:
-                        if VPC_LINK_ID is not None:
+                        if vpc_link_id is not None:
                             print(f"   integration_http_method                      = \"{method.name}\" ", file=f)
                         else:
                             print(f"   integration_http_method                      = \"POST\" ", file=f)
@@ -126,7 +124,7 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_response_http_method             = \"OPTIONS\" ", file=f)
                     else:
-                        if VPC_LINK_ID is not None:
+                        if vpc_link_id is not None:
                             print(f"   integration_response_http_method         = \"{method.name}\" ", file=f)
                         else:
                             print(f"   integration_response_http_method         = \"POST\" ", file=f)
@@ -153,9 +151,9 @@ def create_terraform_file(route: Route):
                     print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
-                if VPC_LINK_ID is not None :
+                if vpc_link_id is not None :
                     if method.name != "OPTIONS":
-                        print(f"   vpc_link_id                                = \"{VPC_LINK_ID}\" ", file=f)
+                        print(f"   vpc_link_id                                = \"{vpc_link_id}\" ", file=f)
 
 
 
@@ -211,28 +209,32 @@ def validate_duplicate_ids(routes: List[Route]):
         check_route(route)
 
 
-def process_all_routes(route: Route):
-    create_terraform_file(route)
+def process_all_routes(route: Route, vpc_link_id: Optional[str] = None):
+    create_terraform_file(route, vpc_link_id)
     for child in route.children:
-        process_all_routes(child)
+        process_all_routes(child, vpc_link_id)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Uso: python script.py '<json_string>'")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Gera recursos do API Gateway a partir de rotas em JSON.")
+    parser.add_argument("json_string", help="String JSON com as rotas (ex.: \"$(cat routes.json)\")")
+    parser.add_argument("vpc_link_id", nargs="?", default=None, help="ID opcional do VPC Link")
+    args = parser.parse_args()
 
-    json_string = sys.argv[1]
+    json_string = args.json_string
+    vpc_link_id = args.vpc_link_id
+
+    print(f"Procesando JSON: {json_string}")
+    print(f"VPC Link ID: {vpc_link_id}")
 
     try:
         routes = parse_routes(json_string)
 
-        if validate_duplicate_ids(routes):
-            print("IDs duplicados encontrados. Abortando.")
-            sys.exit(1)
+        # validate_duplicate_ids não retorna bool; apenas lança exceção se houver duplicados
+        validate_duplicate_ids(routes)
 
         for route in routes:
-            process_all_routes(route)
+            process_all_routes(route, vpc_link_id)
 
     except json.JSONDecodeError as e:
         print(f"Erro ao fazer parse do JSON: {e}")
