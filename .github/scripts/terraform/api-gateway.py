@@ -67,7 +67,7 @@ def create_terraform_file(route: Route):
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.3\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.4\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -101,7 +101,10 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_type                             = \"MOCK\" ", file=f)
                     else:
-                        print(f"   integration_type                             = \"AWS_PROXY\" ", file=f)
+                        if VPC_LINK_ID is not None:
+                            print(f"   integration_type                             = \"HTTP_PROXY\" ", file=f)
+                        else:
+                            print(f"   integration_type                             = \"AWS_PROXY\" ", file=f)
                 else:
                     print(f"   integration_type                             = \"{method.integration_type}\" ", file=f)
 
@@ -111,7 +114,10 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_http_method                      = \"OPTIONS\" ", file=f)
                     else:
-                        print(f"   integration_http_method                      = \"POST\" ", file=f)
+                        if VPC_LINK_ID is not None:
+                            print(f"   integration_http_method                      = \"{method.name}\" ", file=f)
+                        else:
+                            print(f"   integration_http_method                      = \"POST\" ", file=f)
                 else:
                     print(f"   integration_http_method                      = \"{method.integration_http_method}\" ", file=f)
 
@@ -120,7 +126,10 @@ def create_terraform_file(route: Route):
                     if method.name == "OPTIONS":
                         print(f"   integration_response_http_method             = \"OPTIONS\" ", file=f)
                     else:
-                        print(f"   integration_response_http_method             = \"POST\" ", file=f)
+                        if VPC_LINK_ID is not None:
+                            print(f"   integration_response_http_method         = \"{method.name}\" ", file=f)
+                        else:
+                            print(f"   integration_response_http_method         = \"POST\" ", file=f)
                 else:
                     print(f"   integration_response_http_method             = \"{method.integration_response_http_method}\" ", file=f)
 
