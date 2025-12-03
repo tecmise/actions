@@ -94,8 +94,7 @@ runs:
     - name: Execute API Gateway Script
       shell: bash
       env:
-        LOAD_BALANCER_NAME: ${{ inputs.loadbalancer_name }}
-        VPC_LINK_NAME: ${{ inputs.vpc_link_name }}
+        VPC_LINK_ID: ${{ inputs.vpc_link_id }}
       working-directory: ${{ github.run_number }}
       run: |       
         # Executa o script Python com o JSON como argumento
