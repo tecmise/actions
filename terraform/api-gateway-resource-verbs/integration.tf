@@ -25,6 +25,5 @@ resource "aws_api_gateway_integration" "vpc_link" {
   connection_id             = local.vpc_link_id
   request_parameters        = var.integration_request_parameters
   request_templates         = var.append_authorizer_on_request ? merge(local.authorizer_appender, var.integration_request_templates) : var.integration_request_templates
-
 }
 
