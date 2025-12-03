@@ -84,11 +84,7 @@ on:
         type: string
         default: 'api-gateway-files'
 
-      loadbalancer_name:
-        type: string
-        required: false
-        default: ''
-      vpc_link_name:
+      vpc_link_id:
         type: string
         required: false
         default: ''
@@ -105,7 +101,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v6.0.1
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v6.0.2
       with:
         routes_file: ${{ inputs.routes_file }}
         bucket_name: ${{ inputs.bucket_name }}
@@ -117,8 +113,8 @@ jobs:
         health_check_path: "${{ inputs.health_check_path }}"
         key_name: '${{ inputs.artifact_name }}'
         terraform_bucket: ${{ inputs.bucket_name }}
-        loadbalancer_name: ${{ inputs.loadbalancer_name }}
-        vpc_link_name: ${{ inputs.vpc_link_name }}
+        vpc_link_id: ${{ inputs.vpc_link_id }}
+
 
 
 
@@ -159,7 +155,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.1
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.2
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -218,7 +214,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.1
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.2
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}

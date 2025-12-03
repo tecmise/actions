@@ -6,9 +6,7 @@ from typing import List, Optional
 from src.models.route import Route, Method
 
 
-LOAD_BALANCER_NAME = os.getenv("LOAD_BALANCER_NAME")
-VPC_LINK_NAME = os.getenv("VPC_LINK_NAME")
-
+VPC_LINK_ID = os.getenv("VPC_LINK_ID")
 
 
 def parse_routes(json_string: str) -> List[Route]:
@@ -69,7 +67,7 @@ def create_terraform_file(route: Route):
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.1\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.2\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -141,9 +139,9 @@ def create_terraform_file(route: Route):
                     print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
-                if LOAD_BALANCER_NAME is not None and VPC_LINK_NAME is not None:
+                if VPC_LINK_ID is not None :
                     if method.name != "OPTIONS":
-                        print(f"   vpc_link_key                                = \"{LOAD_BALANCER_NAME}_{VPC_LINK_NAME}\" ", file=f)
+                        print(f"   vpc_link_id                                = \"{VPC_LINK_ID}\" ", file=f)
 
 
 

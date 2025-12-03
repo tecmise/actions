@@ -1,7 +1,3 @@
-output "vpc_links" {
-  value = local.vpc_links
-}
-
-output "vpc_link_id" {
-  value = local.vpc_link_id
+output "test" {
+  value = data.terraform_remote_state.api-gateway.outputs.api_gateway_virginia.safe4school-api
 }
