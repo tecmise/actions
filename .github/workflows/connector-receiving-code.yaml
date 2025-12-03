@@ -23,7 +23,9 @@ jobs:
           cache: false
 
       - name: Configure Go env for private modules
-        run: go env -w GOPRIVATE=github.com/tecmise
+        run: |
+          go env -w GOPRIVATE=github.com/tecmise
+          go env -w GOPROXY=direct
 
       - name: Instead of config
         run: git config --global url."https://oauth2:${{ secrets.CONNECTORS_KEY }}@github.com/".insteadOf "https://github.com/"
