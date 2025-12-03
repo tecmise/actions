@@ -19,8 +19,8 @@ resource "aws_api_gateway_integration" "vpc_link" {
   rest_api_id               = var.rest_api_id
   http_method               = aws_api_gateway_method.default.http_method
   integration_http_method   = var.integration_http_method
-  type                      = "HTTP_PROXY"
   uri                       = var.uri
+  type                      = "HTTP_PROXY"
   connection_type           = "VPC_LINK"
   connection_id             = var.vpc_link_id
   request_parameters        = var.integration_request_parameters

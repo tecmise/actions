@@ -119,5 +119,5 @@ variable "terraform_bucket" {
 
 variable "vpc_link_id" {
   type = string
-  default = ""
+  default = null
 }
