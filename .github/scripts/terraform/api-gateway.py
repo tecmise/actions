@@ -67,7 +67,7 @@ def create_terraform_file(route: Route):
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.2\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.3\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -79,9 +79,14 @@ def create_terraform_file(route: Route):
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
                 print(f"   }} ", file=f)
                 if method.uri is None:
-                    print(f"   uri                                          = var.invoke_uri ", file=f)
+                    if VPC_LINK_ID is not None:
+                        print(f"   uri = \"${{var.invoke_uri}}${{aws_api_gateway_resource.{route.id}.path}}\" ", file=f)
+                    else:
+                        print(f"   uri                                          = var.invoke_uri ", file=f)
                 else:
                     print(f"   uri                                          = \"{method.uri}\" ", file=f)
+
+
 
                 if method.api_key_required is None:
                     if method.name == "OPTIONS":
@@ -142,6 +147,7 @@ def create_terraform_file(route: Route):
                 if VPC_LINK_ID is not None :
                     if method.name != "OPTIONS":
                         print(f"   vpc_link_id                                = \"{VPC_LINK_ID}\" ", file=f)
+
 
 
 
