@@ -65,7 +65,7 @@ def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> No
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.4\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.7\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
