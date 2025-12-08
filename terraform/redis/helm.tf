@@ -18,14 +18,6 @@ resource "helm_release" "redis" {
       value = "true"
     },
     {
-      name  = "metrics.serviceMonitor.enabled"
-      value = "true"
-    },
-    {
-      name  = "metrics.serviceMonitor.namespace"
-      value = var.namespace
-    },
-    {
       name  = "replica.nodeSelector.nodegroup-type"
       value = var.node_selector
     },
