@@ -10,6 +10,10 @@ resource "helm_release" "redis" {
   timeout = 600
   set = [
     {
+      name  = "auth.enabled"
+      value = "false"
+    },
+    {
       name  = "architecture"
       value = "standalone"
     },
