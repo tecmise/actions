@@ -39,3 +39,7 @@ variable "persistence_size" {
   type = string
   default = "1Gi"
 }
+
+variable "redis_host" {
+  type = string
+}
