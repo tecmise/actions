@@ -40,6 +40,10 @@ variable "persistence_size" {
   default = "1Gi"
 }
 
-variable "redis_host" {
+variable "redis_sub_domain" {
+  type = string
+}
+
+variable "domain" {
   type = string
 }

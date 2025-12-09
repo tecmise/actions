@@ -13,7 +13,7 @@ resource "kubernetes_manifest" "redis_ingress" {
     spec = {
       rules = [
         {
-          host = var.redis_host
+          host = "${var.redis_sub_domain}.${var.domain}"
           http = {
             paths = [
               {
