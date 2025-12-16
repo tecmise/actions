@@ -167,7 +167,7 @@ jobs:
         mkdir -p /flyway/drivers
         cp ./${{ inputs.drivers_path }}/* /flyway/drivers/
 
-    - name: Validar SQLs com Flyway
+    - name: Migrate
       id: migrate
       run: |
         echo "🚀 Rodando migrações..."
@@ -175,7 +175,7 @@ jobs:
         MIGRATION_OUTPUT=$(flyway -url="${{ inputs.endpoint }}/${{ inputs.database_name }}" \
           -user="${{ inputs.user }}" \
           -password="${{ secrets.database_password }}" \
-          -schemas="${{ inputs.schema }}" \
+#          -schemas="${{ inputs.schema }}" \
           -ignoreMigrationPatterns="*:pending" \
           -table="${{ inputs.flyway_table }}" \
           -connectRetries=60 \
