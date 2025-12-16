@@ -188,7 +188,10 @@ jobs:
     - name: Send Log File
       run: |
         curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@migration.log"
-        
+
+    - name: Throw Error
+      run: |
+        exit 1
 
   send-notification-migrate:
     name: Notify
