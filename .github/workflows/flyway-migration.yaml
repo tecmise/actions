@@ -47,7 +47,11 @@ on:
         required: false
         type: string
         default: ''
-
+      debug:
+        description: 'Enable debug mode'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   validate-migrations:
@@ -60,6 +64,28 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Upload values
+      if: ${{ inputs.debug == true }}
+      run: |
+        echo "🔍 Valores de entrada:"
+        echo "Name: ${{ inputs.name }}" >> content.log
+        echo "Schema: ${{ inputs.schema }}" >> content.log
+        echo "User: ${{ inputs.user }}" >> content.log
+        echo "Endpoint: ${{ inputs.endpoint }}" >> content.log
+        echo "Database Name: ${{ inputs.database_name }}" >> content.log
+        echo "Flyway Table: ${{ inputs.flyway_table }}" >> content.log
+        echo "Migration Path: ${{ inputs.migration_path }}" >> content.log
+        echo "Drivers Path: ${{ inputs.drivers_path }}" >> content.log
+        echo "Secret: ${{ secrets.database_password }}" >> content.log
+
+    - name: Upload Secret
+      if: ${{ inputs.debug == true }}
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 1
+        name: debug-values-${{ inputs.name }}
+        path: content.log
 
     - name: Copiar drivers para o Flyway
       if: inputs.drivers_path != ''
