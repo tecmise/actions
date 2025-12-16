@@ -144,6 +144,9 @@ jobs:
       run: |
         curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@validation.log"
 
+    - name: Throw Error
+      run: |
+        exit 1
 
   migrate:
     name: Migrating Database
