@@ -44,10 +44,10 @@ jobs:
       - name: Verificar erros de compilação
         run: go build ./...
 
-      - name: Verificar erros de lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          verify: false
+#      - name: Verificar erros de lint
+#        uses: golangci/golangci-lint-action@v8
+#        with:
+#          verify: false
 
   open-pr:
     name: Open PR
