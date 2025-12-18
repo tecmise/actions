@@ -175,6 +175,7 @@ jobs:
         MIGRATION_OUTPUT=$(flyway -url="${{ inputs.endpoint }}/${{ inputs.database_name }}" \
           -user="${{ inputs.user }}" \
           -password="${{ secrets.database_password }}" \
+          -schemas="${{ inputs.schema }}" \
           -ignoreMigrationPatterns="*:pending" \
           -table="${{ inputs.flyway_table }}" \
           -connectRetries=60 \

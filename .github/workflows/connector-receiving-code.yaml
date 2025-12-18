@@ -24,7 +24,7 @@ jobs:
 
       - name: Configure Go env for private modules
         run: |
-          go env -w GOPRIVATE=github.com/tecmise
+          go env -w GOPRIVATE=github.com/tecmise/*
           go env -w GOPROXY=direct
 
       - name: Instead of config
