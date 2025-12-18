@@ -30,9 +30,6 @@ jobs:
       - name: Instead of config
         run: git config --global url."https://oauth2:${{ secrets.CONNECTORS_KEY }}@github.com/".insteadOf "https://github.com/"
 
-      - name: Sync Go workspace
-        run: go work sync
-
       - name: Tidy
         run: go mod tidy
 
