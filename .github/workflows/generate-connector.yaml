@@ -19,7 +19,7 @@ on:
       container_tag:
         required: false
         type: string
-        default: "8f25f3b877e41bd88348f07d9d69b299ee8214df"
+        default: "ac17ffa20b0e9caf87f58c7e9c48f8cb7e3d7acd"
 
 jobs:
   protocol-buffers:
@@ -29,6 +29,7 @@ jobs:
       image: public.ecr.aws/g4i8n5q9/connector-provider:${{ inputs.container_tag }}
       env:
         LANGUAGE: "${{ inputs.language }}"
+        REPOSITORY: "${{ github.event.repository.name }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,16 +37,43 @@ jobs:
       - name: Move proto
         run: mv ${{ inputs.proto_path }} /app/proto
 
-      - name: Run generate-connectors.sh
+      - name: Connector Connector
+        id: generate_connector
+        working-directory: /app
+        run: |
+          connector-generator.py --repository ${{ github.event.repository.name }}
+
+      - name: Create connector folder
+        working-directory: /app
+        run: |
+          mkdir -p connector-lib
+          mv protobuf/school-api-connector-go connector-lib/connector
+
+      - name: Connector Lib
+        id: generate_protos
+        working-directory: /app
+        run: |
+          connector-lib-protos.py --repository ${{ github.event.repository.name }}
+
+      - name: Generate Stubs protobug
+        id: run_script_buf
+        working-directory: /app
+        run: |
+          start.py --proto-dir protobuf
+          mv generated/* connector-lib/connector/pkg/shared/
+
+      - name: Generate Stubs proto
         id: run_script
         working-directory: /app
-        run: generate-connectors.sh
+        run: |
+          start.py --proto-dir proto
+          mv generated/* connector-lib/connector/pkg/
 
       - name: Upload Generated Files
         uses: actions/upload-artifact@v4
         with:
           name: generated-files
-          path: /app/generated/app/proto/
+          path: /app/connector-lib/connector
 
       - name: Upload Generated Files
         uses: actions/upload-artifact@v4
@@ -121,7 +149,9 @@ jobs:
 
       - name: Remove existing pkg directory
         working-directory: target-repo
-        run: rm -rf pkg
+        run: |
+          rm -rf pkg
+          rm -rf internal
 
       - name: Create new pkg directory
         working-directory: target-repo
