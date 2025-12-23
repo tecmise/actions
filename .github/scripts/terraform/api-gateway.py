@@ -65,16 +65,18 @@ def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> No
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.0.8\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.1.6\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
                 print(f"   terraform_bucket                             = var.terraform_bucket ", file=f)
 
-
-
                 print(f"   integration_request_parameters               = {{ ", file=f)
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
+                if route.path[0] == "{" and route.path[-1] == "}":
+                    print(f"     \"integration.request.path.{route.path[1:-1]}\" = \"method.request.path.{route.path[1:-1]}\"", file=f)
+
+
                 print(f"   }} ", file=f)
                 if method.uri is None:
                     if vpc_link_id is not None:
@@ -140,7 +142,13 @@ def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> No
                 print(f"   method_response_models                       = {{ ", file=f)
                 print(f"     \"application/json\" = \"Empty\"                      ", file=f)
                 print(f"   }} ", file=f)
-                print(f"   method_request_parameters                    = {{}}", file=f)
+
+                if route.path[0] == "{" and route.path[-1] == "}":
+                    print(f"   method_request_parameters                    = {{", file=f)
+                    print(f"      \"method.request.path.{route.path[1:-1]}\" = true", file=f)
+                    print(f"   }}", file=f)
+                else:
+                    print(f"   method_request_parameters                    = {{}}", file=f)
 
                 if method.authorization is None:
                     if method.name == "OPTIONS":

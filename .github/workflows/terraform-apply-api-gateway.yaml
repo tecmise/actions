@@ -101,7 +101,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Create files
-      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v6.0.8
+      uses: tecmise/actions/.github/actions/generate-terraform-api-gateway@v6.1.6
       with:
         routes_file: ${{ inputs.routes_file }}
         bucket_name: ${{ inputs.bucket_name }}
@@ -114,9 +114,6 @@ jobs:
         key_name: '${{ inputs.artifact_name }}'
         terraform_bucket: ${{ inputs.bucket_name }}
         vpc_link_id: ${{ inputs.vpc_link_id }}
-
-
-
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -155,7 +152,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.8
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.1.6
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -164,16 +161,6 @@ jobs:
     - name: Prepare Terraform plugin cache dir
       run: mkdir -p ~/.terraform.d/plugin-cache
       shell: bash
-
-#    - name: Cache Terraform providers & modules
-#      uses: actions/cache@v4
-#      with:
-#        path: |
-#          ~/.terraform.d/plugin-cache
-#          terraform/.terraform
-#        key: ${{ runner.os }}-terraform-${{ github.event.repository.name }}-${{ hashFiles('terraform.lock.hcl') }}
-#        restore-keys: |
-#          ${{ runner.os }}-terraform-
 
     - name: Terraform Init
       shell: bash
@@ -214,7 +201,7 @@ jobs:
     - uses: hashicorp/setup-terraform@v3
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.0.8
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.1.6
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
