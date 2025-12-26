@@ -19,7 +19,7 @@ on:
       container_tag:
         required: false
         type: string
-        default: "ac17ffa20b0e9caf87f58c7e9c48f8cb7e3d7acd"
+        default: "a481046b20897600f5f6f01da78388084dadd014"
 
 jobs:
   protocol-buffers:
@@ -47,7 +47,7 @@ jobs:
         working-directory: /app
         run: |
           mkdir -p connector-lib
-          mv protobuf/school-api-connector-go connector-lib/connector
+          mv protobuf/${{ github.event.repository.name }}-connector-go connector-lib/connector
 
       - name: Connector Lib
         id: generate_protos
