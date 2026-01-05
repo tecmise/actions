@@ -152,7 +152,6 @@ jobs:
         run: |
           rm -rf pkg
           rm -rf internal
-          rm go.sum
           rm go.mod
 
       - name: Create new pkg directory
