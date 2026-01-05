@@ -164,25 +164,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: generated-files
-          path: target-repo/pkg
+          path: target-repo
 
-      - name: Download generated-files internal
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-files
-          path: target-repo/internal
-
-      - name: Download generated-files go mod
-        uses: actions/download-artifact@v4
-        with:
-          name: generated-files
-          path: target-repo/go.mod
-
-      - name: Show files
-        shell: bash
-        working-directory: target-repo
-        run: |
-          ls -ltra
 
       - name: Status
         shell: bash
