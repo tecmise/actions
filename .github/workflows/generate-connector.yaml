@@ -179,6 +179,12 @@ jobs:
           name: generated-files
           path: target-repo/go.mod
 
+      - name: Show files
+        shell: bash
+        working-directory: target-repo
+        run: |
+          ls -ltra
+
       - name: Status
         shell: bash
         working-directory: target-repo
