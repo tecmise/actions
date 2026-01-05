@@ -152,7 +152,7 @@ jobs:
         run: |
           rm -rf pkg
           rm -rf internal
-          rm go.mod
+          rm -rf go.mod
 
       - name: Create new pkg directory
         working-directory: target-repo
