@@ -2,9 +2,31 @@ import json
 import sys
 import uuid
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict
 from src.models.route import Route, Method
 import argparse
+
+
+def build_map(json_string: str) -> Dict[str, Route]:
+    """
+    Retorna um dict mapeando o caminho completo para o objeto Route.
+    Ex.: "bff-school/users/{id}/profile" -> Route(...)
+    """
+
+    data = json.loads(json_string)
+    routes = [build_route_node(item) for item in data]
+
+    result: Dict[str, Route] = {}
+
+    def walk(route: Route, parent_path: Optional[str] = None):
+        result[route.id] = route
+        for child in route.children:
+            walk(child, child.id)
+
+    for r in routes:
+        walk(r, None)
+
+    return result
 
 
 def parse_routes(json_string: str) -> List[Route]:
@@ -47,7 +69,8 @@ def check_method_name_already_exists(methods: List, name: str) -> bool:
             return True
     return False
 
-def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> None:
+
+def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_link_id: Optional[str] = None) -> None:
     filename = f"{route.id}.tf"
     with open(filename, "w", encoding="utf-8") as f:
         print(f"resource aws_api_gateway_resource {route.id}  {{", file=f)
@@ -65,7 +88,7 @@ def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> No
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.1.6\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.2.0\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -73,9 +96,11 @@ def create_terraform_file(route: Route, vpc_link_id: Optional[str] = None) -> No
 
                 print(f"   integration_request_parameters               = {{ ", file=f)
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
-                if route.path[0] == "{" and route.path[-1] == "}":
-                    print(f"     \"integration.request.path.{route.path[1:-1]}\" = \"method.request.path.{route.path[1:-1]}\"", file=f)
 
+                integration_request_parameters = route.get_integration_request_parameters(routes)
+                if integration_request_parameters is not None:
+                    for param in integration_request_parameters:
+                        print(f"     {param} ", file=f)
 
                 print(f"   }} ", file=f)
                 if method.uri is None:
@@ -217,10 +242,14 @@ def validate_duplicate_ids(routes: List[Route]):
         check_route(route)
 
 
-def process_all_routes(route: Route, vpc_link_id: Optional[str] = None):
-    create_terraform_file(route, vpc_link_id)
-    for child in route.children:
-        process_all_routes(child, vpc_link_id)
+def process_all_routes(routes: Dict[str, Route], key: str, vpc_link_id: Optional[str] = None):
+    route = routes[key]
+    if route.id is None:
+        route.id = key.replace("/", "_").replace("{", "").replace("}", "")
+    print(f"Procesando rota: {key} id: {route.id}")
+    create_terraform_file(routes, key, route, vpc_link_id)
+    # for child in route.children:
+    #     process_all_routes(child, vpc_link_id)
 
 
 if __name__ == "__main__":
@@ -236,13 +265,9 @@ if __name__ == "__main__":
     print(f"VPC Link ID: {vpc_link_id}")
 
     try:
-        routes = parse_routes(json_string)
-
-        # validate_duplicate_ids não retorna bool; apenas lança exceção se houver duplicados
-        validate_duplicate_ids(routes)
-
+        routes = build_map(json_string)
         for route in routes:
-            process_all_routes(route, vpc_link_id)
+            process_all_routes(routes, route, vpc_link_id)
 
     except json.JSONDecodeError as e:
         print(f"Erro ao fazer parse do JSON: {e}")

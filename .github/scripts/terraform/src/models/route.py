@@ -1,4 +1,5 @@
-from typing import List, Optional, Union
+from __future__ import annotations
+from typing import List, Optional, Dict
 from dataclasses import dataclass, field
 
 
@@ -22,6 +23,22 @@ class Route:
     cors: Optional[bool] = None
     parent_id: Optional[str] = None
     children: List['Route'] = field(default_factory=list)
+
+    def get_integration_request_parameters(self, map: Dict[str, Route]) -> List[str]:
+        integration_request_parameters = []
+        if self.parent_id is not None:
+            parent = map[self.parent_id]
+            list = parent.get_integration_request_parameters(map)
+            if list is not None and len(list) > 0:
+                integration_request_parameters.extend(list)
+
+        if self.path[0] == "{" and self.path[-1] == "}":
+            content = f"\"integration.request.path.{self.path[1:-1]}\" = \"method.request.path.{self.path[1:-1]}\""
+            if not integration_request_parameters.__contains__(content):
+                integration_request_parameters.append(content)
+
+        return integration_request_parameters
+
 
     def __post_init__(self):
         # Se methods for None, não fazer nada
