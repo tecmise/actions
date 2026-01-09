@@ -88,7 +88,7 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.2.0\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.2.1\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -96,13 +96,14 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
 
                 print(f"   integration_request_parameters               = {{ ", file=f)
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
-
                 integration_request_parameters = route.get_integration_request_parameters(routes)
                 if integration_request_parameters is not None:
                     for param in integration_request_parameters:
                         print(f"     {param} ", file=f)
-
                 print(f"   }} ", file=f)
+
+
+
                 if method.uri is None:
                     if vpc_link_id is not None:
                         print(f"   uri = \"${{var.invoke_uri}}${{aws_api_gateway_resource.{route.id}.path}}\" ", file=f)
@@ -168,12 +169,18 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
                 print(f"     \"application/json\" = \"Empty\"                      ", file=f)
                 print(f"   }} ", file=f)
 
-                if route.path[0] == "{" and route.path[-1] == "}":
+
+
+
+                method_request_parameters = route.get_method_request_parameters(routes)
+                if method_request_parameters is not None:
                     print(f"   method_request_parameters                    = {{", file=f)
-                    print(f"      \"method.request.path.{route.path[1:-1]}\" = true", file=f)
-                    print(f"   }}", file=f)
+                    for param in method_request_parameters:
+                        print(f"     {param} ", file=f)
+                        print(f"   }}", file=f)
                 else:
                     print(f"   method_request_parameters                    = {{}}", file=f)
+
 
                 if method.authorization is None:
                     if method.name == "OPTIONS":

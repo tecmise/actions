@@ -40,6 +40,21 @@ class Route:
         return integration_request_parameters
 
 
+    def get_method_request_parameters(self, map: Dict[str, Route]) -> List[str]:
+        method_request_parameters = []
+        if self.parent_id is not None:
+            parent = map[self.parent_id]
+            list = parent.get_method_request_parameters(map)
+            if list is not None and len(list) > 0:
+                method_request_parameters.extend(list)
+
+        if self.path[0] == "{" and self.path[-1] == "}":
+            content = f"\"method.request.path.{self.path[1:-1]}\" = true"
+            if not method_request_parameters.__contains__(content):
+                method_request_parameters.append(content)
+
+        return method_request_parameters
+
     def __post_init__(self):
         # Se methods for None, não fazer nada
         if not self.methods:
