@@ -88,7 +88,7 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
                 print(f" ", file=f)
 
                 print(f"module \"{route.id}_{method.name.lower()}\" {{ ", file = f)
-                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.2.1\"", file = f)
+                print(f"   source                                       = \"git::https://github.com/tecmise/actions//terraform/api-gateway-resource-verbs?ref=v6.2.2\"", file = f)
                 print(f"   resource_id                                  = aws_api_gateway_resource.{route.id}.id ", file=f)
                 print(f"   rest_api_id                                  = aws_api_gateway_resource.{route.id}.rest_api_id ", file=f)
                 print(f"   verb                                         = \"{method.name}\" ", file=f)
@@ -173,7 +173,7 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
 
 
                 method_request_parameters = route.get_method_request_parameters(routes)
-                if method_request_parameters is not None:
+                if method_request_parameters is not None and len(method_request_parameters) > 0:
                     print(f"   method_request_parameters                    = {{", file=f)
                     for param in method_request_parameters:
                         print(f"     {param} ", file=f)
