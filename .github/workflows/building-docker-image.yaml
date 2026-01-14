@@ -45,7 +45,8 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ubuntu-latest
+    #    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Checkout
       uses: actions/checkout@v4
