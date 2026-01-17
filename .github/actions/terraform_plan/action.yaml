@@ -1,0 +1,85 @@
+name: Terraform Plan
+inputs:
+  artifact:
+    description: 'Artifact'
+    required: true
+  bucket:
+    description: 'Terraform S3 Bucket'
+    required: true
+  key:
+    description: 'Terraform S3 Key'
+    required: true
+  working_directory:
+    description: 'Working Directory'
+    required: false
+    default: '.'
+runs:
+  using: composite
+  steps:
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: '20'
+  - uses: hashicorp/setup-terraform@v3
+
+  - name: Download Node Group
+    uses: actions/download-artifact@v4
+    with:
+      name: ${{ inputs.artifact }}
+
+  - name: "Enabled permissions"
+    shell: bash
+    run: chmod -R 765 .terraform
+
+  - name: Terraform Plan (binary)
+    shell: bash
+    run: terraform plan -no-color -out=tfplan
+
+  - name: Terraform Show (json)
+    shell: bash
+    run: terraform show -json tfplan > tfplan.json
+
+  - name: Build Terraform changes summary
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      # Conta ações principais (create/update/delete/replace)
+      creates=$(jq '[.resource_changes[]? | select(.change.actions | index("create"))] | length' tfplan.json)
+      updates=$(jq '[.resource_changes[]? | select(.change.actions | index("update"))] | length' tfplan.json)
+      deletes=$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' tfplan.json)
+      replaces=$(jq '[.resource_changes[]? | select(.change.actions | (index("create") and index("delete")))] | length' tfplan.json)
+
+      {
+        echo "## Terraform Plan Summary"
+        echo
+        echo "**Create:** $creates  | **Update:** $updates  | **Delete:** $deletes  | **Replace:** $replaces"
+        echo
+        echo "### Mudanças por recurso"
+        echo
+        echo "| Ação | Recurso | Tipo |"
+        echo "|---|---|---|"
+
+        # Lista recursos e ações
+        jq -r '
+          .resource_changes[]?
+          | select(.change.actions != ["no-op"])
+          | {
+              addr: .address,
+              type: .type,
+              actions: (.change.actions | join(","))
+            }
+          | "\(.actions)|\(.addr)|\(.type)"
+        ' tfplan.json | while IFS='|' read -r actions addr type; do
+          # Normaliza para labels mais amigáveis
+          action_label="$actions"
+          if [[ "$actions" == "create" ]]; then action_label="ADD"
+          elif [[ "$actions" == "update" ]]; then action_label="CHANGE"
+          elif [[ "$actions" == "delete" ]]; then action_label="DESTROY"
+          elif [[ "$actions" == "create,delete" || "$actions" == "delete,create" ]]; then action_label="REPLACE"
+          fi
+
+          echo "| $action_label | \`$addr\` | \`$type\` |"
+        done
+        echo
+      } >> "$GITHUB_STEP_SUMMARY"
