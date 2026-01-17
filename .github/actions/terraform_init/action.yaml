@@ -23,6 +23,7 @@ runs:
   - uses: hashicorp/setup-terraform@v3
 
   - name: Show Files
+    working-directory: ${{ inputs.working_directory }}
     shell: bash
     run: |
       ls -ltra 
@@ -40,3 +41,17 @@ runs:
       name: ${{ inputs.name }}
       include-hidden-files: 'true'
       retention-days: 7
+
+  - name: Summary - Inputs do Terraform Init
+    shell: bash
+    run: |
+      {
+        echo "## Terraform Init - Inputs"
+        echo
+        echo "| Input | Valor |"
+        echo "|---|---|"
+        echo "| artifact | \`${{ inputs.artifact }}\` |"
+        echo "| bucket | \`${{ inputs.bucket }}\` |"
+        echo "| key | \`${{ inputs.key }}\` |"
+        echo "| working_directory | \`${{ inputs.working_directory }}\` |"
+      } >> "$GITHUB_STEP_SUMMARY"
