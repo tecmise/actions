@@ -1,0 +1,71 @@
+name: Terraform Apply
+inputs:
+  artifact:
+    description: 'Artifact'
+    required: true
+  bucket:
+    description: 'Terraform S3 Bucket'
+    required: true
+  key:
+    description: 'Terraform S3 Key'
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: '20'
+  - uses: hashicorp/setup-terraform@v3
+
+  - name: Download Node Group
+    uses: actions/download-artifact@v4
+    with:
+      name: ${{ inputs.artifact }}
+
+  - name: "Enabled permissions"
+    shell: bash
+    run: chmod -R 765 .terraform
+
+  - name: Terraform Apply
+    shell: bash
+    run: terraform destroy -auto-approve
+
+
+  - name: Terraform Outputs (json)
+    shell: bash
+    run: terraform output -json > tfoutputs.json
+
+  - name: Add outputs to GitHub Summary
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      echo "## Terraform Outputs (post-apply)" >> "$GITHUB_STEP_SUMMARY"
+      echo >> "$GITHUB_STEP_SUMMARY"
+      echo "| Output | Valor | Sensível |" >> "$GITHUB_STEP_SUMMARY"
+      echo "|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+      # Monta tabela:
+      # - Se for string/number/bool -> imprime direto
+      # - Se for list/map/object -> imprime como JSON compacto
+      jq -r '
+        to_entries[]
+        | .key as $name
+        | .value as $obj
+        | ($obj.sensitive // false) as $s
+        | (
+            if $s then
+              [$name, "`(sensitive)`", ($s|tostring)]
+            else
+              ($obj.value) as $v
+              | if ($v|type) == "string" or ($v|type) == "number" or ($v|type) == "boolean" then
+                  [$name, ("`"+($v|tostring)+"`"), ($s|tostring)]
+                else
+                  [$name, ("`"+($v|tojson)+"`"), ($s|tostring)]
+                end
+            end
+          )
+        | "| \(.[] ) |"
+      ' tfoutputs.json >> "$GITHUB_STEP_SUMMARY"
