@@ -1,19 +1,8 @@
 name: Terraform Init
 inputs:
-  name:
-    description: 'Name'
+  artifact:
+    description: 'Artifact'
     required: true
-  aws_accounts:
-    description: 'Accounts'
-    required: true
-  category:
-    description: 'Category of repository'
-    required: true
-    default: 's4s'
-  aws_region:
-    description: 'Region'
-    required: false
-    default: 'us-east-1'
   bucket:
     description: 'Terraform S3 Bucket'
     required: true
@@ -23,13 +12,6 @@ inputs:
 runs:
   using: composite
   steps:
-
-  - name: Authenticate on AWS
-    uses: tecmise/actions/.github/actions/aws-authenticate@7.0.0
-    with:
-      category: 's4s'
-      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-      aws_region: ${{ github.event.inputs.region }}
 
   - uses: actions/setup-node@v4
     with:
