@@ -1,0 +1,53 @@
+name: Terraform Init
+inputs:
+  name:
+    description: 'Name'
+    required: true
+  aws_accounts:
+    description: 'Accounts'
+    required: true
+  category:
+    description: 'Category of repository'
+    required: true
+    default: 's4s'
+  aws_region:
+    description: 'Region'
+    required: false
+    default: 'us-east-1'
+  bucket:
+    description: 'Terraform S3 Bucket'
+    required: true
+  key:
+    description: 'Terraform S3 Key'
+    required: true
+runs:
+  using: composite
+  steps:
+
+  - name: Authenticate on AWS
+    uses: tecmise/actions/.github/actions/aws-authenticate@7.0.0
+    with:
+      category: 's4s'
+      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+      aws_region: ${{ github.event.inputs.region }}
+
+  - uses: actions/setup-node@v4
+    with:
+      node-version: '20'
+  - uses: hashicorp/setup-terraform@v3
+
+  - name: Show Files
+    run: |
+      ls -ltra 
+
+  - name: Terraform Init
+    run: |
+      terraform init -backend-config=bucket=${{ inputs.bucket }} -backend-config=key=${{ inputs.key }}
+
+  - name: Upload Node Group
+    uses: actions/upload-artifact@v4
+    with:
+      path: '.'
+      name: ${{ inputs.name }}
+      include-hidden-files: 'true'
+      retention-days: 7
