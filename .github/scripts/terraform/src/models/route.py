@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional, Dict
 from dataclasses import dataclass, field
+import os
 
 
 @dataclass
@@ -65,14 +66,21 @@ class Route:
 
         for m in self.methods:
             if isinstance(m, str):
-                # Se for string, criar objeto Method apenas com o nome
-                converted_methods.append(Method(name=m))
+                meth = Method(name=m)
             elif isinstance(m, dict):
-                # Se for dicionário, criar objeto Method com todos os atributos
-                converted_methods.append(Method(**m))
+                meth = Method(**m)
             elif isinstance(m, Method):
-                # Se já for um objeto Method, manter como está
-                converted_methods.append(m)
+                meth = m
+            else:
+                continue
+
+            if meth.uri.endswith("__") and meth.uri.startswith("__"):
+                key = meth.uri.replace("__", "")
+                print(f"Substituindo URI do método {meth.name} pelo valor da variável de ambiente: {key}")
+                env_value = os.getenv(key)
+                meth.uri = meth.uri.replace(key, env_value)
+
+            converted_methods.append(meth)
 
         # Substituir a lista original pela lista convertida
         self.methods = converted_methods
