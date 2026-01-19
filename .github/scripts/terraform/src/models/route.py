@@ -78,10 +78,10 @@ class Route:
                 print("found __OPEN_ENDPOINT__ in route {self.path} method {meth.name}, replacing...")
                 ref = os.getenv("REF_NAME")
                 print (f"REF_NAME is {ref}")
-                if ref is "master" or ref is "main":
+                if ref == "master" or ref == "main":
                     print(f"replacing with production endpoint")
                     meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.safe4school.com.br")
-                if ref is "sandbox":
+                elif ref == "sandbox":
                     print(f"replacing with sandbox endpoint")
                     meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.sandbox.safe4school.com.br")
 
