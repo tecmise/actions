@@ -74,7 +74,7 @@ class Route:
             else:
                 continue
 
-            if meth.uri.startswith("__OPEN_ENDPOINT__"):
+            if meth.uri is not None and meth.uri.__contains__("__OPEN_ENDPOINT__"):
                 ref = os.getenv("REF_NAME")
                 if ref is "master" or ref is "main":
                     meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.safe4school.com.br")
