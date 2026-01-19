@@ -74,11 +74,15 @@ class Route:
             else:
                 continue
 
-            if meth.uri is not None and meth.uri.__contains__("__OPEN_ENDPOINT__"):
+            if meth.uri is not None and meth.uri.startswith("__OPEN_ENDPOINT__"):
+                print("found __OPEN_ENDPOINT__ in route {self.path} method {meth.name}, replacing...")
                 ref = os.getenv("REF_NAME")
+                print (f"REF_NAME is {ref}")
                 if ref is "master" or ref is "main":
+                    print(f"replacing with production endpoint")
                     meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.safe4school.com.br")
                 if ref is "sandbox":
+                    print(f"replacing with sandbox endpoint")
                     meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.sandbox.safe4school.com.br")
 
             converted_methods.append(meth)
