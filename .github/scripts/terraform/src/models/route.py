@@ -74,13 +74,13 @@ class Route:
             else:
                 continue
 
-            if meth.uri.endswith("__") and meth.uri.startswith("__"):
-                key = meth.uri.replace("__", "")
-                print(f"Substituindo URI do método {meth.name} pelo valor da variável de ambiente: {key}")
-                env_value = os.getenv(key)
-                meth.uri = meth.uri.replace(key, env_value)
+            if meth.uri.__eq__("__OPEN_ENDPOINT__"):
+                ref = os.getenv("REF_NAME")
+                if ref is "master" or ref is "main":
+                    meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.safe4school.com.br")
+                if ref is "sandbox":
+                    meth.uri = meth.uri.replace("__OPEN_ENDPOINT__", "https://bff.sandbox.safe4school.com.br")
 
             converted_methods.append(meth)
 
-        # Substituir a lista original pela lista convertida
         self.methods = converted_methods
