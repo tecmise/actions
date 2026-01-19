@@ -191,9 +191,10 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
                     print(f"   authorization                                = \"{method.authorization}\" ", file=f)
 
 
-                if (vpc_link_id is not None) and (method.uri is not None and not method.uri.startswith("__OPEN_ENDPOINT__")):
+                if vpc_link_id is not None:
                     if method.name != "OPTIONS":
-                        print(f"   vpc_link_id                                = \"{vpc_link_id}\" ", file=f)
+                        if method.uri is None:
+                            print(f"   vpc_link_id                                = \"{vpc_link_id}\" ", file=f)
 
 
 
