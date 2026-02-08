@@ -47,21 +47,39 @@ runs:
     shell: bash
     if: ${{ inputs.category == 'infrastructure' }}
     run: |
-      aws s3 sync "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
+      S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      # Tenta listar como se fosse um arquivo
+      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+      else
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+      fi
 
   - name: Sync artifact to S3
     id: sync-s4s-production
     shell: bash
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
-      aws s3 sync "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
+      S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      # Tenta listar como se fosse um arquivo
+      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+      else
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+      fi
 
   - name: Sync artifact to S3
     id: sync-s4s-sandbox
     shell: bash
     if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
-      aws s3 sync  "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
+      S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      # Tenta listar como se fosse um arquivo
+      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+      else
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+      fi
 
   - name: List all files in the path recursively
     shell: bash
