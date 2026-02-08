@@ -58,7 +58,7 @@ runs:
 
   - name: List all files in the path recursively
     shell: bash
-    if: sync-infrastructure || sync-s4s-production || sync-s4s-sandbox
+    if: steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion
     run: |
       set -euo pipefail
 
