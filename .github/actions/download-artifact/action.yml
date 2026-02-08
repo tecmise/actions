@@ -14,7 +14,10 @@ inputs:
   path:
     description: 'Path to the artifact to be uploaded'
     required: true
-
+  download_path:
+    description: 'Path to download the artifact'
+    required: false
+    default: '.'
 runs:
   using: composite
   steps:
@@ -40,21 +43,21 @@ runs:
     shell: bash
     if: ${{ inputs.category == 'infrastructure' }}
     run: |
-      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+      aws s3 sync "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
 
   - name: Sync artifact to S3
     id: sync-s4s-production
     shell: bash
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
-      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+      aws s3 sync "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
 
   - name: Sync artifact to S3
     id: sync-s4s-sandbox
     shell: bash
     if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
-      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+      aws s3 sync  "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" "${{ inputs.path }}"
 
   - name: List all files in the path recursively
     shell: bash
@@ -74,7 +77,7 @@ runs:
         BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
       fi
 
-      echo "## Artifacts Uploaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
+      echo "## Artifacts Downloaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
       echo >> "$GITHUB_STEP_SUMMARY"
       echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
       echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
