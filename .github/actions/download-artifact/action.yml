@@ -18,8 +18,8 @@ inputs:
     description: 'Path to download the artifact'
     required: false
     default: '.'
-  show_summary:
-    description: 'Show summary of downloaded artifacts'
+  debug:
+    description: 'Debug'
     required: false
     default: 'false'
 runs:
@@ -57,9 +57,9 @@ runs:
     run: |
       set -euo pipefail
       if [ -f "${{ inputs.path }}" ]; then
-        echo "::set-output name=is_file::true"
+        echo "is_file=true" >> $GITHUB_OUTPUT
       else
-        echo "::set-output name=is_file::false"
+        echo "is_file=false" >> $GITHUB_OUTPUT
       fi
 
   - name: Sync artifact to S3
@@ -100,7 +100,7 @@ runs:
 
   - name: List all files in the path recursively
     shell: bash
-    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.show_summary == 'true')
+    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.debug == 'true')
     run: |
       set -euo pipefail
 

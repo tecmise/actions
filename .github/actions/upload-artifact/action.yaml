@@ -14,8 +14,8 @@ inputs:
   path:
     description: 'Path to the artifact to be uploaded'
     required: true
-  show_summary:
-    description: 'Show summary of downloaded artifacts'
+  debug:
+    description: 'Debug'
     required: false
     default: 'false'
 runs:
@@ -85,7 +85,7 @@ runs:
 
   - name: List all files in the path recursively
     shell: bash
-    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.show_summary == 'true')
+    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.debug == 'true')
     run: |
       set -euo pipefail
 
