@@ -35,10 +35,65 @@ runs:
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
-  - name: Upload artifact to S3
+  - name: Sync artifact to S3
+    id: sync-infrastructure
     shell: bash
+    if: ${{ inputs.category == 'infrastructure' }}
     run: |
-      aws s3 ls
+      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+
+  - name: Sync artifact to S3
+    id: sync-s4s-production
+    shell: bash
+    if: ${{ inputs.category == s4s && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    run: |
+      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+
+  - name: Sync artifact to S3
+    id: sync-s4s-sandbox
+    shell: bash
+    if: ${{ inputs.category == s4s && github.ref_name == 'sandbox' }}
+    run: |
+      aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
+
+  - name: List all files in the path recursively
+    shell: bash
+    if: sync-infrastructure || sync-s4s-production || sync-s4s-sandbox
+    run: |
+      set -euo pipefail
+
+      echo "## Artifacts Uploaded" >> "$GITHUB_STEP_SUMMARY"
+      echo >> "$GITHUB_STEP_SUMMARY"
+      echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
+      echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+
+      # Determina o bucket baseado na categoria e branch
+      BUCKET=$(echo "${{ env.ARTIFACT_BUCKETS }}" | jq -r ".${{ inputs.category }}")
+      
+      # Lista recursivamente todos os arquivos
+      find "${{ inputs.path }}" -type f | while read -r file; do
+        # Obtém tamanho em bytes
+        SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+        
+        # Converte para KB ou MB
+        if [ "$SIZE" -lt 1048576 ]; then
+          SIZE_FORMATTED="$(( SIZE / 1024 )) KB"
+        else
+          SIZE_FORMATTED="$(printf '%.2f' $(echo "scale=2; $SIZE / 1048576" | bc)) MB"
+        fi
+        
+        # Extrai extensão
+        EXT="${file##*.}"
+        [ "$EXT" = "$file" ] && EXT="sem extensão"
+        
+        # Cria caminho S3
+        RELATIVE_PATH="${file#${{ inputs.path }}/}"
+        S3_PATH="s3://${BUCKET}/${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
+        
+        # Adiciona linha na tabela
+        echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
+      done
+
 
   - name: Remove Aws Credentials
     shell: bash
