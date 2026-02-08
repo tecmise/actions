@@ -62,14 +62,23 @@ runs:
     run: |
       set -euo pipefail
 
-      echo "## Artifacts Uploaded" >> "$GITHUB_STEP_SUMMARY"
+      # Determina o bucket baseado na categoria
+      CATEGORY="${{ inputs.category }}"
+      if [ "$CATEGORY" = "s4s" ]; then
+        if [ "${{ github.ref_name }}" = "sandbox" ]; then
+          BUCKET_NAME="github-artifact.sandbox-s4s.tecmise.com"
+        else
+          BUCKET_NAME="github-artifact.production-s4s.tecmise.com"
+        fi
+      else
+        BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
+      fi
+
+      echo "## Artifacts Uploaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
       echo >> "$GITHUB_STEP_SUMMARY"
       echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
       echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
 
-      # Determina o bucket baseado na categoria e branch
-      BUCKET=$(echo "${{ env.ARTIFACT_BUCKETS }}" | jq -r ".${{ inputs.category }}")
-      
       # Lista recursivamente todos os arquivos
       find "${{ inputs.path }}" -type f | while read -r file; do
         # Obtém tamanho em bytes
@@ -88,7 +97,7 @@ runs:
         
         # Cria caminho S3
         RELATIVE_PATH="${file#${{ inputs.path }}/}"
-        S3_PATH="s3://${BUCKET}/${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
+        S3_PATH="./${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
         
         # Adiciona linha na tabela
         echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
