@@ -45,14 +45,14 @@ runs:
   - name: Sync artifact to S3
     id: sync-s4s-production
     shell: bash
-    if: ${{ inputs.category == s4s && (github.ref_name == 'main' || github.ref_name == 'master') }}
+    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
       aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
 
   - name: Sync artifact to S3
     id: sync-s4s-sandbox
     shell: bash
-    if: ${{ inputs.category == s4s && github.ref_name == 'sandbox' }}
+    if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
       aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
 
