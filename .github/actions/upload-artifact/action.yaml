@@ -40,3 +40,9 @@ runs:
     run: |
       aws s3 ls
 
+  - name: Remove Aws Credentials
+    shell: bash
+    if: always()
+    run: |
+      rm -rf ~/.aws/credentials
+      rm -rf ~/.aws/config
