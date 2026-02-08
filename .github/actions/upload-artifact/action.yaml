@@ -14,6 +14,10 @@ inputs:
   path:
     description: 'Path to the artifact to be uploaded'
     required: true
+  download_path:
+    description: 'Path to download the artifact'
+    required: false
+    default: '.'
   show_summary:
     description: 'Show summary of downloaded artifacts'
     required: false
@@ -22,114 +26,134 @@ runs:
   using: composite
   steps:
 
-  - name: configure aws credentials-s4s
-    uses: aws-actions/configure-aws-credentials@v4
-    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
-    with:
-      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role
-      role-session-name: github-actions-role
-      aws-region: ${{ inputs.aws_region }}
+    - name: Show Debug Var
+        shell: bash
+        run: |
+            echo "Debug: ${{ DEBUG }}"
 
-  - name: configure aws credentials-infrastructure
-    uses: aws-actions/configure-aws-credentials@v4
-    if: ${{ inputs.category == 'infrastructure' }}
-    with:
-      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
-      role-session-name: github-actions-role
-      aws-region: ${{ inputs.aws_region }}
 
-  - name: Sync artifact to S3
-    id: sync-infrastructure
-    shell: bash
-    if: ${{ inputs.category == 'infrastructure' }}
-    run: |
-      if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
-      elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/"
-      else
-        echo "Path ${{ inputs.path }} is not a valid file or directory."
-        exit 1
-      fi
+    - name: configure aws credentials-s4s
+      uses: aws-actions/configure-aws-credentials@v4
+      if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
+      with:
+        role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role
+        role-session-name: github-actions-role
+        aws-region: ${{ inputs.aws_region }}
 
-  - name: Sync artifact to S3
-    id: sync-s4s-production
-    shell: bash
-    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
-    run: |
-      if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
-      elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/"
-      else
-        echo "Path ${{ inputs.path }} is not a valid file or directory."
-        exit 1
-      fi
+    - name: configure aws credentials-infrastructure
+      uses: aws-actions/configure-aws-credentials@v4
+      if: ${{ inputs.category == 'infrastructure' }}
+      with:
+        role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
+        role-session-name: github-actions-role
+        aws-region: ${{ inputs.aws_region }}
 
-  - name: Sync artifact to S3
-    id: sync-s4s-sandbox
-    shell: bash
-    if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
-    run: |
-      if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}" --delete
-      elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/"
-      else
-        echo "Path ${{ inputs.path }} is not a valid file or directory."
-        exit 1
-      fi
-
-  - name: List all files in the path recursively
-    shell: bash
-    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.show_summary == 'true')
-    run: |
-      set -euo pipefail
-
-      # Determina o bucket baseado na categoria
-      CATEGORY="${{ inputs.category }}"
-      if [ "$CATEGORY" = "s4s" ]; then
-        if [ "${{ github.ref_name }}" = "sandbox" ]; then
-          BUCKET_NAME="github-artifact.sandbox-s4s.tecmise.com"
-        else
-          BUCKET_NAME="github-artifact.production-s4s.tecmise.com"
+    - name: Verify path exists
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ ! -d "${{ inputs.path }}" ]; then
+          echo "Path ${{ inputs.path }} does not exist"
+          exit 1
         fi
-      else
-        BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
-      fi
 
-      echo "## Artifacts Uploaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
-      echo >> "$GITHUB_STEP_SUMMARY"
-      echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
-      echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
-
-      # Lista recursivamente todos os arquivos
-      find "${{ inputs.path }}" -type f | while read -r file; do
-        # Obtém tamanho em bytes
-        SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
-        
-        # Converte para KB ou MB
-        if [ "$SIZE" -lt 1048576 ]; then
-          SIZE_FORMATTED="$(( SIZE / 1024 )) KB"
+    - name: Verify path is folder or file
+      shell: bash
+      id: verify-path
+      run: |
+        set -euo pipefail
+        if [ -f "${{ inputs.path }}" ]; then
+          echo "::set-output name=is_file::true"
         else
-          SIZE_FORMATTED="$(printf '%.2f' $(echo "scale=2; $SIZE / 1048576" | bc)) MB"
+          echo "::set-output name=is_file::false"
+        fi
+
+    - name: Sync artifact to S3
+      id: sync-infrastructure
+      shell: bash
+      if: ${{ inputs.category == 'infrastructure' }}
+      run: |
+        S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+        if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
+          aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+        else
+          aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+        fi
+
+    - name: Sync artifact to S3
+      id: sync-s4s-production
+      shell: bash
+      if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
+      run: |
+        S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+        if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
+          aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+        else
+          aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+        fi
+
+    - name: Sync artifact to S3
+      id: sync-s4s-sandbox
+      shell: bash
+      if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
+      run: |
+        S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+        if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
+          aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
+        else
+          aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+        fi
+
+    - name: List all files in the path recursively
+      shell: bash
+      if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.show_summary == 'true')
+      run: |
+        set -euo pipefail
+        
+        # Determina o bucket baseado na categoria
+        CATEGORY="${{ inputs.category }}"
+        if [ "$CATEGORY" = "s4s" ]; then
+          if [ "${{ github.ref_name }}" = "sandbox" ]; then
+            BUCKET_NAME="github-artifact.sandbox-s4s.tecmise.com"
+          else
+            BUCKET_NAME="github-artifact.production-s4s.tecmise.com"
+          fi
+        else
+          BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
         fi
         
-        # Extrai extensão
-        EXT="${file##*.}"
-        [ "$EXT" = "$file" ] && EXT="sem extensão"
+        echo "## Artifacts Downloaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
+        echo >> "$GITHUB_STEP_SUMMARY"
+        echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
+        echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
         
-        # Cria caminho S3
-        RELATIVE_PATH="${file#${{ inputs.path }}/}"
-        S3_PATH="./${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
+        # Lista recursivamente todos os arquivos
+        find "${{ inputs.path }}" -type f | while read -r file; do
+          # Obtém tamanho em bytes
+          SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
         
-        # Adiciona linha na tabela
-        echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
-      done
+          # Converte para KB ou MB
+          if [ "$SIZE" -lt 1048576 ]; then
+            SIZE_FORMATTED="$(( SIZE / 1024 )) KB"
+          else
+            SIZE_FORMATTED="$(printf '%.2f' $(echo "scale=2; $SIZE / 1048576" | bc)) MB"
+          fi
+        
+          # Extrai extensão
+          EXT="${file##*.}"
+          [ "$EXT" = "$file" ] && EXT="sem extensão"
+        
+          # Cria caminho S3
+          RELATIVE_PATH="${file#${{ inputs.path }}/}"
+          S3_PATH="./${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
+        
+          # Adiciona linha na tabela
+          echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
+        done
 
-  - name: Remove Aws Credentials
-    shell: bash
-    if: always()
-    run: |
-      rm -rf ~/.aws/credentials
-      rm -rf ~/.aws/config
+    - name: Remove Aws Credentials
+      shell: bash
+      if: always()
+      run: |
+        rm -rf ~/.aws/credentials
+        rm -rf ~/.aws/config

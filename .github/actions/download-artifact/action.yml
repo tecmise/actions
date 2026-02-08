@@ -42,14 +42,33 @@ runs:
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
+  - name: Verify path exists
+    shell: bash
+    run: |
+      set -euo pipefail
+      if [ ! -d "${{ inputs.path }}" ]; then
+        echo "Path ${{ inputs.path }} does not exist"
+        exit 1
+      fi
+
+  - name: Verify path is folder or file
+    shell: bash
+    id: verify-path
+    run: |
+      set -euo pipefail
+      if [ -f "${{ inputs.path }}" ]; then
+        echo "::set-output name=is_file::true"
+      else
+        echo "::set-output name=is_file::false"
+      fi
+
   - name: Sync artifact to S3
     id: sync-infrastructure
     shell: bash
     if: ${{ inputs.category == 'infrastructure' }}
     run: |
       S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
-      # Tenta listar como se fosse um arquivo
-      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+      if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
         aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
@@ -61,8 +80,7 @@ runs:
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
       S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
-      # Tenta listar como se fosse um arquivo
-      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+      if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
         aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
@@ -74,8 +92,7 @@ runs:
     if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
       S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
-      # Tenta listar como se fosse um arquivo
-      if aws s3 ls "$S3_PATH" 2>/dev/null | grep -q .; then
+      if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
         aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
