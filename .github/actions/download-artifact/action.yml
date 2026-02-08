@@ -18,6 +18,10 @@ inputs:
     description: 'Path to download the artifact'
     required: false
     default: '.'
+  show_summary:
+    description: 'Show summary of downloaded artifacts'
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -61,7 +65,7 @@ runs:
 
   - name: List all files in the path recursively
     shell: bash
-    if: steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion
+    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.show_summary == 'true')
     run: |
       set -euo pipefail
 
