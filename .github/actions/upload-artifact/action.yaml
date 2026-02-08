@@ -1,8 +1,5 @@
 name: Upload Artifact
 inputs:
-  aws_accounts:
-    description: 'Accounts'
-    required: true
   category:
     description: 'Category of repository'
     required: false
@@ -23,7 +20,7 @@ runs:
     uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
     with:
-      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role
+      role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
@@ -31,7 +28,7 @@ runs:
     uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 'infrastructure' }}
     with:
-      role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
+      role-to-assume: arn:aws:iam::${{ fromJson(vars.AWS_ACCOUNTS).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
