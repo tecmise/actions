@@ -1,0 +1,182 @@
+name: Building Go
+
+on:
+  workflow_call:
+    inputs:
+      hashcode:
+        description: 'Hashcode'
+        required: true
+        type: string
+      runner_name:
+        required: true
+        type: string
+      runner_category:
+        required: true
+        type: string
+      go_version:
+        required: false
+        type: string
+        default: '^1.21'
+      is_lambda:
+        required: false
+        type: boolean
+        default: false
+      is_container:
+        required: false
+        type: boolean
+        default: false
+
+
+      artifact_name:
+        required: true
+        type: string
+      artifact_main_path:
+        required: true
+        type: string
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
+      aws_environment:
+        description: 'Environment for the workflow'
+        required: false
+        type: string
+        default: 's4s'
+
+      resource_folder:
+        description: 'Resource folder for the artifact'
+        required: false
+        type: string
+        default: ''
+
+    outputs:
+      md5:
+        description: "MD5 checksum of the built artifact"
+        value: ${{ jobs.building.outputs.md5 }}
+
+jobs:
+
+  building:
+    name: Building
+    environment: ${{ github.ref_name }}
+    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    permissions:
+      contents: read
+    env:
+      GO111MODULE: on
+      GOPROXY: direct
+      GOSUMDB: off
+    outputs:
+      md5: ${{ steps.calculate-md5.outputs.md5 }}
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go_version }}
+          cache: false
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Autenticar repositórios privados
+        run: |
+          # Cria ~/.netrc com credenciais GitHub
+          echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+          chmod 600 ~/.netrc
+          go env -w GOPRIVATE=github.com/tecmise/*
+          go env -w GOSUMDB=off
+
+      - name: Tidy
+        run: go mod tidy
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Build Lambda
+        if: inputs.is_lambda == true
+        run: |
+          GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+      - name: Build Container
+        if: inputs.is_lambda != true
+        run: |
+          go mod verify
+          go mod vendor
+          GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+
+      - name: Calculate MD5
+        id: calculate-md5
+        run: |
+          MD5=$(md5sum ${{ inputs.artifact_name }} | cut -d ' ' -f 1)
+          echo "md5=$MD5" >> "$GITHUB_OUTPUT"
+
+      - name: Set Extended Attributes
+        run: |
+          setfattr -n user.application -v "${{ github.event.repository.name }}" ${{ inputs.artifact_name }}
+          setfattr -n user.artifact -v "${{ inputs.artifact_name }}" ${{ inputs.artifact_name }}
+          setfattr -n user.sha -v "${{ github.sha }}" ${{ inputs.artifact_name }}
+          setfattr -n user.md5 -v "${{ steps.calculate-md5.outputs.md5 }}" ${{ inputs.artifact_name }}
+          setfattr -n user.build_time -v "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" ${{ inputs.artifact_name }}
+          setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
+          setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
+
+      - name: Rename
+        if: inputs.is_lambda == true
+        run: |
+          mv ${{ inputs.artifact_name }} bootstrap
+          chmod +x bootstrap
+
+      - name: Zip the artifact-builded folder
+        if: inputs.is_lambda == true
+        run: |
+          zip -r artifact-builded.zip bootstrap ${{ inputs.resource_folder }}
+          mv artifact-builded.zip ${{ inputs.artifact_name }}.zip
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.artifact_name }}.zip
+
+
+  publishing:
+    name: Publish
+    environment: ${{ github.ref_name }}
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    needs:
+      - building
+    steps:
+
+      - name: Authenticate on AWS
+        uses: tecmise/actions/.github/actions/aws-authenticate@main
+        with:
+          category: ${{ inputs.aws_environment }}
+          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+          aws_region: ${{ inputs.aws_region }}
+
+
+      - name: Put parameter in SSM Parameter Store
+        run: |
+          aws ssm put-parameter --name "/versions/${{ github.event.repository.name }}/hashcode" --value "${{ inputs.hashcode }}" --type String --overwrite
+
+      - name: download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+
+      - name: Upload artifact to S3
+        if: ${{ inputs.runner_category == 's4s' }}
+        run: aws s3 cp ${{ inputs.artifact_name }}.zip s3://${{ fromJson(vars.AWS_BUCKETS_LAMBDA).s4s[github.ref_name] }}/${{ github.event.repository.name }}/${{ inputs.hashcode }}/${{ inputs.artifact_name }}.zip
