@@ -45,5 +45,5 @@ variable "webhook_discord" {
 
 
 variable "subnet_ids" {
-  type = string
+  type = list(string)
 }
