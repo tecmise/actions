@@ -24,7 +24,7 @@ on:
 jobs:
   loading-hash:
     name: Generating hashcode
-    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     outputs:
       content: ${{ steps.generate_hash.outputs.content }}
     steps:
