@@ -14,5 +14,6 @@ module "lambda-consumer" {
   })
   policy_arns         = var.policy_arns
   security_group_ids  = var.security_groups
+  subnet_ids          = var.subnet_ids
 }
 

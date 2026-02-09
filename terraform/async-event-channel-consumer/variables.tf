@@ -42,3 +42,8 @@ variable "queue_arn" {
 variable "webhook_discord" {
   type = string
 }
+
+
+variable "subnet_ids" {
+  type = string
+}
