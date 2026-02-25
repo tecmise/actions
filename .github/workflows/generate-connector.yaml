@@ -24,6 +24,9 @@ on:
 jobs:
   protocol-buffers:
     name: Protocol Buffers
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     container:
       image: public.ecr.aws/g4i8n5q9/connector-provider:${{ inputs.container_tag }}
@@ -118,6 +121,9 @@ jobs:
     environment: ${{ github.ref_name }}
     runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: protocol-buffers
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
