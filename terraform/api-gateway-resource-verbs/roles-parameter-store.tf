@@ -8,4 +8,3 @@ resource "aws_ssm_parameter" "roles_parameter" {
     BelogsToAuthorization = true
   }
 }
-

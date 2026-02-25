@@ -24,7 +24,7 @@ on:
 jobs:
   protocol-buffers:
     name: Protocol Buffers
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     container:
       image: public.ecr.aws/g4i8n5q9/connector-provider:${{ inputs.container_tag }}
       env:
@@ -84,7 +84,7 @@ jobs:
 
   notify:
     name: Notify Error
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: protocol-buffers
     if: ${{ always() && needs.protocol-buffers.result == 'failure' }}
     environment: "${{ github.ref_name }}"
@@ -103,7 +103,7 @@ jobs:
   commit-changes:
     name: Commit Changes
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
     needs: protocol-buffers
     steps:
       - name: Checkout target repository

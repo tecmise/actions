@@ -37,6 +37,7 @@ on:
         required: true
         type: string
         default: 'flyway_schema_history'
+
       migration_path:
         description: 'Path to the migration files'
         required: false
@@ -107,7 +108,8 @@ jobs:
           -connectRetries=60 \
           -locations="filesystem:${{ inputs.migration_path }}" \
           validate 2>&1)
-        EXIT_CODE=$?
+        
+        =$?
         echo "$VALIDATION_OUTPUT" > validation.log
         echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
