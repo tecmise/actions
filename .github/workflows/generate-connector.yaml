@@ -69,18 +69,31 @@ jobs:
           start.py --proto-dir proto
           mv generated/* connector-lib/connector/pkg/
 
-      - name: Upload Generated Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-files
-          path: /app/connector-lib/connector
 
-      - name: Upload Logs
-        uses: actions/upload-artifact@v4
+      - name: Upload Generated Files
+        uses: tecmise/actions/.github/actions/upload-artifact@main
         with:
-          name: logs
-          path: /tmp/execution.log
-          retention-days: 1
+          path: '/app/connector-lib/connector'
+          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+
+      - name: Upload Generated Files
+        uses: tecmise/actions/.github/actions/upload-artifact@main
+        with:
+          path: '/tmp/execution.log'
+          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+
+#      - name: Upload Generated Files
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: generated-files
+#          path: /app/connector-lib/connector
+#
+#      - name: Upload Logs
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: logs
+#          path: /tmp/execution.log
+#          retention-days: 1
 
   notify:
     name: Notify Error
@@ -160,11 +173,27 @@ jobs:
           mkdir -p pkg
           mkdir -p internal
 
+
+
+
+
       - name: Download generated-files pkg
-        uses: actions/download-artifact@v4
+        uses: tecmise/actions/.github/actions/download-artifact@main
         with:
-          name: generated-files
-          path: target-repo
+          path: '/app/connector-lib/connector'
+          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+          download_path: 'target-repo'
+
+
+
+
+
+#
+#      - name: Download generated-files pkg
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: generated-files
+#          path: target-repo
 
 
       - name: Status
