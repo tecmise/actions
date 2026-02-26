@@ -69,6 +69,9 @@ jobs:
           start.py --proto-dir proto
           mv generated/* connector-lib/connector/pkg/
 
+      - name: Add Apk AWS CLI
+        run: apk add --no-cache aws-cli
+
 
 
       - name: Upload Generated Files
@@ -83,18 +86,6 @@ jobs:
           path: '/tmp/execution.log'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
 
-#      - name: Upload Generated Files
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: generated-files
-#          path: /app/connector-lib/connector
-#
-#      - name: Upload Logs
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: logs
-#          path: /tmp/execution.log
-#          retention-days: 1
 
   notify:
     name: Notify Error
