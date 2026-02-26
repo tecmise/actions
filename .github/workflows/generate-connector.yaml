@@ -69,6 +69,11 @@ jobs:
           start.py --proto-dir proto
           mv generated/* connector-lib/connector/pkg/
 
+      - name: Install curl
+        shell: bash
+        run: |
+          apt-get update && apt-get install -y curl unzip sudo
+
       - name: Install AWS CLI
         shell: bash
         run: |
