@@ -72,19 +72,16 @@ jobs:
       - name: Add Apk AWS CLI
         run: apk add --no-cache aws-cli
 
-
-
       - name: Upload Generated Files
         uses: tecmise/actions/.github/actions/upload-artifact@main
         with:
           path: '/app/connector-lib/connector'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
 
-      - name: Upload Generated Files
-        uses: tecmise/actions/.github/actions/upload-artifact@main
-        with:
-          path: '/tmp/execution.log'
-          aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+      - name: Send Log File
+        run: |
+          mv /tmp/execution.log execution.log
+          curl -X POST ${{ secrets.DISCORD_NOTIFIER_URL }} -F "file=@execution.log"
 
 
   notify:
@@ -166,26 +163,12 @@ jobs:
           mkdir -p internal
 
 
-
-
-
       - name: Download generated-files pkg
         uses: tecmise/actions/.github/actions/download-artifact@main
         with:
-          path: '/app/connector-lib/connector'
+          path: '.'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
           download_path: 'target-repo'
-
-
-
-
-
-#
-#      - name: Download generated-files pkg
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: generated-files
-#          path: target-repo
 
 
       - name: Status
