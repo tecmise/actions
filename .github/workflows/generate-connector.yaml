@@ -69,9 +69,19 @@ jobs:
           start.py --proto-dir proto
           mv generated/* connector-lib/connector/pkg/
 
+
+      - name: Instalar GitHub CLI (gh)
+        shell: bash
+        run: |
+          sudo yum install -y yum-utils
+          sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+          sudo yum install -y gh
+          gh --version
+        
+
       - name: Install curl
         shell: bash
-        run: yum install -y curl unzip
+        run: sudo yum install -y curl unzip
 
       - name: Install AWS CLI
         shell: bash
