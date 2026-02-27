@@ -30,6 +30,7 @@ runs:
       path: '.'
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}
       download_path: '.'
+      artifact: '${{ inputs.artifact }}'
 
 
 
