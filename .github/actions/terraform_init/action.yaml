@@ -43,11 +43,12 @@ runs:
 #      retention-days: 7
 
   - name: Upload Generated Files
-    uses: tecmise/actions/.github/actions/upload-artifact@v6.3.0
+    uses: tecmise/actions/.github/actions/upload-artifact@v6.3.1
     with:
       path: '${{ inputs.working_directory }}'
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}
       artifact: '${{ inputs.artifact }}'
+      category: 's4s'
 
 
   - name: Summary - Inputs do Terraform Init
