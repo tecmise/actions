@@ -18,6 +18,10 @@ inputs:
     description: 'Path to download the artifact'
     required: false
     default: '.'
+  artifact:
+    description: 'Artifact name'
+    required: false
+    default: 'default'
   debug:
     description: 'Debug'
     required: false
@@ -67,7 +71,7 @@ runs:
     shell: bash
     if: ${{ inputs.category == 'infrastructure' }}
     run: |
-      S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
       if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
@@ -79,7 +83,7 @@ runs:
     shell: bash
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
-      S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
       if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
@@ -91,7 +95,7 @@ runs:
     shell: bash
     if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
-      S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}"
+      S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
       if [ "${{ steps.verify-path.outputs.is_file }}" = "true" ]; then
         aws s3 cp "$S3_PATH" "${{ inputs.download_path }}"
       else
