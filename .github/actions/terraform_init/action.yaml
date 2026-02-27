@@ -47,6 +47,7 @@ runs:
     with:
       path: '${{ inputs.working_directory }}'
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+      artifact: '${{ inputs.artifact }}'
 
 
   - name: Summary - Inputs do Terraform Init
