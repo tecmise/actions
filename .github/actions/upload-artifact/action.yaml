@@ -1,9 +1,5 @@
 name: Upload Artifact
 inputs:
-  artifact:
-    description: 'Name of the artifact'
-    required: false
-    default: '/'
   aws_accounts:
     description: 'Accounts'
     required: true
@@ -18,6 +14,10 @@ inputs:
   path:
     description: 'Path to the artifact to be uploaded'
     required: true
+  artifact:
+    description: 'Artifact name'
+    required: false
+    default: 'default'
   debug:
     description: 'Debug'
     required: false
@@ -51,9 +51,9 @@ runs:
     if: ${{ inputs.category == 'infrastructure' }}
     run: |
       if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}" --delete
+        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}" --delete
       elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}"
+        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}/"
       else
         echo "Path ${{ inputs.path }} is not a valid file or directory."
         exit 1
@@ -65,9 +65,9 @@ runs:
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
     run: |
       if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}" --delete
+        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}" --delete
       elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}"
+        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}/"
       else
         echo "Path ${{ inputs.path }} is not a valid file or directory."
         exit 1
@@ -79,9 +79,9 @@ runs:
     if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
     run: |
       if [ -d "${{ inputs.path }}" ]; then
-        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}" --delete
+        aws s3 sync "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}" --delete
       elif [ -f "${{ inputs.path }}" ]; then
-        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}${{ inputs.artifact }}"
+        aws s3 cp "${{ inputs.path }}" "s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}/"
       else
         echo "Path ${{ inputs.path }} is not a valid file or directory."
         exit 1
