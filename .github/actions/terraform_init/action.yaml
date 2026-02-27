@@ -43,7 +43,7 @@ runs:
 #      retention-days: 7
 
   - name: Upload Generated Files
-    uses: tecmise/actions/.github/actions/upload-artifact@main
+    uses: tecmise/actions/.github/actions/upload-artifact@v6.3.0
     with:
       path: '${{ inputs.working_directory }}'
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}

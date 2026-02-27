@@ -25,7 +25,7 @@ runs:
 #      name: ${{ inputs.artifact }}
 
   - name: Download generated-files pkg
-    uses: tecmise/actions/.github/actions/download-artifact@main
+    uses: tecmise/actions/.github/actions/download-artifact@v6.3.0
     with:
       path: '.'
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}
