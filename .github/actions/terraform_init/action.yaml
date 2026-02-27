@@ -34,13 +34,20 @@ runs:
     run: |
       terraform init -backend-config=bucket=${{ inputs.bucket }} -backend-config=key=${{ inputs.key }}
 
-  - name: Upload Node Group
-    uses: actions/upload-artifact@v4
+#  - name: Upload Node Group
+#    uses: actions/upload-artifact@v4
+#    with:
+#      path: '${{ inputs.working_directory }}'
+#      name: ${{ inputs.artifact }}
+#      include-hidden-files: 'true'
+#      retention-days: 7
+
+  - name: Upload Generated Files
+    uses: tecmise/actions/.github/actions/upload-artifact@main
     with:
       path: '${{ inputs.working_directory }}'
-      name: ${{ inputs.artifact }}
-      include-hidden-files: 'true'
-      retention-days: 7
+      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+
 
   - name: Summary - Inputs do Terraform Init
     shell: bash
