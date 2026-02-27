@@ -31,6 +31,12 @@ runs:
       aws_accounts: ${{ vars.AWS_ACCOUNTS }}
       download_path: '.'
 
+  - name: Check files
+    shell: bash
+    run: |
+      echo "Files in current directory:"
+      ls -ltra
+
 
   - name: "Enabled permissions"
     shell: bash
