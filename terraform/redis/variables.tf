@@ -42,8 +42,10 @@ variable "persistence_size" {
 
 variable "redis_sub_domain" {
   type = string
+  default = null
 }
 
 variable "domain" {
   type = string
+  default = null
 }

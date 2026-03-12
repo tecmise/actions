@@ -34,6 +34,4 @@ resource "kubernetes_manifest" "redis_ingress" {
       ]
     }
   }
-
-  depends_on = [helm_release.redis]
 }

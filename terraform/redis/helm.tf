@@ -64,3 +64,12 @@ resource "helm_release" "redis" {
   ]
 }
 
+module "expose" {
+  depends_on = [helm_release.redis]
+  count = var.redis_sub_domain != null && var.domain != null ? 1 : 0
+  source = "./expose"
+  domain = var.domain
+  name   = var.name
+  namespace = var.name
+  redis_sub_domain = var.redis_sub_domain
+}
