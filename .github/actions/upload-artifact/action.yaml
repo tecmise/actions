@@ -25,10 +25,7 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: Show Debug Var
-    shell: bash
-    run: |
-        echo "Debug: ${{ DEBUG }}"
+
   - name: configure aws credentials-s4s
     uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
