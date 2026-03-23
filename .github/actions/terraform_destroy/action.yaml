@@ -23,6 +23,7 @@ runs:
   - uses: hashicorp/setup-terraform@v3
 
   - name: Show Accounts
+    shell: bash
     run: echo "${{ inputs.accounts }}"
 
   - name: Download generated-files pkg
