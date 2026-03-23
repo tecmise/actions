@@ -30,7 +30,7 @@ runs:
     uses: tecmise/actions/.github/actions/download-artifact@main
     with:
       path: '.'
-      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+      aws_accounts: ${{ inputs.accounts }}
       download_path: '.'
       artifact: '${{ inputs.artifact }}'
       category: 's4s'
