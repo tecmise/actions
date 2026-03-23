@@ -22,9 +22,10 @@ runs:
       node-version: '20'
   - uses: hashicorp/setup-terraform@v3
 
-  - name: Show Accounts
+  - name: Debug inputs
     shell: bash
-    run: echo "${{ inputs.accounts }}"
+    run: |
+      echo "accounts: '${{ inputs.accounts }}'"
 
   - name: Download generated-files pkg
     uses: tecmise/actions/.github/actions/download-artifact@main
