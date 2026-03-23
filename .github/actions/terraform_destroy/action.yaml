@@ -1,5 +1,8 @@
-name: Terraform Apply
+name: Terraform Destroy
 inputs:
+  accounts:
+    description: "Accounts aws"
+    required: true
   artifact:
     description: 'Artifact'
     required: true
@@ -28,7 +31,7 @@ runs:
     uses: tecmise/actions/.github/actions/download-artifact@main
     with:
       path: '.'
-      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+      aws_accounts: ${{ inputs.accounts }}
       download_path: '.'
       artifact: '${{ inputs.artifact }}'
       category: 's4s'
