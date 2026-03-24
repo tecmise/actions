@@ -73,14 +73,14 @@ jobs:
         run: apk add --no-cache aws-cli
 
       - name: Authenticate on AWS
-        uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.0
+        uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
         with:
           category: 'infrastructure'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
           aws_region: 'us-east-1'
 
       - name: Upload Generated Files
-        uses: tecmise/actions/.github/actions/upload-artifact@v6.4.0
+        uses: tecmise/actions/.github/actions/upload-artifact@v6.4.1
         with:
           path: '/app/connector-lib/connector'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -98,7 +98,7 @@ jobs:
     environment: "${{ github.ref_name }}"
     steps:
       - name: Send Notification Error
-        uses: tecmise/actions/.github/actions/discord-notifier@v.6.4.0
+        uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
         with:
           title: '🚨 Houve um problema ao gerar connectores 🚨'
           message: "Para melhor detalhamento consult o arquivo de logs na aba de artifacts."
@@ -169,7 +169,7 @@ jobs:
           mkdir -p internal
 
       - name: Authenticate on AWS
-        uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.0
+        uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
         with:
           category: 'infrastructure'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -177,7 +177,7 @@ jobs:
 
 
       - name: Download generated-files pkg
-        uses: tecmise/actions/.github/actions/download-artifact@v6.4.0
+        uses: tecmise/actions/.github/actions/download-artifact@v6.4.1
         with:
           path: '.'
           download_path: 'target-repo'

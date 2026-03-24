@@ -39,7 +39,7 @@ jobs:
 
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.0
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}

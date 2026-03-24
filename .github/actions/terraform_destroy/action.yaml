@@ -20,7 +20,7 @@ runs:
   - uses: hashicorp/setup-terraform@v3
 
   - name: Download generated-files pkg
-    uses: tecmise/actions/.github/actions/download-artifact@v6.4.0
+    uses: tecmise/actions/.github/actions/download-artifact@v6.4.1
     with:
       path: '.'
       download_path: '.'

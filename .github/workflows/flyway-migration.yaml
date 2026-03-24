@@ -132,7 +132,7 @@ jobs:
         name: validation-log-${{ inputs.name }}
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
       with:
         title: '❌  Houve um erro ao validar migrations ❌ '
         message: "Falha na validação das migrations."
@@ -206,7 +206,7 @@ jobs:
         name: migration-log
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
       with:
         title: '❌  Houve um erro ao Executar Migration ❌ '
         message: "Falha ao executar migrations."
@@ -236,7 +236,7 @@ jobs:
         name: migration-log
 
     - name: Notify Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.0
+      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
       with:
         title: '🚀 Migration ${{ github.event.repository.name }} 🚀'
         message: "Migrações aplicadas com sucesso."
