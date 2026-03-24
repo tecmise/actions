@@ -36,9 +36,9 @@ jobs:
         go-version: ${{ inputs.go_version }}
         cache: false
 
-    - name: Show Files
-      run: |
-        ls -ltra ~/go/pkg/mod
+    # - name: Show Files
+    #   run: |
+    #     ls -ltra ~/go/pkg/mod
 
     - name: Tidy
       run: go mod tidy
