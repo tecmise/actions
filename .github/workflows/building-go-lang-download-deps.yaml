@@ -3,6 +3,16 @@ name: Download Dependencies
 on:
   workflow_call:
     inputs:
+      runner_name:
+        required: true
+        type: string
+        default: 'building'
+      runner_category:
+        type: string
+        default: 's4s'
+      go_version:
+        type: string
+        default: '^1.21'
 
 jobs:
 
