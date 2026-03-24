@@ -75,7 +75,7 @@ jobs:
       - name: Authenticate on AWS
         uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.0
         with:
-          category: 's4s'
+          category: 'infrastructure'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
           aws_region: 'us-east-1'
 
