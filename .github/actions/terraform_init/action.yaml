@@ -38,7 +38,7 @@ runs:
     uses: tecmise/actions/.github/actions/upload-artifact@main
     with:
       path: '${{ inputs.working_directory }}'
-      aws_accounts: ${{ inputs.aws_accounts }}
+      aws_accounts: ${{ vars.AWS_ACCOUNTS }}
       artifact: '${{ inputs.artifact }}'
       category: 's4s'
 
