@@ -1,0 +1,43 @@
+name: Download Dependencies
+
+on:
+  workflow_call:
+    inputs:
+
+jobs:
+
+  building:
+    name: Building
+    environment: ${{ github.ref_name }}
+    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    permissions:
+      contents: read
+    env:
+      GO111MODULE: on
+      GOPROXY: direct
+      GOSUMDB: off
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go_version }}
+        cache: false
+
+    - name: Show Files
+      run: |
+        ls -ltra ~/go/pkg/mod
+
+    - name: Tidy
+      run: go mod tidy
+
+    - name: Download dependencies
+      run: go mod download
+
+    - name: Show Files
+      run: |
+        ls -ltra ~/go/pkg/mod
+
