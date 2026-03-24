@@ -44,10 +44,6 @@ jobs:
         go env -w GOPRIVATE=github.com/tecmise/*
         go env -w GOSUMDB=off
 
-    # - name: Show Files
-    #   run: |
-    #     ls -ltra ~/go/pkg/mod
-
     - name: Tidy
       run: go mod tidy
 
@@ -58,3 +54,9 @@ jobs:
       run: |
         ls -ltra ~/go/pkg/mod
 
+    - name: Upload Generated Files
+      uses: tecmise/actions/.github/actions/upload-artifact@v6.4.1
+      with:
+        path: '~/go/pkg/mod'
+        artifact: '${{ github.sha }}'
+        category: 'infrastructure'
