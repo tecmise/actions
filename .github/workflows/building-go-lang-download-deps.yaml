@@ -36,6 +36,14 @@ jobs:
         go-version: ${{ inputs.go_version }}
         cache: false
 
+    - name: Autenticar repositórios privados
+      run: |
+        # Cria ~/.netrc com credenciais GitHub
+        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+        chmod 600 ~/.netrc
+        go env -w GOPRIVATE=github.com/tecmise/*
+        go env -w GOSUMDB=off
+
     # - name: Show Files
     #   run: |
     #     ls -ltra ~/go/pkg/mod
