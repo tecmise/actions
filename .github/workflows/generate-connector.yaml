@@ -73,7 +73,7 @@ jobs:
         run: apk add --no-cache aws-cli
 
       - name: Upload Generated Files
-        uses: tecmise/actions/.github/actions/upload-artifact@main
+        uses: tecmise/actions/.github/actions/upload-artifact@v6.4.0
         with:
           path: '/app/connector-lib/connector'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -91,7 +91,7 @@ jobs:
     environment: "${{ github.ref_name }}"
     steps:
       - name: Send Notification Error
-        uses: tecmise/actions/.github/actions/discord-notifier@v3.0.0
+        uses: tecmise/actions/.github/actions/discord-notifier@v.6.4.0
         with:
           title: '🚨 Houve um problema ao gerar connectores 🚨'
           message: "Para melhor detalhamento consult o arquivo de logs na aba de artifacts."
@@ -163,7 +163,7 @@ jobs:
 
 
       - name: Download generated-files pkg
-        uses: tecmise/actions/.github/actions/download-artifact@main
+        uses: tecmise/actions/.github/actions/download-artifact@v6.4.0
         with:
           path: '.'
           aws_accounts: ${{ vars.AWS_ACCOUNTS }}

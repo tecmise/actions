@@ -54,7 +54,7 @@ jobs:
         id: versionament
         env:
           GITHUB_TOKEN: ${{ secrets.CONNECTORS_KEY }}
-        uses: tecmise/actions/.github/actions/versionament@main
+        uses: tecmise/actions/.github/actions/versionament@v6.4.0
 
       - name: Next Patch
         id: patch
@@ -129,7 +129,7 @@ jobs:
           
           echo "Tag $VERSION criada com sucesso!"
       - name: Send Notification
-        uses: tecmise/actions/.github/actions/discord-notifier@v3.1.2
+        uses: tecmise/actions/.github/actions/discord-notifier@v.6.4.0
         with:
           title: '🔗 Novo connector ${{ github.event.repository.name }} (v${{ needs.loading_pr_data.outputs.major }}.${{ needs.loading_pr_data.outputs.minor }}.${{ needs.loading_pr_data.outputs.patch }}) 🔗'
           message: 'Atualizem seus repositorios com a nova tag, o projeto versaionado está como privado para download sera necessario utilizar proxy local ou chave ssh.'

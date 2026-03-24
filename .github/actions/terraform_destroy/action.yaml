@@ -1,8 +1,5 @@
 name: Terraform Destroy
 inputs:
-  accounts:
-    description: "Accounts aws"
-    required: true
   artifact:
     description: 'Artifact'
     required: true
@@ -23,7 +20,7 @@ runs:
   - uses: hashicorp/setup-terraform@v3
 
   - name: Download generated-files pkg
-    uses: tecmise/actions/.github/actions/download-artifact@main
+    uses: tecmise/actions/.github/actions/download-artifact@v6.4.0
     with:
       path: '.'
       download_path: '.'
