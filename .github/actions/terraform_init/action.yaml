@@ -1,8 +1,5 @@
 name: Terraform Init
 inputs:
-  aws_accounts:
-    description: 'Artifact'
-    required: true
   artifact:
     description: 'Artifact'
     required: true
@@ -41,7 +38,6 @@ runs:
     uses: tecmise/actions/.github/actions/upload-artifact@main
     with:
       path: '${{ inputs.working_directory }}'
-      aws_accounts: ${{ inputs.aws_accounts }}
       artifact: '${{ inputs.artifact }}'
       category: 's4s'
 

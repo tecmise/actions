@@ -22,26 +22,13 @@ runs:
       node-version: '20'
   - uses: hashicorp/setup-terraform@v3
 
-  - name: Debug inputs
-    shell: bash
-    run: |
-      echo "accounts: '${{ inputs.accounts }}'"
-
   - name: Download generated-files pkg
     uses: tecmise/actions/.github/actions/download-artifact@main
     with:
       path: '.'
-      aws_accounts: ${{ inputs.accounts }}
       download_path: '.'
       artifact: '${{ inputs.artifact }}'
       category: 's4s'
-
-  - name: Check files
-    shell: bash
-    run: |
-      echo "Files in current directory:"
-      ls -ltra
-
 
   - name: "Enabled permissions"
     shell: bash
@@ -50,7 +37,6 @@ runs:
   - name: Terraform Apply
     shell: bash
     run: terraform destroy -auto-approve
-
 
   - name: Terraform Outputs (json)
     shell: bash
