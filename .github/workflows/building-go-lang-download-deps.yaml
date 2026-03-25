@@ -29,13 +29,6 @@ jobs:
       GOSUMDB: off
     steps:
 
-    - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
-      with:
-        category: 'infrastructure'
-        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-        aws_region: us-east-1
-
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -53,6 +46,13 @@ jobs:
         go env -w GOPRIVATE=github.com/tecmise/*
         go env -w GOSUMDB=off
 
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
+      with:
+        category: 'infrastructure'
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: us-east-1
+
     - name: Check S3 cache
       id: check_s3
       run: |
@@ -66,12 +66,15 @@ jobs:
         aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
 
     - name: Tidy
+      if: steps.check_s3.outputs.exists == 'false'
       run: go mod tidy
 
     - name: Download dependencies
+      if: steps.check_s3.outputs.exists == 'false'
       run: go mod download
 
     - name: Show Files
+      if: steps.check_s3.outputs.exists == 'false'
       run: |
         ls -ltra ~/go/pkg/mod
         aws s3 sync ~/go/pkg/mod s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps --delete
