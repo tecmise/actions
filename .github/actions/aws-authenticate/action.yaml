@@ -25,7 +25,7 @@ runs:
 
   - name: configure aws credentials-infrastructure
     uses: aws-actions/configure-aws-credentials@v4
-    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure') }}
+    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure' || github.ref_name == 'sandbox') }}
     with:
       role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
