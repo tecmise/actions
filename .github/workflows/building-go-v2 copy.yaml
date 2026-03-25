@@ -15,14 +15,17 @@ on:
       is_lambda:
         type: boolean
         default: false
-      applications:
-        type: string
-        required: true
       goarch:
         description: 'Target architecture (amd64 or arm64)'
         required: false
         type: string
         default: 'amd64'
+      # artifact_name:
+      #   required: true
+      #   type: string
+      # artifact_main_path:
+      #   required: true
+      #   type: string
 
 jobs:
 
@@ -33,113 +36,20 @@ jobs:
     # runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
-    outputs:
-      matrix: ${{ steps.parse_apps.outputs.matrix }}
     env:
       GO111MODULE: on
       GOPROXY: direct
       GOSUMDB: off
     steps:
 
-    - name: Parse and validate applications
-      id: parse_apps
-      run: |
-        python3 << 'PYEOF'
-        import sys, yaml, json, os
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
 
-        raw = r"""${{ inputs.applications }}"""
-
-        try:
-            data = yaml.safe_load(raw)
-        except yaml.YAMLError as e:
-            print(f"::error::applications input is not valid YAML: {e}")
-            sys.exit(1)
-
-        if not isinstance(data, list):
-            print("::error::applications must be an array")
-            sys.exit(1)
-
-        for i, app in enumerate(data):
-            for field in ['name', 'artifact']:
-                if field not in app:
-                    print(f"::error::applications[{i}] is missing required field '{field}'")
-                    sys.exit(1)
-            app.setdefault('goarch', 'amd64')
-            app.setdefault('is_lambda', False)
-            app.setdefault('docker_image', '.github/docker/Dockerfile')
-
-        matrix_json = json.dumps(data)
-        with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-            f.write(f"matrix={matrix_json}\n")
-
-        print("Applications validated successfully:")
-        print(json.dumps(data, indent=2))
-        PYEOF
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ inputs.go_version }}
-        cache: false
-
-    - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@main
-      with:
-        category: 'infrastructure'
-        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-        aws_region: us-east-1
-
-    - name: Check S3 cache
-      id: check_s3
-      run: |
-        COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
-        echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-
-    - name: Send Notification Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
-      if: steps.check_s3.outputs.exists == 'false'
-      with:
-        title: '🚨 Erro de build 🚨'
-        message: "houve uma falha no build do ${{ github.repository }}"
-        severity: 'error'
-        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-        fields:
-          Link:"${{github.workflow.url}}"
-          Run:"${{github.run_id}}"
-
-    - name: Stop
-      if: steps.check_s3.outputs.exists == 'false'
-      run: |
-        exit(1)
-
-    - name: Restore Go cache from S3
-      if: steps.check_s3.outputs.exists == 'true'
-      run: |
-        mkdir -p ~/go/pkg/mod
-        aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
-
-
-
-  build-applications:
-    name: Build - ${{ matrix.name }}
-    needs: building
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include: ${{ fromJson(needs.building.outputs.matrix) }}
-    steps:
-
-    - name: Print application values
-      run: |
-        echo "name:         ${{ matrix.name }}"
-        echo "artifact:     ${{ matrix.artifact }}"
-        echo "goarch:       ${{ matrix.goarch }}"
-        echo "is_lambda:    ${{ matrix.is_lambda }}"
-        echo "docker_image: ${{ matrix.docker_image }}"
-
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ inputs.go_version }}
+  #         cache: false
 
   #     - name: Autenticar repositórios privados
   #       run: |
