@@ -73,7 +73,7 @@ jobs:
       if: steps.check_s3.outputs.exists == 'false'
       run: go mod download
 
-    - name: Show Files
+    - name: Upload files
       if: steps.check_s3.outputs.exists == 'false'
       run: |
         ls -ltra ~/go/pkg/mod
