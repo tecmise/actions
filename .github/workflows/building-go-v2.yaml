@@ -84,6 +84,14 @@ jobs:
             Link:"${{github.workflow.url}}"
             Run:"${{github.run_id}}"
 
+      - name: Restore Go cache from S3
+        if: steps.check_s3.outputs.exists == 'true'
+        run: |
+          mkdir -p ~/go/pkg/mod
+          aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
+
+
+
       - name: Build Lambda
         if: inputs.is_lambda == true
         run: |
