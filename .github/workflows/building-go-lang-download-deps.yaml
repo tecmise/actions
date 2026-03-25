@@ -18,7 +18,9 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+
+    runs-on: ubuntu-latest
+    # runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
     env:
@@ -60,10 +62,13 @@ jobs:
     - name: Show Files
       run: |
         ls -ltra ~/go/pkg/mod
+        mkdir -p go-deps
+        cp -rp ~/go/pkg/mod/* go-deps
+        ls -ltra go-deps
 
     - name: Upload Generated Files
       uses: tecmise/actions/.github/actions/upload-artifact@v6.4.1
       with:
-        path: '~/go/pkg/mod'
+        path: go-deps
         artifact: '${{ github.sha }}'
         category: 'infrastructure'
