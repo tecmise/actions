@@ -23,6 +23,7 @@ jobs:
     # runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
+      id-token: write
     env:
       GO111MODULE: on
       GOPROXY: direct
