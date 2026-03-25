@@ -53,6 +53,9 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: us-east-1
 
+    - name: Verify AWS credentials
+      run: aws sts get-caller-identity
+
     - name: Check S3 cache
       id: check_s3
       run: |
