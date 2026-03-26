@@ -139,7 +139,7 @@ jobs:
         category: 'infrastructure'
         aws_region: us-east-1
         artifact: go-deps
-        download_path: ${{ env.HOME }}/go/pkg/mod
+        download_path: ~/go/pkg/mod
 
 
 
