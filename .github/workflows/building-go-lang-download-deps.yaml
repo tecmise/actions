@@ -65,18 +65,8 @@ jobs:
 
 
     - name: Create folder
-      if: steps.check_s3.outputs.exists == 'true'
+      if: steps.check_s3.outputs.exists == 'false'
       run: mkdir -p ~/go/pkg/mod
-
-
-    - name: Restore Go cache from S3
-      if: steps.check_s3.outputs.exists == 'true'
-      uses: tecmise/actions/.github/actions/download-artifact@main
-      with:
-        category: 'infrastructure'
-        aws_region: us-east-1
-        artifact: go-deps
-        download_path: ~/go/pkg/mod
 
     - name: Tidy
       if: steps.check_s3.outputs.exists == 'false'
