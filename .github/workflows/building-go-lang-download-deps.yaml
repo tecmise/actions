@@ -66,7 +66,7 @@ jobs:
 
     - name: Create folder
       if: steps.check_s3.outputs.exists == 'true'
-      run: mkdir -p ${{ env.HOME }}/go/pkg/mod
+      run: mkdir -p ~/go/pkg/mod
 
 
     - name: Restore Go cache from S3
@@ -76,7 +76,7 @@ jobs:
         category: 'infrastructure'
         aws_region: us-east-1
         artifact: go-deps
-        download_path: ${{ env.HOME }}/go/pkg/mod
+        download_path: ~/go/pkg/mod
 
     - name: Tidy
       if: steps.check_s3.outputs.exists == 'false'

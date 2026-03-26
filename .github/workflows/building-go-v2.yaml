@@ -130,7 +130,7 @@ jobs:
 
     - name: Create folder
       if: steps.check_s3.outputs.exists == 'true'
-      run: mkdir -p ${{ env.HOME }}/go/pkg/mod
+      run: mkdir -p $HOME/go/pkg/mod
 
     - name: Restore Go cache from S3
       if: steps.check_s3.outputs.exists == 'true'
