@@ -70,7 +70,7 @@ jobs:
         category: 'infrastructure'
         aws_region: us-east-1
         artifact: go-deps
-        download_path: ~/go/pkg/mod
+        download_path: ${{ env.HOME }}/go/pkg/mod
 
     - name: Tidy
       if: steps.check_s3.outputs.exists == 'false'
@@ -87,5 +87,5 @@ jobs:
         category: 'infrastructure'
         aws_region: us-east-1
         artifact: go-deps
-        path: ~/go/pkg/mod
+        path: ${{ env.HOME }}/go/pkg/mod
 
