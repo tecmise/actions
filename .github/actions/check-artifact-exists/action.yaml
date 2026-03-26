@@ -1,0 +1,62 @@
+name: Check Artifact Exists
+inputs:
+  category:
+    description: 'Category of repository'
+    required: false
+    default: 'infrastructure'
+  aws_region:
+    description: 'Region'
+    required: false
+    default: 'us-east-1'
+  artifact:
+    description: 'Artifact name'
+    required: false
+    default: 'default'
+outputs:
+  exists:
+    description: 'Whether the artifact exists in S3'
+    value: ${{ steps.check.outputs.exists }}
+  type:
+    description: 'Type of artifact: file or folder'
+    value: ${{ steps.check.outputs.type }}
+runs:
+  using: composite
+  steps:
+
+  - name: Check artifact in S3
+    id: check
+    shell: bash
+    run: |
+      set -euo pipefail
+
+      if [ "${{ inputs.category }}" = "s4s" ]; then
+        if [ "${{ github.ref_name }}" = "sandbox" ]; then
+          BUCKET="github-artifact.sandbox-s4s.tecmise.com"
+        else
+          BUCKET="github-artifact.production-s4s.tecmise.com"
+        fi
+      else
+        BUCKET="github-artifact.infrastructure.tecmise.com"
+      fi
+
+      S3_PATH="s3://${BUCKET}/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
+
+      COUNT=$(aws s3 ls --recursive "${S3_PATH}/" 2>/dev/null | wc -l | tr -d ' ')
+
+      if [ "$COUNT" -eq 0 ]; then
+        echo "exists=false" >> "$GITHUB_OUTPUT"
+        echo "type=" >> "$GITHUB_OUTPUT"
+      elif [ "$COUNT" -eq 1 ]; then
+        echo "exists=true" >> "$GITHUB_OUTPUT"
+        echo "type=file" >> "$GITHUB_OUTPUT"
+      else
+        echo "exists=true" >> "$GITHUB_OUTPUT"
+        echo "type=folder" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Remove Aws Credentials
+    shell: bash
+    if: always()
+    run: |
+      rm -rf ~/.aws/credentials
+      rm -rf ~/.aws/config

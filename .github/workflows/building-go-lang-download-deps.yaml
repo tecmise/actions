@@ -57,15 +57,20 @@ jobs:
 
     - name: Check S3 cache
       id: check_s3
-      run: |
-        COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
-        echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+      uses: tecmise/actions/.github/actions/check-artifact-exists@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
 
     - name: Restore Go cache from S3
       if: steps.check_s3.outputs.exists == 'true'
-      run: |
-        mkdir -p ~/go/pkg/mod
-        aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
+      uses: tecmise/actions/.github/actions/download-artifact@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
+        download_path: ~/go/pkg/mod
 
     - name: Tidy
       if: steps.check_s3.outputs.exists == 'false'
@@ -77,7 +82,10 @@ jobs:
 
     - name: Upload files
       if: steps.check_s3.outputs.exists == 'false'
-      run: |
-        ls -ltra ~/go/pkg/mod
-        aws s3 sync ~/go/pkg/mod s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps --delete
+      uses: tecmise/actions/.github/actions/upload-artifact@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
+        path: ~/go/pkg/mod
 

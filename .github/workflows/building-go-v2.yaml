@@ -18,6 +18,7 @@ on:
       applications:
         type: string
         required: true
+        default: '.github/applications.yaml'
       goarch:
         description: 'Target architecture (amd64 or arm64)'
         required: false
@@ -105,9 +106,11 @@ jobs:
 
     - name: Check S3 cache
       id: check_s3
-      run: |
-        COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
-        echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+      uses: tecmise/actions/.github/actions/check-artifact-exists@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
 
     - name: Send Notification Error
       uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
@@ -123,14 +126,16 @@ jobs:
 
     - name: Stop
       if: steps.check_s3.outputs.exists == 'false'
-      run: |
-        exit(1)
+      run: exit 1
 
     - name: Restore Go cache from S3
       if: steps.check_s3.outputs.exists == 'true'
-      run: |
-        mkdir -p ~/go/pkg/mod
-        aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
+      uses: tecmise/actions/.github/actions/download-artifact@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
+        download_path: ~/go/pkg/mod
 
 
 
