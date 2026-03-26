@@ -161,6 +161,9 @@ jobs:
         echo "docker_image: ${{ matrix.docker_image }}"
 
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Autenticar repositórios privados
       run: |
         # Cria ~/.netrc com credenciais GitHub
