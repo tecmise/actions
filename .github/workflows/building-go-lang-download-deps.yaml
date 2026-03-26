@@ -63,7 +63,6 @@ jobs:
         aws_region: us-east-1
         artifact: go-deps
 
-
     - name: Create folder
       if: steps.check_s3.outputs.exists == 'false'
       run: mkdir -p ~/go/pkg/mod
@@ -81,7 +80,6 @@ jobs:
       run: |
         mkdir ${{ github.sha }}
         mv ~/go/pkg/mod/* ${{ github.sha }}/
-
 
     - name: Upload files
       if: steps.check_s3.outputs.exists == 'false'
