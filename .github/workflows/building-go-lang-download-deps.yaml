@@ -80,6 +80,13 @@ jobs:
       if: steps.check_s3.outputs.exists == 'false'
       run: go mod download
 
+    - name: MoveFiles
+      if: steps.check_s3.outputs.exists == 'false'
+      run: |
+        mkdir ${{ github.sha }}
+        mv ~/go/pkg/mod/* ${{ github.sha }}/
+
+
     - name: Upload files
       if: steps.check_s3.outputs.exists == 'false'
       uses: tecmise/actions/.github/actions/upload-artifact@main
@@ -87,5 +94,5 @@ jobs:
         category: 'infrastructure'
         aws_region: us-east-1
         artifact: go-deps
-        path: ${{ env.HOME }}/go/pkg/mod
+        path: ${{ github.sha }}
 
