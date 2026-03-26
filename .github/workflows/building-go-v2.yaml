@@ -17,7 +17,7 @@ on:
         default: false
       applications:
         type: string
-        required: true
+        required: false
         default: '.github/applications.yaml'
       goarch:
         description: 'Target architecture (amd64 or arm64)'
