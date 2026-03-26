@@ -41,7 +41,7 @@ runs:
 
       S3_PATH="s3://${BUCKET}/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
 
-      COUNT=$(aws s3 ls --recursive "${S3_PATH}/" 2>/dev/null | wc -l | tr -d ' ')
+      COUNT=$(aws s3 ls --recursive "${S3_PATH}/" 2>/dev/null | wc -l | tr -d ' ') || COUNT=0
 
       if [ "$COUNT" -eq 0 ]; then
         echo "exists=false" >> "$GITHUB_OUTPUT"
