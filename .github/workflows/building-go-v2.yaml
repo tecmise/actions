@@ -42,13 +42,26 @@ jobs:
       GOSUMDB: off
     steps:
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Load applications YAML from file
+      id: load_apps
+      run: |
+        content=$(cat "${{ inputs.applications }}")
+        {
+          echo "content<<APPSEOF"
+          echo "$content"
+          echo "APPSEOF"
+        } >> "$GITHUB_OUTPUT"
+
     - name: Parse and validate applications
       id: parse_apps
       run: |
         python3 << 'PYEOF'
         import sys, yaml, json, os
 
-        raw = r"""${{ inputs.applications }}"""
+        raw = r"""${{ steps.load_apps.outputs.content }}"""
 
         try:
             data = yaml.safe_load(raw)
@@ -76,9 +89,6 @@ jobs:
         print("Applications validated successfully:")
         print(json.dumps(data, indent=2))
         PYEOF
-
-    - name: Checkout code
-      uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -142,84 +152,75 @@ jobs:
         echo "docker_image: ${{ matrix.docker_image }}"
 
 
-  #     - name: Autenticar repositórios privados
-  #       run: |
-  #         # Cria ~/.netrc com credenciais GitHub
-  #         echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
-  #         chmod 600 ~/.netrc
-  #         go env -w GOPRIVATE=github.com/tecmise/*
-  #         go env -w GOSUMDB=off
+    - name: Autenticar repositórios privados
+      run: |
+        # Cria ~/.netrc com credenciais GitHub
+        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+        chmod 600 ~/.netrc
+        go env -w GOPRIVATE=github.com/tecmise/*
+        go env -w GOSUMDB=off
 
-  #     - name: Authenticate on AWS
-  #       uses: tecmise/actions/.github/actions/aws-authenticate@main
-  #       with:
-  #         category: 'infrastructure'
-  #         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
-  #         aws_region: us-east-1
+    - name: Authenticate on AWS
+      uses: tecmise/actions/.github/actions/aws-authenticate@main
+      with:
+        category: 'infrastructure'
+        aws_accounts: ${{ vars.AWS_ACCOUNTS }}
+        aws_region: us-east-1
 
-  #     - name: Check S3 cache
-  #       id: check_s3
-  #       run: |
-  #         COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
-  #         echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
+    - name: Check S3 cache
+      id: check_s3
+      run: |
+        COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
+        echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
-  #     - name: Send Notification Error
-  #       uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
-  #       if: steps.check_s3.outputs.exists == 'false'
-  #       with:
-  #         title: '🚨 Erro de build 🚨'
-  #         message: "houve uma falha no build do ${{ github.repository }}"
-  #         severity: 'error'
-  #         discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-  #         fields:
-  #           Link:"${{github.workflow.url}}"
-  #           Run:"${{github.run_id}}"
+    - name: Send Notification Error
+      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
+      if: steps.check_s3.outputs.exists == 'false'
+      with:
+        title: '🚨 Erro de build 🚨'
+        message: "houve uma falha no build do ${{ github.repository }}"
+        severity: 'error'
+        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
+        fields:
+          Link:"${{github.workflow.url}}"
+          Run:"${{github.run_id}}"
 
-  #     - name: Restore Go cache from S3
-  #       if: steps.check_s3.outputs.exists == 'true'
-  #       run: |
-  #         mkdir -p ~/go/pkg/mod
-  #         aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
+    - name: Restore Go cache from S3
+      if: steps.check_s3.outputs.exists == 'true'
+      run: |
+        mkdir -p ~/go/pkg/mod
+        aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
 
+    - name: Build Lambda
+      if: matrix.is_lambda == true
+      run: |
+        GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ matrix.name }} ./${{ matrix.artifact }}
 
+    - name: Build Container
+      if: matrix.is_lambda != true
+      run: |
+        go mod verify
+        go mod vendor
+        GOOS=linux GOARCH=${{ inputs.goarch }} go build -a -buildvcs=false -installsuffix cgo -o ${{ matrix.name }} ${{ matrix.artifact }}
 
-  #     - name: Build Lambda
-  #       if: inputs.is_lambda == true
-  #       run: |
-  #         GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+    - name: Rename
+      if: matrix.is_lambda == true
+      run: |
+        mv ${{ matrix.name }} bootstrap
+        chmod +x bootstrap
 
-  #     - name: Build Container
-  #       if: inputs.is_lambda != true
-  #       run: |
-  #         go mod verify
-  #         go mod vendor
-  #         GOOS=linux GOARCH=${{ inputs.goarch }} go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+    - name: Zip the artifact-builded folder
+      if: matrix.is_lambda == true
+      run: |
+        zip -r artifact-builded.zip bootstrap
+        mv artifact-builded.zip ${{ matrix.name }}.zip
 
-
-  #     - name: Calculate MD5
-  #       id: calculate-md5
-  #       run: |
-  #         MD5=$(md5sum ${{ inputs.artifact_name }} | cut -d ' ' -f 1)
-  #         echo "md5=$MD5" >> "$GITHUB_OUTPUT"
-
-  #     - name: Rename
-  #       if: inputs.is_lambda == true
-  #       run: |
-  #         mv ${{ inputs.artifact_name }} bootstrap
-  #         chmod +x bootstrap
-
-  #     - name: Zip the artifact-builded folder
-  #       if: inputs.is_lambda == true
-  #       run: |
-  #         zip -r artifact-builded.zip bootstrap ${{ inputs.resource_folder }}
-  #         mv artifact-builded.zip ${{ inputs.artifact_name }}.zip
-
-  #     - name: upload artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         retention-days: 1
-  #         name: ${{ inputs.artifact_name }}
-  #         path: ${{ inputs.artifact_name }}.zip
+    - name: upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        retention-days: 1
+        name: ${{ matrix.name }}
+        path: ${{ matrix.name }}.zip
 
 
   # publishing:
