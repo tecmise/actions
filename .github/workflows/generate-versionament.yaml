@@ -129,7 +129,7 @@ jobs:
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     needs: generate-versionament
     steps:
 

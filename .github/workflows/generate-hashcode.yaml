@@ -70,7 +70,7 @@ jobs:
 
   checking-last-version:
     name: Checking current version
-    runs-on: 'ubuntu-latest'
+    runs-on: tecmise-runner
     needs: loading-hash
     outputs:
       has_changes: ${{ steps.check_version.outputs.has_changes }}
