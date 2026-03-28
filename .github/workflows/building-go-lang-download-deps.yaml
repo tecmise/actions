@@ -18,7 +18,7 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: 'tecmise-runner'
+    runs-on: tecmise-runner
     permissions:
       contents: read
       id-token: write

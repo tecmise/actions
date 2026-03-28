@@ -24,7 +24,7 @@ on:
 jobs:
   loading-hash:
     name: Generating hashcode
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     outputs:
       content: ${{ steps.generate_hash.outputs.content }}
     steps:
