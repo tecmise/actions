@@ -35,7 +35,7 @@ jobs:
 
   building:
     name: Building
-    runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     environment: ${{ github.ref_name }}
     steps:
       - name: Checkout code
@@ -80,7 +80,7 @@ jobs:
 
   publishing:
     name: Publishing
-    runs-on: ['building', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     needs: [ building ]
     environment: ${{ github.ref_name }}
     permissions:

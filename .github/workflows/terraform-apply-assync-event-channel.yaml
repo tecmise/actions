@@ -30,7 +30,7 @@ jobs:
   generate-file:
     name: Generate Files for API Gateway
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     steps:
 
     - name: Checkout code
@@ -55,7 +55,7 @@ jobs:
   terraform-plan:
     name: Terraform Plan
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     needs:
       - generate-file
     steps:
@@ -113,7 +113,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     needs:
       - terraform-plan
     steps:

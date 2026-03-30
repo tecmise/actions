@@ -10,7 +10,7 @@ on:
 jobs:
   validate:
     name: Validate
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     environment: master
     steps:
       - name: Checkout code
@@ -52,7 +52,7 @@ jobs:
   open-pr:
     name: Open PR
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     needs: validate
     steps:
     - name: Checkout code
@@ -104,7 +104,7 @@ jobs:
 
   notify-error:
     name: Notify Error
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     needs: validate
     if: ${{ always() && needs.validate.result == 'failure' }}
     environment: "${{ github.ref_name }}"

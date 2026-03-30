@@ -57,7 +57,7 @@ on:
 jobs:
   validate-migrations:
     name: Validating Migrations
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     outputs:
       is-valid: "${{ steps.validate.outputs.exit_code == '0' }}"
     container:
@@ -121,7 +121,7 @@ jobs:
 
   send-notification-validate:
     name: Send Notification Validate Error
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     needs: validate-migrations
     if: needs.validate-migrations.outputs.is-valid == 'false'
     steps:
@@ -152,7 +152,7 @@ jobs:
 
   migrate:
     name: Migrating Database
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     if: needs.validate-migrations.outputs.is-valid == 'true'
     needs: validate-migrations
     outputs:
@@ -196,7 +196,7 @@ jobs:
 
   send-notification-migrate-error:
     name: Notify Error
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     needs: migrate
     if: needs.migrate.outputs.is-valid == 'false'
     steps:
@@ -226,7 +226,7 @@ jobs:
 
   send-notification-migrate:
     name: Notify
-    runs-on: ['infrastructure', 's4s', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: tecmise-runner
     needs: migrate
     if: needs.migrate.outputs.is-valid == 'true'
     steps:

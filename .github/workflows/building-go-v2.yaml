@@ -30,7 +30,7 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     # runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
@@ -146,7 +146,7 @@ jobs:
   build-applications:
     name: Build - ${{ matrix.name }}
     needs: building
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     strategy:
       matrix:
         include: ${{ fromJson(needs.building.outputs.matrix) }}
