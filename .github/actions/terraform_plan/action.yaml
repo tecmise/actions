@@ -29,7 +29,9 @@ runs:
 
   - name: "Enabled permissions"
     shell: bash
-    run: chmod -R 765 .terraform
+    run: |
+      ls -ltra
+      chmod -R 765 .terraform
 
   - name: Terraform Plan (binary)
     shell: bash
