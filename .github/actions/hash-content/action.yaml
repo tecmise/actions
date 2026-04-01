@@ -23,5 +23,6 @@ runs:
     name: Generate JWT and get access token
     shell: bash
     run: |
+      sudo ln -sf $(which python3) /usr/bin/python
       hash=$(python code/.github/scripts/content_check.py "${{ inputs.paths }}")
       echo "content=$hash" >> $GITHUB_OUTPUT
