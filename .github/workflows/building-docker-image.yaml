@@ -51,7 +51,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
+      uses: tecmise/actions/.github/actions/aws-authenticate@v7.0.1
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}

@@ -95,7 +95,7 @@ jobs:
         GH_TOKEN: ${{ secrets.CONNECTORS_KEY }}
 
     - name: Notify
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
+      uses: tecmise/actions/.github/actions/discord-notifier@v7.0.1
       with:
         title: '🔗 Nova Pull request no connector 🔗'
         message: 'Uma nova versão do connector está sendo gerada. Caso seja necessario alterar o tipo de versão (major, minor, patch), por favor, realizar um comentário na PR com a palavra-chave correspondente.'
@@ -110,7 +110,7 @@ jobs:
     environment: "${{ github.ref_name }}"
     steps:
       - name: Send Notification Error
-        uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
+        uses: tecmise/actions/.github/actions/discord-notifier@v7.0.1
         with:
           title: '🚨 Falha ao validar connector 🚨'
           message: "houve uma falha no build do connector"

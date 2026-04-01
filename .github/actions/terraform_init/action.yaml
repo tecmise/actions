@@ -35,7 +35,7 @@ runs:
       terraform init -backend-config=bucket=${{ inputs.bucket }} -backend-config=key=${{ inputs.key }}
 
   - name: Upload Generated Files
-    uses: tecmise/actions/.github/actions/upload-artifact@v6.4.1
+    uses: tecmise/actions/.github/actions/upload-artifact@v7.0.1
     with:
       path: '${{ inputs.working_directory }}'
       artifact: '${{ inputs.artifact }}'

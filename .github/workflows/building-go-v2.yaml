@@ -113,7 +113,7 @@ jobs:
         artifact: go-deps
 
     - name: Send Notification Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
+      uses: tecmise/actions/.github/actions/discord-notifier@v7.0.1
       if: steps.check_s3.outputs.exists == 'false'
       with:
         title: '🚨 Erro de build 🚨'
@@ -186,7 +186,7 @@ jobs:
         echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
     - name: Send Notification Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v6.4.1
+      uses: tecmise/actions/.github/actions/discord-notifier@v7.0.1
       if: steps.check_s3.outputs.exists == 'false'
       with:
         title: '🚨 Erro de build 🚨'
@@ -252,7 +252,7 @@ jobs:
   #   steps:
 
   #     - name: Authenticate on AWS
-  #       uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
+  #       uses: tecmise/actions/.github/actions/aws-authenticate@v7.0.1
   #       with:
   #         category: ${{ inputs.aws_environment }}
   #         aws_accounts: ${{ vars.AWS_ACCOUNTS }}

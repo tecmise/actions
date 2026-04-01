@@ -39,7 +39,7 @@ jobs:
 
 
     - name: Authenticate on AWS
-      uses: tecmise/actions/.github/actions/aws-authenticate@v6.4.1
+      uses: tecmise/actions/.github/actions/aws-authenticate@v7.0.1
       with:
         category: ${{ inputs.aws_environment }}
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
@@ -135,9 +135,9 @@ jobs:
 
     - name: Instalar GitHub CLI (gh)
       run: |
-        sudo yum install -y yum-utils
-        sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-        sudo yum install -y gh
+        # sudo yum install -y yum-utils
+        # sudo yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+        # sudo yum install -y gh
         gh --version
 
 
