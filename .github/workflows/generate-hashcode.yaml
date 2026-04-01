@@ -44,12 +44,6 @@ jobs:
     - name: Remove code directory
       run: rm -rf code_internal
 
-    - name: Instalar Python via yum
-      run: |
-        # sudo yum update -y
-        # sudo yum install -y python3 python3-pip
-        sudo ln -sf $(which python3) /usr/bin/python
-
     - id: generate_hash
       name: Generate Hash Token
       run: |
