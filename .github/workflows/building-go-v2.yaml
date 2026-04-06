@@ -201,6 +201,13 @@ jobs:
         go env -w GOPRIVATE=github.com/tecmise/*
         go env -w GOSUMDB=off
 
+    - name: Tidy
+      run: go mod tidy
+
+    - name: Download dependencies
+      run: go mod download
+
+
     - name: Build Lambda
       if: matrix.is_lambda == true
       run: |
