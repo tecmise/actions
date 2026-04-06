@@ -55,6 +55,12 @@ jobs:
           echo "APPSEOF"
         } >> "$GITHUB_OUTPUT"
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
     - name: Set up Python virtual environment
       run: |
         python3 -m venv .venv
