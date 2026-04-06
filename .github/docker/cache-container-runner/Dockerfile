@@ -16,8 +16,8 @@ RUN apk update && \
 
 WORKDIR /app
 
-COPY go.mod go.sum
-COPY go.sum go.sum
+COPY go.mod .
+COPY go.sum .
 
 ARG TOKEN
 
