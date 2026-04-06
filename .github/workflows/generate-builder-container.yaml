@@ -34,8 +34,8 @@ jobs:
           repository: 'tecmise/actions'
           path: code_internal
 
-      - name: Rename md5_calculator.py
-        run: mv code_internal.github/docker/cache-container-runner/Dockerfile Dockerfile
+      - name: Copy Dockerfile
+        run: mv code_internal/.github/docker/cache-container-runner/Dockerfile Dockerfile
 
       - name: Remove code directory
         run: rm -rf code_internal
