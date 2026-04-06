@@ -55,6 +55,10 @@ jobs:
           echo "APPSEOF"
         } >> "$GITHUB_OUTPUT"
 
+    - name: Install Python dependencies
+      run: |
+        python3 -m pip install --user pyyaml
+
     - name: Parse and validate applications
       id: parse_apps
       run: |
