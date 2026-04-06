@@ -2,6 +2,10 @@ name: Generate Container Build
 
 on:
   workflow_call:
+    secrets:
+      CONNECTORS_KEY:
+        required: false
+
     inputs:
       tag:
         required: true
@@ -41,7 +45,7 @@ jobs:
         run: rm -rf code_internal
 
       - name: Docker build
-        run: docker build -t tecmise/builder:latest .
+        run: docker build -t tecmise/builder:latest . --build-arg TOKEN=${{ secrets.CONNECTORS_KEY }}
 
 
       - name: Cria Repository no ECR caso nao existir
