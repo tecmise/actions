@@ -142,16 +142,6 @@ jobs:
       if: steps.check_s3.outputs.exists == 'true'
       run: mkdir -p $HOME/go/pkg/mod
 
-    - name: Restore Go cache from S3
-      if: steps.check_s3.outputs.exists == 'true'
-      uses: tecmise/actions/.github/actions/download-artifact@main
-      with:
-        category: 'infrastructure'
-        aws_region: us-east-1
-        artifact: go-deps
-        download_path: ~/go/pkg/mod
-
-
 
   build-applications:
     name: Build - ${{ matrix.name }}
@@ -189,29 +179,18 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: us-east-1
 
-    - name: Check S3 cache
-      id: check_s3
-      run: |
-        COUNT=$(aws s3 ls s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps/ 2>/dev/null | wc -l)
-        echo "exists=$([ "$COUNT" -gt 0 ] && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
-
-    - name: Send Notification Error
-      uses: tecmise/actions/.github/actions/discord-notifier@v7.0.1
-      if: steps.check_s3.outputs.exists == 'false'
-      with:
-        title: '🚨 Erro de build 🚨'
-        message: "houve uma falha no build do ${{ github.repository }}"
-        severity: 'error'
-        discord-webhook-url: "${{ secrets.DISCORD_NOTIFIER_URL }}"
-        fields:
-          Link:"${{github.workflow.url}}"
-          Run:"${{github.run_id}}"
-
-    - name: Restore Go cache from S3
-      if: steps.check_s3.outputs.exists == 'true'
+    - name: Create Files
       run: |
         mkdir -p ~/go/pkg/mod
-        aws s3 sync s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/go-deps ~/go/pkg/mod
+
+
+    - name: Restore Go cache from S3
+      uses: tecmise/actions/.github/actions/download-artifact@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
+        download_path: ~/go/pkg/mod
 
     - name: Autenticar repositórios privados
       run: |
