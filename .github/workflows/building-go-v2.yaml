@@ -36,6 +36,7 @@ jobs:
       id-token: write
     outputs:
       matrix: ${{ steps.parse_apps.outputs.matrix }}
+      hash-tag: ${{ steps.hash-tag.outputs.image_tag }}
     env:
       GO111MODULE: on
       GOPROXY: direct
@@ -142,11 +143,20 @@ jobs:
       if: steps.check_s3.outputs.exists == 'true'
       run: mkdir -p $HOME/go/pkg/mod
 
+    - name: Gerar hash da tag
+      id: hash-tag
+      run: |
+        IMAGE_TAG=$(echo -n "${{ inputs.tag }}" | md5sum | awk '{print $1}')
+        echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+
 
   build-applications:
     name: Build - ${{ matrix.name }}
     needs: building
     runs-on: tecmise-runner
+    container:
+      image: '303767825511.dkr.ecr.us-east-1.amazonaws.com/tecmise/builder:${{ needs.building.outputs.hash-tag }}'
     strategy:
       matrix:
         include: ${{ fromJson(needs.building.outputs.matrix) }}
@@ -170,17 +180,27 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: us-east-1
 
-    - name: Create Files
-      run: |
-        mkdir -p ~/go/pkg/mod
-
-    - name: Restore Go cache from S3
-      uses: tecmise/actions/.github/actions/download-artifact@main
-      with:
-        category: 'infrastructure'
-        aws_region: us-east-1
-        artifact: go-deps
-        download_path: ~/go/pkg/mod
+#    - name: Create Files
+#      run: |
+#        mkdir -p ~/go/pkg/mod
+#
+#    - name: Restore Go cache from S3
+#      uses: tecmise/actions/.github/actions/download-artifact@main
+#      with:
+#        category: 'infrastructure'
+#        aws_region: us-east-1
+#        artifact: go-deps
+#        download_path: ~/go/pkg/mod    - name: Create Files
+#      run: |
+#        mkdir -p ~/go/pkg/mod
+#
+#    - name: Restore Go cache from S3
+#      uses: tecmise/actions/.github/actions/download-artifact@main
+#      with:
+#        category: 'infrastructure'
+#        aws_region: us-east-1
+#        artifact: go-deps
+#        download_path: ~/go/pkg/mod
 
     - name: Set up Go
       uses: actions/setup-go@v5
