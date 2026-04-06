@@ -48,6 +48,12 @@ jobs:
         run: docker build -t tecmise/builder:latest . --build-arg TOKEN=${{ secrets.CONNECTORS_KEY }}
 
 
+      - name: Gerar hash da tag
+        id: hash-tag
+        run: |
+          IMAGE_TAG=$(echo -n "${{ inputs.tag }}" | md5sum | awk '{print $1}')
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
       - name: Cria Repository no ECR caso nao existir
         run: |
           aws ecr describe-repositories --repository-names tecmise/builder --region us-east-1 || \
@@ -59,15 +65,16 @@ jobs:
 
       - name: Tag da imagem
         run: |
-          docker tag tecmise/builder:latest ${{ steps.login-ecr.outputs.registry }}/tecmise/builder:${{ inputs.tag }}
+          docker tag tecmise/builder:latest ${{ steps.login-ecr.outputs.registry }}/tecmise/builder:${{ steps.hash-tag.outputs.image_tag }}
 
-      - name: Deleta a tag se existir ${{ inputs.tag }}
+      - name: Deleta a tag se existir
         run: |
-          EXISTING_TAG=$(aws ecr list-images --repository-name tecmise/builder --query "imageIds[?imageTag=='${{ inputs.tag }}'].imageTag" --output text --region us-east-1)
-          if [ "${EXISTING_TAG}" == "${{ inputs.tag }}" ]; then
-            aws ecr batch-delete-image --repository-name tecmise/builder --image-ids imageTag=${{ inputs.tag }} --region us-east-1
+          IMAGE_TAG=${{ steps.hash-tag.outputs.image_tag }}
+          EXISTING_TAG=$(aws ecr list-images --repository-name tecmise/builder --query "imageIds[?imageTag=='${IMAGE_TAG}'].imageTag" --output text --region us-east-1)
+          if [ "${EXISTING_TAG}" == "${IMAGE_TAG}" ]; then
+            aws ecr batch-delete-image --repository-name tecmise/builder --image-ids imageTag=${IMAGE_TAG} --region us-east-1
           fi
 
-      - name: Push to ECR ${{ inputs.tag }}
+      - name: Push to ECR
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/tecmise/builder:${{ inputs.tag }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/tecmise/builder:${{ steps.hash-tag.outputs.image_tag }}
