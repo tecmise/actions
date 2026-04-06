@@ -64,12 +64,12 @@ jobs:
       run: |
         python3 -m venv .venv
         ./.venv/bin/python -m pip install --upgrade pip
-        ./.venv/bin/python -m pip install pyyaml yaml
+        ./.venv/bin/python -m pip install PyYAML
 
     - name: Parse and validate applications
       id: parse_apps
       run: |
-        python3 << 'PYEOF'
+        ./.venv/bin/python << 'PYEOF'
         import sys, yaml, json, os
 
         raw = r"""${{ steps.load_apps.outputs.content }}"""
