@@ -164,14 +164,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Autenticar repositórios privados
-      run: |
-        # Cria ~/.netrc com credenciais GitHub
-        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
-        chmod 600 ~/.netrc
-        go env -w GOPRIVATE=github.com/tecmise/*
-        go env -w GOSUMDB=off
-
     - name: Authenticate on AWS
       uses: tecmise/actions/.github/actions/aws-authenticate@main
       with:
@@ -183,7 +175,6 @@ jobs:
       run: |
         mkdir -p ~/go/pkg/mod
 
-
     - name: Restore Go cache from S3
       uses: tecmise/actions/.github/actions/download-artifact@main
       with:
@@ -192,13 +183,13 @@ jobs:
         artifact: go-deps
         download_path: ~/go/pkg/mod
 
-    - name: gerando netrc
-      run: |
-        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
-
-    - name: chmod
-      run: |
-        chmod 600 ~/.netrc
+#    - name: gerando netrc
+#      run: |
+#        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+#
+#    - name: chmod
+#      run: |
+#        chmod 600 ~/.netrc
 
     - name: Autenticar repositórios privados
       run: |
