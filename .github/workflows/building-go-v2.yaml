@@ -160,7 +160,6 @@ jobs:
         echo "is_lambda:    ${{ matrix.is_lambda }}"
         echo "docker_image: ${{ matrix.docker_image }}"
 
-
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -190,6 +189,12 @@ jobs:
 #    - name: chmod
 #      run: |
 #        chmod 600 ~/.netrc
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go_version }}
+        cache: false
 
     - name: Autenticar repositórios privados
       run: |
