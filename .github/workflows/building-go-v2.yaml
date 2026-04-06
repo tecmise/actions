@@ -170,17 +170,17 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: us-east-1
 
-#    - name: Create Files
-#      run: |
-#        mkdir -p ~/go/pkg/mod
-#
-#    - name: Restore Go cache from S3
-#      uses: tecmise/actions/.github/actions/download-artifact@main
-#      with:
-#        category: 'infrastructure'
-#        aws_region: us-east-1
-#        artifact: go-deps
-#        download_path: ~/go/pkg/mod
+    - name: Create Files
+      run: |
+        mkdir -p ~/go/pkg/mod
+
+    - name: Restore Go cache from S3
+      uses: tecmise/actions/.github/actions/download-artifact@main
+      with:
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: go-deps
+        download_path: ~/go/pkg/mod
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -201,11 +201,11 @@ jobs:
         go env -w GOPRIVATE=github.com/tecmise/*
         go env -w GOSUMDB=off
 
-    - name: Tidy
-      run: go mod tidy
-
-    - name: Download dependencies
-      run: go mod download
+#    - name: Tidy
+#      run: go mod tidy
+#
+#    - name: Download dependencies
+#      run: go mod download
 
 
     - name: Build Lambda
@@ -213,12 +213,17 @@ jobs:
       run: |
         GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ matrix.name }} ./${{ matrix.artifact }}
 
+    - name: Go Verify
+      if: matrix.is_lambda != true
+      run: go mod verify
+
+    - name: Go Vendor
+      if: matrix.is_lambda != true
+      run: go mod vendor
+
     - name: Build Container
       if: matrix.is_lambda != true
-      run: |
-        go mod verify
-        go mod vendor
-        GOOS=linux GOARCH=${{ inputs.goarch }} go build -a -buildvcs=false -installsuffix cgo -o ${{ matrix.name }} ${{ matrix.artifact }}
+      run: GOOS=linux GOARCH=${{ inputs.goarch }} go build -a -buildvcs=false -installsuffix cgo -o ${{ matrix.name }} ${{ matrix.artifact }}
 
     - name: Rename
       if: matrix.is_lambda == true
