@@ -182,19 +182,19 @@ jobs:
         artifact: go-deps
         download_path: ~/go/pkg/mod
 
-#    - name: gerando netrc
-#      run: |
-#        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
-#
-#    - name: chmod
-#      run: |
-#        chmod 600 ~/.netrc
-
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: ${{ inputs.go_version }}
         cache: false
+
+    - name: gerando netrc
+      run: |
+        echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+
+    - name: chmod
+      run: |
+        chmod 600 ~/.netrc
 
     - name: Autenticar repositórios privados
       run: |
