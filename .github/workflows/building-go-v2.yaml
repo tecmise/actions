@@ -170,17 +170,17 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: us-east-1
 
-    - name: Create Files
-      run: |
-        mkdir -p ~/go/pkg/mod
-
-    - name: Restore Go cache from S3
-      uses: tecmise/actions/.github/actions/download-artifact@main
-      with:
-        category: 'infrastructure'
-        aws_region: us-east-1
-        artifact: go-deps
-        download_path: ~/go/pkg/mod
+#    - name: Create Files
+#      run: |
+#        mkdir -p ~/go/pkg/mod
+#
+#    - name: Restore Go cache from S3
+#      uses: tecmise/actions/.github/actions/download-artifact@main
+#      with:
+#        category: 'infrastructure'
+#        aws_region: us-east-1
+#        artifact: go-deps
+#        download_path: ~/go/pkg/mod
 
     - name: Set up Go
       uses: actions/setup-go@v5
