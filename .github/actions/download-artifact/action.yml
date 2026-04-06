@@ -1,4 +1,4 @@
-name: Upload Artifact
+name: Download Artifact
 inputs:
   category:
     description: 'Category of repository'
@@ -16,6 +16,10 @@ inputs:
     description: 'Artifact name'
     required: false
     default: 'default'
+  zip:
+    description: 'Zip'
+    required: false
+    default: 'false'
   debug:
     description: 'Debug'
     required: false
@@ -24,80 +28,110 @@ runs:
   using: composite
   steps:
 
-  - name: Sync artifact to S3
-    id: sync-infrastructure
-    shell: bash
-    if: ${{ inputs.category == 'infrastructure' }}
-    run: |
-      S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
-      aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+    - name: Sync artifact from S3
+      id: sync-infrastructure
+      shell: bash
+      if: ${{ inputs.category == 'infrastructure' && inputs.zip == 'false' }}
+      run: |
+        S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
 
-  - name: Sync artifact to S3
-    id: sync-s4s-production
-    shell: bash
-    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') }}
-    run: |
-      S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
-      aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+    - name: Sync zipped artifact from S3
+      id: sync-zip-infrastructure
+      shell: bash
+      if: ${{ inputs.category == 'infrastructure' && inputs.zip == 'true' }}
+      run: |
+        S3_PATH="s3://github-artifact.infrastructure.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}.zip"
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
+        unzip "${{ inputs.download_path }}/${{ inputs.artifact }}.zip" -d "${{ inputs.download_path }}"
+        rm "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
 
-  - name: Sync artifact to S3
-    id: sync-s4s-sandbox
-    shell: bash
-    if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' }}
-    run: |
-      S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
-      aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+    - name: Sync artifact from S3
+      id: sync-s4s-production
+      shell: bash
+      if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') && inputs.zip == 'false' }}
+      run: |
+        S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
 
-  - name: List all files in the path recursively
-    shell: bash
-    if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion) && (inputs.debug == 'true')
-    run: |
-      set -euo pipefail
+    - name: Sync zipped artifact from S3
+      id: sync-zip-s4s-production
+      shell: bash
+      if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master') && inputs.zip == 'true' }}
+      run: |
+        S3_PATH="s3://github-artifact.production-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}.zip"
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
+        unzip "${{ inputs.download_path }}/${{ inputs.artifact }}.zip" -d "${{ inputs.download_path }}"
+        rm "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
 
-      # Determina o bucket baseado na categoria
-      CATEGORY="${{ inputs.category }}"
-      if [ "$CATEGORY" = "s4s" ]; then
-        if [ "${{ github.ref_name }}" = "sandbox" ]; then
-          BUCKET_NAME="github-artifact.sandbox-s4s.tecmise.com"
+    - name: Sync artifact from S3
+      id: sync-s4s-sandbox
+      shell: bash
+      if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' && inputs.zip == 'false' }}
+      run: |
+        S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}"
+        aws s3 sync "$S3_PATH" "${{ inputs.download_path }}"
+
+    - name: Sync zipped artifact from S3
+      id: sync-zip-s4s-sandbox
+      shell: bash
+      if: ${{ inputs.category == 's4s' && github.ref_name == 'sandbox' && inputs.zip == 'true' }}
+      run: |
+        S3_PATH="s3://github-artifact.sandbox-s4s.tecmise.com/${{ github.repository }}/${{ github.ref_name }}/${{ github.sha }}/${{ inputs.artifact }}.zip"
+        aws s3 cp "$S3_PATH" "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
+        unzip "${{ inputs.download_path }}/${{ inputs.artifact }}.zip" -d "${{ inputs.download_path }}"
+        rm "${{ inputs.download_path }}/${{ inputs.artifact }}.zip"
+
+    - name: List all files in the path recursively
+      shell: bash
+      if: (steps.sync-infrastructure.conclusion || steps.sync-s4s-production.conclusion || steps.sync-s4s-sandbox.conclusion || steps.sync-zip-infrastructure.conclusion || steps.sync-zip-s4s-production.conclusion || steps.sync-zip-s4s-sandbox.conclusion) && (inputs.debug == 'true')
+      run: |
+        set -euo pipefail
+
+        # Determina o bucket baseado na categoria
+        CATEGORY="${{ inputs.category }}"
+        if [ "$CATEGORY" = "s4s" ]; then
+          if [ "${{ github.ref_name }}" = "sandbox" ]; then
+            BUCKET_NAME="github-artifact.sandbox-s4s.tecmise.com"
+          else
+            BUCKET_NAME="github-artifact.production-s4s.tecmise.com"
+          fi
         else
-          BUCKET_NAME="github-artifact.production-s4s.tecmise.com"
+          BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
         fi
-      else
-        BUCKET_NAME="github-artifact.infrastructure.tecmise.com"
-      fi
 
-      echo "## Artifacts Downloaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
-      echo >> "$GITHUB_STEP_SUMMARY"
-      echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
-      echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
+        echo "## Artifacts Downloaded (Bucket: ${BUCKET_NAME})" >> "$GITHUB_STEP_SUMMARY"
+        echo >> "$GITHUB_STEP_SUMMARY"
+        echo "| Nome | Extensão | Tamanho | Caminho S3 |" >> "$GITHUB_STEP_SUMMARY"
+        echo "|---|---|---|---|" >> "$GITHUB_STEP_SUMMARY"
 
-      # Lista recursivamente todos os arquivos
-      find "${{ inputs.download_path }}" -type f | while read -r file; do
-        # Obtém tamanho em bytes
-        SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
-        
-        # Converte para KB ou MB
-        if [ "$SIZE" -lt 1048576 ]; then
-          SIZE_FORMATTED="$(( SIZE / 1024 )) KB"
-        else
-          SIZE_FORMATTED="$(printf '%.2f' $(echo "scale=2; $SIZE / 1048576" | bc)) MB"
-        fi
-        
-        # Extrai extensão
-        EXT="${file##*.}"
-        [ "$EXT" = "$file" ] && EXT="sem extensão"
-        
-        # Cria caminho S3
-        RELATIVE_PATH="${file#${{ inputs.download_path }}/}"
-        S3_PATH="./${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
-        
-        # Adiciona linha na tabela
-        echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
-      done
+        # Lista recursivamente todos os arquivos
+        find "${{ inputs.download_path }}" -type f | while read -r file; do
+          # Obtém tamanho em bytes
+          SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+          
+          # Converte para KB ou MB
+          if [ "$SIZE" -lt 1048576 ]; then
+            SIZE_FORMATTED="$(( SIZE / 1024 )) KB"
+          else
+            SIZE_FORMATTED="$(printf '%.2f' $(echo "scale=2; $SIZE / 1048576" | bc)) MB"
+          fi
+          
+          # Extrai extensão
+          EXT="${file##*.}"
+          [ "$EXT" = "$file" ] && EXT="sem extensão"
+          
+          # Cria caminho S3
+          RELATIVE_PATH="${file#${{ inputs.download_path }}/}"
+          S3_PATH="./${{ github.repository }}/${{ github.ref_name }}/${RELATIVE_PATH}"
+          
+          # Adiciona linha na tabela
+          echo "| ${RELATIVE_PATH} | .${EXT} | ${SIZE_FORMATTED} | \`${S3_PATH}\` |" >> "$GITHUB_STEP_SUMMARY"
+        done
 
-  - name: Remove Aws Credentials
-    shell: bash
-    if: always()
-    run: |
-      rm -rf ~/.aws/credentials
-      rm -rf ~/.aws/config
+    - name: Remove Aws Credentials
+      shell: bash
+      if: always()
+      run: |
+        rm -rf ~/.aws/credentials
+        rm -rf ~/.aws/config
