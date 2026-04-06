@@ -55,9 +55,11 @@ jobs:
           echo "APPSEOF"
         } >> "$GITHUB_OUTPUT"
 
-    - name: Install Python dependencies
+    - name: Set up Python virtual environment
       run: |
-        python3 -m pip install --user pyyaml
+        python3 -m venv .venv
+        ./.venv/bin/python -m pip install --upgrade pip
+        ./.venv/bin/python -m pip install pyyaml
 
     - name: Parse and validate applications
       id: parse_apps
