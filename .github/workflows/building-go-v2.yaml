@@ -31,7 +31,6 @@ jobs:
     name: Building
     environment: ${{ github.ref_name }}
     runs-on: tecmise-runner
-    # runs-on: ['${{ inputs.runner_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       contents: read
       id-token: write
@@ -235,11 +234,12 @@ jobs:
         zip -r artifact-builded.zip bootstrap
         mv artifact-builded.zip ${{ matrix.name }}.zip
 
-    - name: upload artifact
-      uses: actions/upload-artifact@v4
+    - name: Upload files
+      uses: tecmise/actions/.github/actions/upload-artifact@main
       with:
-        retention-days: 1
-        name: ${{ matrix.name }}
+        category: 'infrastructure'
+        aws_region: us-east-1
+        artifact: ${{ matrix.name }}
         path: ${{ matrix.name }}.zip
 
 
