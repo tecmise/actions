@@ -8,7 +8,7 @@ on:
 
     inputs:
       runner:
-        description: node group runner
+        description: 'node group runner'
         required: false
         default: 'tecmise-runner'
       docker_file_path:
