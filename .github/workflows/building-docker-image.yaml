@@ -7,10 +7,6 @@ on:
         required: false
 
     inputs:
-      runner:
-        description: 'node group runner'
-        required: false
-        default: 'tecmise-runner'
       docker_file_path:
         description: 'Path to the Dockerfile'
         required: true
@@ -43,7 +39,11 @@ on:
         required: false
         type: string
         default: ''
-
+      runner:
+        description: 'node group runner'
+        required: false
+        type: string
+        default: 'tecmise-runner'
 jobs:
 
   building:
