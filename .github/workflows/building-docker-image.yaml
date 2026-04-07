@@ -45,7 +45,7 @@ jobs:
   building:
     name: Building
     environment: ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: tecmise-runner
     steps:
     - name: Checkout
       uses: actions/checkout@v4
