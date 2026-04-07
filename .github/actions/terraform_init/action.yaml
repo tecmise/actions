@@ -13,6 +13,10 @@ inputs:
     description: 'Working Directory'
     required: false
     default: '.'
+  category:
+    description: 'Category of repository for artifact storage'
+    required: false
+    default: 's4s'
 runs:
   using: composite
   steps:
@@ -39,7 +43,7 @@ runs:
     with:
       path: '${{ inputs.working_directory }}'
       artifact: '${{ inputs.artifact }}'
-      category: 's4s'
+      category: '${{ inputs.category }}'
 
 
   - name: Summary - Inputs do Terraform Init

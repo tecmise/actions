@@ -9,6 +9,10 @@ inputs:
   key:
     description: 'Terraform S3 Key'
     required: true
+  category:
+    description: 'Category of repository for artifact storage'
+    required: false
+    default: 's4s'
 
 runs:
   using: composite
@@ -25,7 +29,7 @@ runs:
       path: '.'
       download_path: '.'
       artifact: '${{ inputs.artifact }}'
-      category: 's4s'
+      category: '${{ inputs.category }}'
 
   - name: "Enabled permissions"
     shell: bash
