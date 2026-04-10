@@ -82,7 +82,7 @@ jobs:
 
     - name: Docker Build
       run: |
-        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host ${{ env.args }}
+        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host --provenance=false --sbom=false ${{ env.args }}
       env:
         args: ${{ env.args }}
     - name: Tag da imagem
@@ -101,6 +101,15 @@ jobs:
         AWS_ACCOUNT_ID: ${{ fromJson(vars.AWS_ACCOUNTS).s4s[github.ref_name] }}
         AWS_REGION: "us-east-1"
 
+
+    - name: Limpar imagens sem tag no ECR
+      run: |
+        UNTAGGED_IMAGES=$(aws ecr list-images --repository-name ${{ inputs.image_name }} --filter tagStatus=UNTAGGED --query 'imageIds[*]' --output json --region ${AWS_REGION})
+        if [ "$UNTAGGED_IMAGES" != "[]" ] && [ -n "$UNTAGGED_IMAGES" ]; then
+          aws ecr batch-delete-image --repository-name ${{ inputs.image_name }} --image-ids "$UNTAGGED_IMAGES" --region ${AWS_REGION}
+        fi
+      env:
+        AWS_REGION: "us-east-1"
 
     - name: Login to Amazon ECR
       id: login-ecr
