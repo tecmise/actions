@@ -8,7 +8,7 @@ resource "aws_lambda_function" "default" {
   role          = aws_iam_role.default.arn
   timeout       = var.timeout
   memory_size   = var.memory_size
-  source_code_hash = data.aws_s3_bucket_object.lambda_zip.etag
+  source_code_hash = data.aws_s3_object.lambda_zip.etag
   architectures = ["arm64"]
 
   # s3_object_version = var.version_id
@@ -41,7 +41,7 @@ locals {
 
 }
 
-data "aws_s3_bucket_object" "lambda_zip" {
+data "aws_s3_object" "lambda_zip" {
   bucket = var.s3_bucket
   key    = var.s3_key
 }

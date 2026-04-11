@@ -1,21 +1,23 @@
-data "aws_ssm_parameters_by_path" "parameters" {
-  count = length(var.parameter_store_preffix)
-  path            = var.parameter_store_preffix[count.index]
-  recursive       = true
-  with_decryption = true
+data "aws_ssm_parameter" "parameters" {
+  for_each = {
+    for index, value in local.paths : value["key"] => value["path"]
+  }
+  name  = each.value
 }
 
+
 locals {
-  ssms = flatten([
-    for by_path in data.aws_ssm_parameters_by_path.parameters : flatten([
-      for index, variableName in by_path.names : {
-        name = variableName
-        value = by_path.values[index]
+
+  paths = flatten([
+    for env in var.environments : flatten([
+      for index, key_var in env.values : {
+        path = "/${env.preffix}/${env.kind}/${key_var}"
+        key = key_var
       }
     ])
   ])
+
   variables = {
-    for index, variable in local.ssms : variable["name"] => variable["value"]
+    for index, variable in data.aws_ssm_parameter.parameters : index => nonsensitive(variable.value)
   }
 }
-

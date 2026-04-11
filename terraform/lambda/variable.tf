@@ -58,7 +58,11 @@ variable "policy_arns" {
   default = []
 }
 
-variable "parameter_store_preffix" {
-  type = list(string)
+variable "environments" {
+  type = list(object({
+    kind = string
+    preffix = string
+    values = list(string)
+  }))
   default = []
 }
