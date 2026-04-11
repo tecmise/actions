@@ -18,6 +18,6 @@ locals {
   ])
 
   variables = {
-    for index, variable in data.aws_ssm_parameter.parameters : index => nonsensitive(variable.value)
+    for index, variable in data.aws_ssm_parameter.parameters : index => variable.value
   }
 }
