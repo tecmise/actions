@@ -32,6 +32,7 @@ variable "tracing_config_mode" {
 }
 variable "variables" {
   type = map(string)
+  default = {}
 }
 
 variable "subnet_ids" {
@@ -56,7 +57,8 @@ variable "policy_arns" {
   type = list(string)
   default = []
 }
-#
-# variable "version_id" {
-#   type = string
-# }
+
+variable "parameter_store_preffix" {
+  type = list(string)
+  default = []
+}
