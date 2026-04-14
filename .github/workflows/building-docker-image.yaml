@@ -82,7 +82,7 @@ jobs:
 
     - name: Docker Build
       run: |
-        docker build -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} . --network=host --provenance=false --sbom=false ${{ env.args }}
+        docker build --provenance=false --sbom=false --network=host -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} ${{ env.args }} .
       env:
         args: ${{ env.args }}
     - name: Tag da imagem
