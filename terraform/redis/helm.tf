@@ -70,6 +70,6 @@ module "expose" {
   source = "./expose"
   domain = var.domain
   name   = var.name
-  namespace = var.name
+  namespace = var.namespace
   redis_sub_domain = var.redis_sub_domain
 }
