@@ -3,7 +3,7 @@ data "aws_route53_zone" "default" {
 }
 
 data "aws_lb" "network" {
-  name = "nginx-ingress"
+  name = "nginx-internal"
 }
 
 resource "aws_route53_record" "clickhouse" {
