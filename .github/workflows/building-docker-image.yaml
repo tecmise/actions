@@ -55,6 +55,13 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: ${{ inputs.aws_region }}
 
+    - name: Validar autenticação AWS
+      run: |
+        echo "=== AWS Identity ==="
+        aws sts get-caller-identity
+      env:
+        AWS_REGION: ${{ inputs.aws_region }}
+
     - name: Montar argumentos para o build
       id: prepare-args
       run: |
