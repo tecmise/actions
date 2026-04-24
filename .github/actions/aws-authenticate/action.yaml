@@ -15,6 +15,16 @@ runs:
   using: composite
   steps:
 
+  - name: Log autenticação AWS
+    shell: bash
+    run: |
+      echo "=== AWS Authenticate Debug ==="
+      echo "category:   ${{ inputs.category }}"
+      echo "aws_region: ${{ inputs.aws_region }}"
+      echo "ref_name:   ${{ github.ref_name }}"
+      echo "s4s account (ref): ${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}"
+      echo "infrastructure account: ${{ fromJson(inputs.aws_accounts).infrastructure }}"
+
   - name: configure aws credentials-s4s
     uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
@@ -23,6 +33,14 @@ runs:
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
 
+  - name: Log s4s autenticado
+    shell: bash
+    if: ${{ inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox') }}
+    run: |
+      echo "=== Credenciais s4s configuradas ==="
+      echo "role: arn:aws:iam::${{ fromJson(inputs.aws_accounts).s4s[github.ref_name] }}:role/github-actions-role"
+      aws sts get-caller-identity
+
   - name: configure aws credentials-infrastructure
     uses: aws-actions/configure-aws-credentials@v4
     if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure' || github.ref_name == 'sandbox') }}
@@ -30,3 +48,18 @@ runs:
       role-to-assume: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role
       role-session-name: github-actions-role
       aws-region: ${{ inputs.aws_region }}
+
+  - name: Log infrastructure autenticado
+    shell: bash
+    if: ${{ inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure' || github.ref_name == 'sandbox') }}
+    run: |
+      echo "=== Credenciais infrastructure configuradas ==="
+      echo "role: arn:aws:iam::${{ fromJson(inputs.aws_accounts).infrastructure }}:role/github-actions-role"
+      aws sts get-caller-identity
+
+  - name: Log sem credenciais configuradas
+    shell: bash
+    if: ${{ ! ((inputs.category == 's4s' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'sandbox')) || (inputs.category == 'infrastructure' && (github.ref_name == 'main' || github.ref_name == 'master' || github.ref_name == 'infrastructure' || github.ref_name == 'sandbox'))) }}
+    run: |
+      echo "::warning::Nenhuma credencial AWS foi configurada!"
+      echo "category '${{ inputs.category }}' com ref_name '${{ github.ref_name }}' não corresponde a nenhuma condição de autenticação."
