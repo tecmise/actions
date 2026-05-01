@@ -96,7 +96,8 @@ jobs:
           chmod 600 ~/.netrc
           go env -w GOPRIVATE=github.com/tecmise/*
           go env -w GOSUMDB=off
-
+          go env -w GOPROXY=https://proxy.golang.org,direct
+          
       - name: Tidy
         run: go mod tidy
 
