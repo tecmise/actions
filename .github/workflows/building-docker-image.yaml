@@ -85,6 +85,7 @@ jobs:
       run: |
         docker build --provenance=false --sbom=false --network=host -t ${{ inputs.image_name }}:${{ inputs.versionament }} -f ${{ inputs.docker_file_path }} ${{ env.args }} .
       env:
+        GOPRIVATE: github.com/tecmise/*
         GOPROXY: https://proxy.golang.org,direct                                                                                                                                                                                                                                                                                                                                                                                                
         GONOSUMDB: gopkg.in
         args: ${{ env.args }}
