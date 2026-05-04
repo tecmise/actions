@@ -24,8 +24,16 @@ jobs:
 
       - name: Configure Go env for private modules
         run: |
+
+      - name: Autenticar repositórios privados
+        run: |
+          # Cria ~/.netrc com credenciais GitHub
+          echo "machine github.com login ${{ github.actor }} password ${{ secrets.CONNECTORS_KEY }}" > ~/.netrc
+          chmod 600 ~/.netrc
           go env -w GOPRIVATE=github.com/tecmise/*
-          go env -w GOPROXY=direct
+          go env -w GOSUMDB=off
+          go env -w GOPROXY=https://proxy.golang.org,direct
+          
 
       - name: Instead of config
         run: git config --global url."https://oauth2:${{ secrets.CONNECTORS_KEY }}@github.com/".insteadOf "https://github.com/"
