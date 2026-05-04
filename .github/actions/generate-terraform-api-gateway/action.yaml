@@ -5,66 +5,69 @@ inputs:
     required: false
     default: ''
   aws_region:
-    description: "'AWS Region to deploy the API Gateway'"
+    description: 'AWS Region to deploy the API Gateway'
     required: false
     default: 'us-east-1'
   bucket_name:
-    description: "'S3 Bucket name for Terraform state'"
+    description: 'S3 Bucket name for Terraform state'
     required: true
   port:
-    description: "'Port for the target group'"
+    description: 'Port for the target group'
     required: false
     default: 0
   protocol:
-    description: "'Protocol for the target group'"
+    description: 'Protocol for the target group'
     required: false
     default: 'HTTP'
   vpc_id:
-    description: "'VPC ID for the target group'"
+    description: 'VPC ID for the target group'
     required: false
     default: ''
 
   terraform_bucket:
-    description: "'S3 Bucket name for Terraform state'"
+    description: 'S3 Bucket name for Terraform state'
+    required: true
+  host: 
+    description: 'Domain applications'
     required: true
 
   health_check_protocol:
-    description: "'Health Check Protocol for the target group'"
+    description: 'Health Check Protocol for the target group'
     required: false
     default: "HTTP"
   health_check_port:
-    description: "'Health Check Port for the target group'"
+    description: 'Health Check Port for the target group'
     required: false
     default: ""
   health_check_interval:
-    description: "'Health Check Interval for the target group'"
+    description: 'Health Check Interval for the target group'
     required: false
     default: "30"
   health_check_timeout:
-    description: "'Health Check Timeout for the target group'"
+    description: 'Health Check Timeout for the target group'
     required: false
     default: "5"
   health_check_healthy_threshold:
-    description: "'Health Check Healthy Threshold for the target group'"
+    description: 'Health Check Healthy Threshold for the target group'
     required: false
     default: "2"
   health_check_unhealthy_threshold:
-    description: "'Health Check Unhealthy Threshold for the target group'"
+    description: 'Health Check Unhealthy Threshold for the target group'
     required: false
     default: "2"
   health_check_path:
-    description: "'Health Check Path for the target group'"
+    description: 'Health Check Path for the target group'
     required: false
     default: "/health"
   health_check_matcher:
-    description: "'Health Check Matcher for the target group'"
+    description: 'Health Check Matcher for the target group'
     default: "200"
   key_name:
-    description: "'Key name for the Terraform state file in S3'"
+    description: 'Key name for the Terraform state file in S3'
     required: true
-    default: 'default'
+    default: "default"
   vpc_link_id:
-    description: "'VPC Link Name for the API Gateway'"
+    description: 'VPC Link Name for the API Gateway'
     required: false
     default: ''
 
