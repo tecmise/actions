@@ -25,9 +25,11 @@ inputs:
     default: ''
 
   terraform_bucket:
+    type: string
     description: 'S3 Bucket name for Terraform state'
     required: true
   host: 
+    type: string
     description: 'Domain applications'
     required: true
 
