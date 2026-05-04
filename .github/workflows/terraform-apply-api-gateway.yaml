@@ -89,13 +89,26 @@ on:
         required: false
         default: ''
 
-      host: 
-        type: string
-        description: 'Domain applications'
-        required: true
-
-
 jobs:
+  resolve-host:
+    name: Resolve Host from Branch
+    runs-on: tecmise-runner
+    outputs:
+      host: ${{ steps.set-host.outputs.host }}
+    steps:
+      - name: Set host based on branch
+        id: set-host
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" || "${{ github.ref_name }}" == "master" ]]; then
+            echo "host=safe4school.com.br" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "sandbox" ]]; then
+            echo "host=sandbox.safe4school.com.br" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Branch '${{ github.ref_name }}' não é suportado. Use main, master ou sandbox."
+            exit 1
+          fi
+
   generate-files:
     name: Generate Files for API Gateway
     environment: ${{ github.ref_name }}
@@ -121,7 +134,6 @@ jobs:
         key_name: '${{ inputs.artifact_name }}'
         terraform_bucket: ${{ inputs.bucket_name }}
         vpc_link_id: ${{ inputs.vpc_link_id }}
-        host: ${{ inputs.host }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -140,8 +152,10 @@ jobs:
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
       TF_VAR_application_name: ${{ github.event.repository.name }}
       TF_VAR_terraform_bucket: ${{ inputs.bucket_name }}
+      TF_VAR_host: ${{ needs.resolve-host.outputs.host }}
     needs:
       - generate-files
+      - resolve-host
     runs-on: tecmise-runner
     steps:
     - name: Download artifact
@@ -190,9 +204,11 @@ jobs:
       TF_VAR_cors_origin_domain: ${{ secrets.CORS_ORIGIN_DOMAIN }}
       TF_VAR_application_name: ${{ github.event.repository.name }}
       TF_VAR_terraform_bucket: ${{ inputs.bucket_name }}
+      TF_VAR_host: ${{ needs.resolve-host.outputs.host }}
     needs:
       - generate-files
       - exposing-routes-plan
+      - resolve-host
     runs-on: tecmise-runner
     steps:
     - name: Download artifact
