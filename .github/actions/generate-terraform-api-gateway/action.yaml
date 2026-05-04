@@ -171,6 +171,11 @@ runs:
             type    = string
             default = "${{ inputs.terraform_bucket }}"
         }
+
+        variable "host" {
+          type = string
+          default = "${{ inputs.host }}"
+        }
         
         EOF
         

@@ -96,6 +96,9 @@ def create_terraform_file(routes: Dict[str, Route], key: str, route: Route, vpc_
 
                 print(f"   integration_request_parameters               = {{ ", file=f)
                 print(f"     \"integration.request.header.target\"      = \"'${{var.application_name}}'\" ", file=f)
+                print(f"     \"integration.request.header.Host\"      = \"'${{var.host}}'\" ", file=f)
+
+
                 integration_request_parameters = route.get_integration_request_parameters(routes)
                 if integration_request_parameters is not None:
                     for param in integration_request_parameters:
