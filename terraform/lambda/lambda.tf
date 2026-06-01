@@ -9,7 +9,7 @@ resource "aws_lambda_function" "default" {
   timeout       = var.timeout
   memory_size   = var.memory_size
   source_code_hash = data.aws_s3_object.lambda_zip.etag
-  architectures = ["arm64"]
+  architectures = var.architectures
 
   # s3_object_version = var.version_id
   dynamic "vpc_config" {

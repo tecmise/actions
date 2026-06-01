@@ -66,3 +66,8 @@ variable "environments" {
   }))
   default = []
 }
+
+variable "architectures" {
+  type = list(string)
+  default = ["arm64"]
+}
