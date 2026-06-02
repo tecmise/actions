@@ -76,3 +76,8 @@ variable "publish" {
   type = bool
   default = false
 }
+
+variable "is_edge" {
+  type = bool
+  default = false
+}
