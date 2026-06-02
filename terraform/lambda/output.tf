@@ -22,7 +22,10 @@ output "qualified_arn" {
   value = aws_lambda_function.default.qualified_arn
 }
 
-
 output "qualified_invoke_arn" {
   value = aws_lambda_function.default.qualified_invoke_arn
+}
+
+output "lambda_version" {
+  value = aws_lambda_function.default.version
 }
