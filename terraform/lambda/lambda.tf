@@ -10,6 +10,7 @@ resource "aws_lambda_function" "default" {
   memory_size   = var.memory_size
   source_code_hash = data.aws_s3_object.lambda_zip.etag
   architectures = var.architectures
+  publish       = var.publish
 
   # s3_object_version = var.version_id
   dynamic "vpc_config" {

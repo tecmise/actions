@@ -17,3 +17,12 @@ output "role_id" {
 output "role_arn" {
   value = aws_iam_role.default.arn
 }
+
+output "qualified_arn" {
+  value = aws_lambda_function.default.qualified_arn
+}
+
+
+output "qualified_invoke_arn" {
+  value = aws_lambda_function.default.qualified_invoke_arn
+}

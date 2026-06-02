@@ -71,3 +71,8 @@ variable "architectures" {
   type = list(string)
   default = ["arm64"]
 }
+
+variable "publish" {
+  type = bool
+  default = false
+}
