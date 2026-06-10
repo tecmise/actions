@@ -8,12 +8,13 @@ resource "aws_iam_role" "default" {
         Action = "sts:AssumeRole",
         Effect = "Allow"
         Principal = {
-          Service = "lambda.amazonaws.com"
+          Service = var.is_edge ? ["lambda.amazonaws.com", "edgelambda.amazonaws.com"] : ["lambda.amazonaws.com"]
         },
       }
     ]
   })
 }
+
 
 data "aws_iam_policy_document" "default" {
   statement {

@@ -66,3 +66,18 @@ variable "environments" {
   }))
   default = []
 }
+
+variable "architectures" {
+  type = list(string)
+  default = ["arm64"]
+}
+
+variable "publish" {
+  type = bool
+  default = false
+}
+
+variable "is_edge" {
+  type = bool
+  default = false
+}
