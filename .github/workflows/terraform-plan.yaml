@@ -49,6 +49,38 @@ jobs:
         aws_accounts: ${{ vars.AWS_ACCOUNTS }}
         aws_region: ${{ inputs.aws_region }}
 
+    - name: Allow runner IP on Security Groups
+      shell: bash
+      run: |
+        set -e
+        BRANCH="${{ github.ref_name }}"
+        case "$BRANCH" in
+          main)    SG_IDS=("sg-0752703a40001dd78" "sg-0cf1b0743379edc61") ;;
+          sandbox) SG_IDS=("sg-081cfc260c09b7efb") ;;
+          *)       echo "No SGs mapped for branch '$BRANCH'; skipping"; exit 0 ;;
+        esac
+
+        RUNNER_IP=$(curl -fsSL https://checkip.amazonaws.com | tr -d '[:space:]')
+        echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
+
+        DESCRIPTION="[${{ github.event.repository.name }}]-${{ github.run_number }}"
+        ADDED_SGS=()
+        for SG in "${SG_IDS[@]}"; do
+          if OUT=$(aws ec2 authorize-security-group-ingress \
+                --group-id "$SG" \
+                --ip-permissions "IpProtocol=tcp,FromPort=5432,ToPort=5432,IpRanges=[{CidrIp=${RUNNER_IP}/32,Description=\"${DESCRIPTION}\"}]" \
+                --region "${{ inputs.aws_region }}" 2>&1); then
+            echo "Added ${RUNNER_IP}/32 to ${SG} as ${DESCRIPTION}"
+            ADDED_SGS+=("$SG")
+          elif echo "$OUT" | grep -q "InvalidPermission.Duplicate"; then
+            echo "Rule for ${RUNNER_IP}/32 already exists on ${SG}; will not revoke at end"
+          else
+            echo "$OUT" >&2
+            exit 1
+          fi
+        done
+        echo "ADDED_SGS=${ADDED_SGS[*]}" >> $GITHUB_ENV
+
     - name: Prepare Terraform plugin cache dir
       if: ${{ inputs.terraform_directory != '' }}
       working-directory: ${{ inputs.terraform_directory }}
@@ -98,3 +130,17 @@ jobs:
       if: ${{ inputs.terraform_directory == '' }}
       shell: bash
       run: terraform plan
+
+    - name: Revoke runner IP from Security Groups
+      if: ${{ always() && env.RUNNER_IP != '' && env.ADDED_SGS != '' }}
+      shell: bash
+      run: |
+        for SG in $ADDED_SGS; do
+          echo "Revoking ${RUNNER_IP}/32 from ${SG}"
+          aws ec2 revoke-security-group-ingress \
+            --group-id "$SG" \
+            --protocol tcp \
+            --port 5432 \
+            --cidr "${RUNNER_IP}/32" \
+            --region "${{ inputs.aws_region }}" || true
+        done
