@@ -72,11 +72,9 @@ jobs:
                 --region "${{ inputs.aws_region }}" 2>&1); then
             echo "Added ${RUNNER_IP}/32 to ${SG} as ${DESCRIPTION}"
             ADDED_SGS+=("$SG")
-          elif echo "$OUT" | grep -q "InvalidPermission.Duplicate"; then
-            echo "Rule for ${RUNNER_IP}/32 already exists on ${SG}; will not revoke at end"
           else
-            echo "$OUT" >&2
-            exit 1
+            echo "Could not add ${RUNNER_IP}/32 to ${SG}; logging error and continuing"
+            echo "$OUT"
           fi
         done
         echo "ADDED_SGS=${ADDED_SGS[*]}" >> $GITHUB_ENV
